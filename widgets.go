@@ -6,6 +6,8 @@ import (
 	"fyne.io/fyne/v2/dialog"
 	"fyne.io/fyne/v2/theme"
 	"fyne.io/fyne/v2/widget"
+	"github.com/atotto/clipboard"
+	"time"
 )
 
 var StatusProcessBar *widget.ProgressBarInfinite
@@ -25,6 +27,13 @@ var RefreshProfileButton *widget.Button
 var RefreshNotificationButton *widget.Button
 var ProcessNotificationButton *widget.Button
 var RemoveNotificationButton *widget.Button
+
+var RefreshChipInfoButton *widget.Button
+var EidLabel *widget.Label
+var DefaultDpAddressLabel *widget.Label
+var RootDsAddressLabel *widget.Label
+var EuiccInfo2TextGrid *widget.TextGrid
+var CopyEidButton *widget.Button
 
 func InitWidgets() {
 	StatusProcessBar = widget.NewProgressBarInfinite()
@@ -181,4 +190,27 @@ func InitWidgets() {
 		RefreshNotification()
 	})
 	RefreshNotificationButton.SetIcon(theme.ViewRefreshIcon())
+
+	RefreshChipInfoButton = widget.NewButton("Refresh", func() {
+		RefreshChipInfo()
+	})
+	RefreshChipInfoButton.SetIcon(theme.ViewRefreshIcon())
+
+	EidLabel = widget.NewLabel("")
+	DefaultDpAddressLabel = widget.NewLabel("")
+	RootDsAddressLabel = widget.NewLabel("")
+	EuiccInfo2TextGrid = widget.NewTextGrid()
+	CopyEidButton = widget.NewButton("Copy", func() {
+		err := clipboard.WriteAll(ChipInfo.EidValue)
+		if err != nil {
+			ErrDialog(err)
+		} else {
+			go func() {
+				CopyEidButton.SetText("Copied!")
+				time.Sleep(2 * time.Second)
+				CopyEidButton.SetText("Copy")
+			}()
+		}
+	})
+	CopyEidButton.Hide()
 }

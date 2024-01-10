@@ -1,6 +1,7 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
 	"os/exec"
 	"runtime"
@@ -25,13 +26,8 @@ func RefreshProfile() {
 	ProfileList.Refresh()
 	ProfileList.UnselectAll()
 	SelectedProfile = -1
-	chipInfo, err := LpacChipInfo()
-	if err != nil {
-		ErrDialog(err)
-	}
-	// 计算剩余空间
-	freeSpace := float32(chipInfo.Euiccinfo2.FreeNvram) / 1024
-	FreeSpaceLabel.SetText(fmt.Sprintf("Free space: %.2f kb", freeSpace))
+
+	RefreshChipInfo()
 }
 
 func RefreshNotification() {
@@ -45,13 +41,40 @@ func RefreshNotification() {
 	NotificationList.UnselectAll()
 	SelectedNotification = -1
 
-	chipInfo, err := LpacChipInfo()
+	RefreshChipInfo()
+}
+
+func RefreshChipInfo() {
+	var err error
+	ChipInfo, err = LpacChipInfo()
 	if err != nil {
 		ErrDialog(err)
 	}
+
+	convertToString := func(value interface{}) string {
+		if value == nil {
+			return "<not set>"
+		}
+		if str, ok := value.(string); ok {
+			return str
+		}
+		return "<not set>"
+	}
+
+	EidLabel.SetText(fmt.Sprintf("EID: %s", ChipInfo.EidValue))
+	DefaultDpAddressLabel.SetText(fmt.Sprintf("Default DP Address:  %s", convertToString(ChipInfo.EuiccConfiguredAddresses.DefaultDpAddress)))
+	RootDsAddressLabel.SetText(fmt.Sprintf("Root DS Address:  %s", convertToString(ChipInfo.EuiccConfiguredAddresses.RootDsAddress)))
+	bytes, err := json.MarshalIndent(ChipInfo.EUICCInfo2, "", "  ")
+	if err != nil {
+		ErrDialog(fmt.Errorf("chip Info: failed to decode EUICCInfo2\n%s", err))
+	}
+	CopyEidButton.Show()
+
+	EuiccInfo2TextGrid.SetText(string(bytes))
+
 	// 计算剩余空间
-	freeSpace := float32(chipInfo.Euiccinfo2.FreeNvram) / 1024
-	FreeSpaceLabel.SetText(fmt.Sprintf("Free space: %.2f kb", freeSpace))
+	freeSpace := float32(ChipInfo.EUICCInfo2.ExtCardResource.FreeNonVolatileMemory) / 1024
+	FreeSpaceLabel.SetText(fmt.Sprintf("Free space: %.2f KB", freeSpace))
 }
 
 func OpenLog() {

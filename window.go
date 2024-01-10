@@ -72,6 +72,28 @@ func InitMainWindow() fyne.Window {
 			NotificationList))
 	notificationTab := container.NewTabItem("Notification", notificationTabContent)
 
+	chipInfoTabContent := container.NewBorder(
+		container.NewBorder(
+			layout.NewSpacer(),
+			nil,
+			container.NewHBox(OpenLogButton, spacer, RefreshChipInfoButton),
+			FreeSpaceLabel),
+		container.NewBorder(
+			nil,
+			nil,
+			nil,
+			nil,
+			statusBar),
+		nil,
+		nil,
+		container.NewBorder(
+			container.NewVBox(container.NewHBox(EidLabel, CopyEidButton), DefaultDpAddressLabel, RootDsAddressLabel),
+			nil,
+			nil,
+			nil,
+			container.NewScroll(EuiccInfo2TextGrid)))
+	chipInfoTab := container.NewTabItem("Chip Info", chipInfoTabContent)
+
 	thankstoText := widget.NewRichTextFromMarkdown(`
 # Thanks to
 
@@ -94,7 +116,7 @@ lpac GUI Frontend
 		container.NewCenter(container.NewVBox(thankstoText, aboutText)))
 	aboutTab := container.NewTabItem("About", aboutTabContent)
 
-	tabs := container.NewAppTabs(profileTab, notificationTab, aboutTab)
+	tabs := container.NewAppTabs(profileTab, notificationTab, chipInfoTab, aboutTab)
 
 	w.SetContent(tabs)
 

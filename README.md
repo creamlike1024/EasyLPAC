@@ -12,6 +12,7 @@ Currently, only pcsc APDUINTERFAC and curl HTTPINTERFACE are supported.
 
 ---
 
-![IMG_0298](https://github.com/creamlike1024/EasyLPAC/assets/25699126/552424e8-2021-4da9-b9b1-0dfbd74e5015)
+![IMG_0308](https://github.com/creamlike1024/EasyLPAC/assets/25699126/910e6b7d-a42b-4d39-aad1-56bca4c3c8a9)
 
-![IMG_0300](https://github.com/creamlike1024/EasyLPAC/assets/25699126/52532b47-3d08-4cc5-bfb6-3556a76f2594)
+![IMG_0307](https://github.com/creamlike1024/EasyLPAC/assets/25699126/4df18b27-ec64-497c-983a-d49749def80a)
+
