@@ -12,7 +12,9 @@ import (
 
 var StatusProcessBar *widget.ProgressBarInfinite
 var StatusLabel *widget.Label
+var SetNicknameButton *widget.Button
 var DownloadButton *widget.Button
+var DiscoveryButton *widget.Button
 var DeleteButton *widget.Button
 var EnableButton *widget.Button
 var ProfileList *widget.List
@@ -42,13 +44,39 @@ func InitWidgets() {
 	StatusLabel = widget.NewLabel("Ready.")
 
 	DownloadButton = widget.NewButton("Download", func() {
-		downloadWindow := InitDownloadWindow()
-		downloadWindow.Show()
+		d := InitDownloadDialog()
+		d.Show()
 	})
 	DownloadButton.SetIcon(theme.DownloadIcon())
+
+	DiscoveryButton = widget.NewButton("Discovery", func() {
+		d := dialog.NewInformation("WIP", "Work in Progress", WMain)
+		d.Show()
+	})
+	DiscoveryButton.SetIcon(theme.SearchIcon())
+
+	SetNicknameButton = widget.NewButton("Nickname", func() {
+		if SelectedProfile < 0 || SelectedProfile >= len(Profiles) {
+			SelectItemDialog()
+			return
+		}
+		d := InitSetNicknameDialog()
+		d.Show()
+	})
+	SetNicknameButton.SetIcon(theme.DocumentCreateIcon())
+
 	DeleteButton = widget.NewButton("Delete", func() {
 		if SelectedProfile < 0 || SelectedProfile >= len(Profiles) {
 			SelectItemDialog()
+			return
+		}
+		if Profiles[SelectedProfile].ProfileState == "enabled" {
+			d := dialog.NewInformation("Hint", "You should disable the profile before deleting it.", WMain)
+			d.Resize(fyne.Size{
+				Width:  360,
+				Height: 170,
+			})
+			d.Show()
 			return
 		}
 		dialogText := fmt.Sprintf("Are you sure you want to delete this profile?\n\n%s\t\t%s",
@@ -67,13 +95,16 @@ func InitWidgets() {
 						ErrDialog(err)
 					}
 					RefreshProfile()
-					// SelectedProfile = -1
+					RefreshNotification()
+					RefreshChipInfo()
 				} else {
 					return
 				}
 			}, WMain)
 		d.Show()
 	})
+	DeleteButton.SetIcon(theme.DeleteIcon())
+
 	EnableButton = widget.NewButton("Enable", func() {
 		if SelectedProfile < 0 || SelectedProfile >= len(Profiles) {
 			SelectItemDialog()
@@ -83,7 +114,10 @@ func InitWidgets() {
 			ErrDialog(err)
 		}
 		RefreshProfile()
+		RefreshNotification()
+		RefreshChipInfo()
 	})
+	EnableButton.SetIcon(theme.ConfirmIcon())
 
 	ProfileList = widget.NewList(
 		func() int {
@@ -108,6 +142,7 @@ func InitWidgets() {
 	ProfileList.OnSelected = func(id widget.ListItemID) {
 		SelectedProfile = id
 	}
+
 	ProfileListTitle = widget.NewLabel(fmt.Sprintf("%19s\t\t\t%s\t\t\t%s\t\t\t\t%s", "ICCID", "Profile State", "Provider", "Nickname"))
 
 	NotificationList = widget.NewList(
@@ -132,6 +167,7 @@ func InitWidgets() {
 	NotificationList.OnSelected = func(id widget.ListItemID) {
 		SelectedNotification = id
 	}
+
 	NotificationListTitle = widget.NewLabel(fmt.Sprintf("%s\t%19s\t\t\t\t%s\t\t\t\t%s", "Seq", "ICCID", "Operation", "Server"))
 
 	ProcessNotificationButton = widget.NewButton("Process", func() {
@@ -142,6 +178,8 @@ func InitWidgets() {
 		seq := Notifications[SelectedNotification].SeqNumber
 		if err := LpacNotificationProcess(seq); err != nil {
 			ErrDialog(err)
+			RefreshNotification()
+			// RefreshChipInfo()
 		} else {
 			dialogText := fmt.Sprintf("Successfully processed notification.\nDo you want to remove this notification now?\n\n%d\t\t%s\t\t%s\t\t%s\n\n",
 				Notifications[SelectedNotification].SeqNumber,
@@ -155,15 +193,13 @@ func InitWidgets() {
 						if err := LpacNotificationRemove(seq); err != nil {
 							ErrDialog(err)
 						}
-						RefreshNotification()
-					} else {
-						RefreshNotification()
-						return
 					}
+					RefreshNotification()
 				}, WMain)
 			d.Show()
 		}
 	})
+	ProcessNotificationButton.SetIcon(theme.MediaPlayIcon())
 
 	RemoveNotificationButton = widget.NewButton("Remove", func() {
 		if SelectedNotification < 0 || SelectedNotification >= len(Notifications) {
@@ -174,7 +210,9 @@ func InitWidgets() {
 			ErrDialog(err)
 		}
 		RefreshNotification()
+		RefreshChipInfo()
 	})
+	RemoveNotificationButton.SetIcon(theme.DeleteIcon())
 
 	FreeSpaceLabel = widget.NewLabel("")
 
@@ -183,11 +221,13 @@ func InitWidgets() {
 
 	RefreshProfileButton = widget.NewButton("Refresh", func() {
 		RefreshProfile()
+		RefreshChipInfo()
 	})
 	RefreshProfileButton.SetIcon(theme.ViewRefreshIcon())
 
 	RefreshNotificationButton = widget.NewButton("Refresh", func() {
 		RefreshNotification()
+		RefreshChipInfo()
 	})
 	RefreshNotificationButton.SetIcon(theme.ViewRefreshIcon())
 
@@ -212,5 +252,6 @@ func InitWidgets() {
 			}()
 		}
 	})
+	CopyEidButton.SetIcon(theme.ContentCopyIcon())
 	CopyEidButton.Hide()
 }

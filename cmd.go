@@ -10,7 +10,6 @@ import (
 	"os/exec"
 	"path/filepath"
 	"strconv"
-	"syscall"
 )
 
 func runLpac(args []string) (json.RawMessage, error) {
@@ -32,10 +31,7 @@ func runLpac(args []string) (json.RawMessage, error) {
 	}
 
 	cmd := exec.Command(lpacPath, args...)
-	// For windows hide console window
-	cmd.SysProcAttr = &syscall.SysProcAttr{
-		HideWindow: true,
-	}
+	HideCmdWindow(cmd)
 
 	cmd.Dir = ConfigInstance.lpacDir
 
@@ -48,7 +44,9 @@ func runLpac(args []string) (json.RawMessage, error) {
 
 	err := cmd.Run()
 	if err != nil {
-		return nil, fmt.Errorf("lpac error:\n%s", stderr.String())
+		if len(bytes.TrimSpace(stderr.Bytes())) != 0 {
+			return nil, fmt.Errorf("lpac error:\n%s", stderr.String())
+		}
 	}
 
 	var resp LpacReturnValue
@@ -128,13 +126,31 @@ func LpacProfileDownload(info PullInfo) {
 	}
 	_, err := runLpac(args)
 	if err != nil {
-		RefreshProfile()
 		ErrDialog(err)
 	} else {
-		RefreshProfile()
-		d := dialog.NewInformation("Info", "Download success", WMain)
+		d := dialog.NewInformation("Info", "Downloaded successfully", WMain)
 		d.Show()
 	}
+}
+
+func LpacProfileDiscovery() error {
+	// args := []string{"profile", "discovery"}
+	// payload,err := runLpac(args)
+	// if err != nil {
+	// 	ErrDialog(err)
+	// }else {
+	//
+	// }
+	return nil
+}
+
+func LpacProfileNickname(iccid, nickname string) error {
+	args := []string{"profile", "nickname", iccid, nickname}
+	_, err := runLpac(args)
+	if err != nil {
+		return err
+	}
+	return nil
 }
 
 func LpacNotificationList() ([]Notification, error) {

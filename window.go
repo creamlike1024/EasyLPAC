@@ -38,7 +38,7 @@ func InitMainWindow() fyne.Window {
 			nil,
 			nil,
 			nil,
-			container.NewHBox(DownloadButton, spacer, EnableButton, spacer, DeleteButton),
+			container.NewHBox(DownloadButton, spacer, DiscoveryButton, spacer, SetNicknameButton, spacer, EnableButton, spacer, DeleteButton),
 			statusBar),
 		nil,
 		nil,
@@ -123,17 +123,7 @@ lpac GUI Frontend
 	return w
 }
 
-func InitDownloadWindow() fyne.Window {
-	LockButtonChan <- true
-	w := App.NewWindow("Download")
-	w.Resize(fyne.Size{
-		Width:  500,
-		Height: 200,
-	})
-	w.RequestFocus()
-	w.SetOnClosed(func() {
-		LockButtonChan <- false
-	})
+func InitDownloadDialog() dialog.Dialog {
 	smdp := widget.NewEntry()
 	smdp.PlaceHolder = "Leave it empty to use default smdp"
 	matchID := widget.NewEntry()
@@ -143,35 +133,52 @@ func InitDownloadWindow() fyne.Window {
 	imei := widget.NewEntry()
 	imei.PlaceHolder = "The IMEI sent to SM-DP. Optional"
 
-	// appendText := widget.NewTextGridFromString(
-	// 	"SM-DP+: Leave it empty to use default smdp.\n" +
-	// 		"Matching ID: activation code. optional.\n" +
-	// 		"Confirm Code: optional.\n" +
-	// 		"IMEI: The IMEI of the device to which Profile is to be downloaded, optional.")
-	// appendText := widget.NewRichTextWithText("Placeholder")
+	form := []*widget.FormItem{
+		{Text: "SM-DP+", Widget: smdp},
+		{Text: "Matching ID", Widget: matchID},
+		{Text: "Confirm Code", Widget: confirmCode},
+		{Text: "IMEI", Widget: imei},
+	}
 
-	form := &widget.Form{
-		Items: []*widget.FormItem{ // we can specify items in the constructor
-			{Text: "SM-DP+", Widget: smdp},
-			{Text: "Matching ID", Widget: matchID},
-			{Text: "Confirm Code", Widget: confirmCode},
-			{Text: "IMEI", Widget: imei}},
-		OnSubmit: func() { // optional, handle form submission
+	d := dialog.NewForm("Download", "Submit", "Cancel", form, func(b bool) {
+		if b {
 			var pullConfig PullInfo
 			pullConfig.smdp = smdp.Text
 			pullConfig.matchID = matchID.Text
 			pullConfig.confirmCode = confirmCode.Text
 			pullConfig.imei = imei.Text
-			w.Close()
 			LpacProfileDownload(pullConfig)
-		},
-		OnCancel: func() {
-			w.Close()
-		},
+			RefreshProfile()
+			RefreshNotification()
+			RefreshChipInfo()
+		}
+	}, WMain)
+	d.Resize(fyne.Size{
+		Width:  500,
+		Height: 300,
+	})
+	return d
+}
+
+func InitSetNicknameDialog() dialog.Dialog {
+	entry := widget.NewEntry()
+	entry.SetPlaceHolder("Leave it empty to remove nickname")
+	form := []*widget.FormItem{
+		{Text: "Nickname", Widget: entry},
 	}
-	// form.Append("", appendText)
-	w.SetContent(form)
-	return w
+	d := dialog.NewForm("Set Nickname", "Submit", "Cancel", form, func(b bool) {
+		if b {
+			if err := LpacProfileNickname(Profiles[SelectedProfile].Iccid, entry.Text); err != nil {
+				ErrDialog(err)
+			}
+			RefreshProfile()
+		}
+	}, WMain)
+	d.Resize(fyne.Size{
+		Width:  400,
+		Height: 200,
+	})
+	return d
 }
 
 func ErrDialog(err error) {
@@ -181,5 +188,9 @@ func ErrDialog(err error) {
 
 func SelectItemDialog() {
 	d := dialog.NewInformation("Info", "Please select a item.", WMain)
+	d.Resize(fyne.Size{
+		Width:  220,
+		Height: 160,
+	})
 	d.Show()
 }
