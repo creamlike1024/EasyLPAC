@@ -26,8 +26,6 @@ func RefreshProfile() {
 	ProfileList.Refresh()
 	ProfileList.UnselectAll()
 	SelectedProfile = -1
-
-	RefreshChipInfo()
 }
 
 func RefreshNotification() {
@@ -40,8 +38,6 @@ func RefreshNotification() {
 	NotificationList.Refresh()
 	NotificationList.UnselectAll()
 	SelectedNotification = -1
-
-	RefreshChipInfo()
 }
 
 func RefreshChipInfo() {
@@ -120,6 +116,8 @@ func LockButton() {
 		lock := <-LockButtonChan
 		if lock {
 			DownloadButton.Disable()
+			DiscoveryButton.Disable()
+			SetNicknameButton.Disable()
 			RefreshProfileButton.Disable()
 			RefreshNotificationButton.Disable()
 			EnableButton.Disable()
@@ -128,6 +126,8 @@ func LockButton() {
 			RemoveNotificationButton.Disable()
 		} else {
 			DownloadButton.Enable()
+			DiscoveryButton.Enable()
+			SetNicknameButton.Enable()
 			RefreshProfileButton.Enable()
 			RefreshNotificationButton.Enable()
 			EnableButton.Enable()
