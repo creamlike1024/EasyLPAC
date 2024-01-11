@@ -22,8 +22,8 @@ func init() {
 		panic(err)
 	}
 
-	if _, err := os.Stat(ConfigInstance.logDir); os.IsNotExist(err) {
-		os.Mkdir(ConfigInstance.logDir, 0755)
+	if _, err := os.Stat(ConfigInstance.LogDir); os.IsNotExist(err) {
+		os.Mkdir(ConfigInstance.LogDir, 0755)
 	}
 }
 
@@ -33,13 +33,17 @@ func main() {
 	InitWidgets()
 
 	var err error
-	ConfigInstance.LogFile, err = os.Create(filepath.Join(ConfigInstance.logDir, ConfigInstance.logFilename))
+	ConfigInstance.LogFile, err = os.Create(filepath.Join(ConfigInstance.LogDir, ConfigInstance.LogFilename))
 	if err != nil {
 		panic(err)
 	}
 	defer ConfigInstance.LogFile.Close()
 
 	WMain = InitMainWindow()
+	RefreshApduDriver()
+	if ApduDrivers != nil {
+		ApduDriverSelect.SetSelectedIndex(0)
+	}
 	WMain.Show()
 
 	App.Run()

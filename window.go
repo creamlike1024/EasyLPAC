@@ -28,12 +28,24 @@ func InitMainWindow() fyne.Window {
 	spacer := canvas.NewRectangle(color.Transparent)
 	spacer.SetMinSize(fyne.NewSize(1, 36))
 
-	profileTabContent := container.NewBorder(
+	topToolBar := container.NewBorder(
+		layout.NewSpacer(),
+		nil,
+		container.New(layout.NewHBoxLayout(), OpenLogButton, spacer, RefreshButton),
+		FreeSpaceLabel,
 		container.NewBorder(
-			layout.NewSpacer(),
 			nil,
-			container.New(layout.NewHBoxLayout(), OpenLogButton, spacer, RefreshProfileButton),
-			FreeSpaceLabel),
+			nil,
+			widget.NewLabel("Card Reader:"),
+			nil,
+			container.NewHBox(container.NewGridWrap(fyne.Size{
+				Width:  260,
+				Height: 36,
+			}, ApduDriverSelect), ApduDriverRefreshButton)),
+	)
+
+	profileTabContent := container.NewBorder(
+		topToolBar,
 		container.NewBorder(
 			nil,
 			nil,
@@ -48,14 +60,10 @@ func InitMainWindow() fyne.Window {
 			nil,
 			nil,
 			ProfileList))
-	profileTab := container.NewTabItem("Profile", profileTabContent)
+	ProfileTab = container.NewTabItem("Profile", profileTabContent)
 
 	notificationTabContent := container.NewBorder(
-		container.NewBorder(
-			layout.NewSpacer(),
-			nil,
-			container.NewHBox(OpenLogButton, spacer, RefreshNotificationButton),
-			FreeSpaceLabel),
+		topToolBar,
 		container.NewBorder(
 			nil,
 			nil,
@@ -70,14 +78,10 @@ func InitMainWindow() fyne.Window {
 			nil,
 			nil,
 			NotificationList))
-	notificationTab := container.NewTabItem("Notification", notificationTabContent)
+	NotificationTab = container.NewTabItem("Notification", notificationTabContent)
 
 	chipInfoTabContent := container.NewBorder(
-		container.NewBorder(
-			layout.NewSpacer(),
-			nil,
-			container.NewHBox(OpenLogButton, spacer, RefreshChipInfoButton),
-			FreeSpaceLabel),
+		topToolBar,
 		container.NewBorder(
 			nil,
 			nil,
@@ -92,7 +96,7 @@ func InitMainWindow() fyne.Window {
 			nil,
 			nil,
 			container.NewScroll(EuiccInfo2TextGrid)))
-	chipInfoTab := container.NewTabItem("Chip Info", chipInfoTabContent)
+	ChipInfoTab = container.NewTabItem("Chip Info", chipInfoTabContent)
 
 	thankstoText := widget.NewRichTextFromMarkdown(`
 # Thanks to
@@ -114,18 +118,18 @@ lpac GUI Frontend
 		layout.NewSpacer(),
 		layout.NewSpacer(),
 		container.NewCenter(container.NewVBox(thankstoText, aboutText)))
-	aboutTab := container.NewTabItem("About", aboutTabContent)
+	AboutTab = container.NewTabItem("About", aboutTabContent)
 
-	tabs := container.NewAppTabs(profileTab, notificationTab, chipInfoTab, aboutTab)
+	Tabs = container.NewAppTabs(ProfileTab, NotificationTab, ChipInfoTab, AboutTab)
 
-	w.SetContent(tabs)
+	w.SetContent(Tabs)
 
 	return w
 }
 
 func InitDownloadDialog() dialog.Dialog {
 	smdp := widget.NewEntry()
-	smdp.PlaceHolder = "Leave it empty to use default smdp"
+	smdp.PlaceHolder = "Leave it empty to use default SMDP"
 	matchID := widget.NewEntry()
 	matchID.PlaceHolder = "Activation code. Optional"
 	confirmCode := widget.NewEntry()
@@ -143,10 +147,10 @@ func InitDownloadDialog() dialog.Dialog {
 	d := dialog.NewForm("Download", "Submit", "Cancel", form, func(b bool) {
 		if b {
 			var pullConfig PullInfo
-			pullConfig.smdp = smdp.Text
-			pullConfig.matchID = matchID.Text
-			pullConfig.confirmCode = confirmCode.Text
-			pullConfig.imei = imei.Text
+			pullConfig.SMDP = smdp.Text
+			pullConfig.MatchID = matchID.Text
+			pullConfig.ConfirmCode = confirmCode.Text
+			pullConfig.IMEI = imei.Text
 			LpacProfileDownload(pullConfig)
 			RefreshProfile()
 			RefreshNotification()
@@ -192,5 +196,15 @@ func SelectItemDialog() {
 		Width:  220,
 		Height: 160,
 	})
+	d.Show()
+}
+
+func SelectCardReaderDialog() {
+	d := dialog.NewInformation("Info", "Please select a card reader.", WMain)
+	d.Show()
+}
+
+func RefreshNeededDialog() {
+	d := dialog.NewInformation("Info", "Card reader changed.\nPlease refresh before proceeding.", WMain)
 	d.Show()
 }

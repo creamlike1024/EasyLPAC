@@ -12,12 +12,13 @@ const LpacDir = "lpac"
 const LogDir = "log"
 
 type Config struct {
-	lpacDir       string
-	exeName       string
-	apduInterface string
-	httpInterface string
-	logDir        string
-	logFilename   string
+	LpacDir       string
+	EXEName       string
+	APDUInterface string
+	HTTPInterface string
+	DriverIFID    string
+	LogDir        string
+	LogFilename   string
 	LogFile       *os.File
 }
 
@@ -28,24 +29,24 @@ func LoadConfig() error {
 	if err != nil {
 		return err
 	}
-	ConfigInstance.lpacDir = filepath.Join(pwd, LpacDir)
+	ConfigInstance.LpacDir = filepath.Join(pwd, LpacDir)
 	switch platform := runtime.GOOS; platform {
 	case "windows":
-		ConfigInstance.exeName = "lpac.exe"
-		ConfigInstance.apduInterface = "libapduinterface_pcsc.dll"
-		ConfigInstance.httpInterface = "libapduinterface_curl.dll"
+		ConfigInstance.EXEName = "lpac.exe"
+		ConfigInstance.APDUInterface = "libapduinterface_pcsc.dll"
+		ConfigInstance.HTTPInterface = "libhttpinterface_curl.dll"
 	case "darwin":
-		ConfigInstance.exeName = "lpac"
-		ConfigInstance.apduInterface = "libapduinterface_pcsc.dylib"
-		ConfigInstance.httpInterface = "libapduinterface_curl.dylib"
+		ConfigInstance.EXEName = "lpac"
+		ConfigInstance.APDUInterface = "libapduinterface_pcsc.dylib"
+		ConfigInstance.HTTPInterface = "libhttpinterface_curl.dylib"
 	default:
-		ConfigInstance.exeName = "lpac"
-		ConfigInstance.apduInterface = "libapduinterface_pcsc.so"
-		ConfigInstance.httpInterface = "libapduinterface_curl.so"
+		ConfigInstance.EXEName = "lpac"
+		ConfigInstance.APDUInterface = "libapduinterface_pcsc.so"
+		ConfigInstance.HTTPInterface = "libhttpinterface_curl.so"
 	}
 
 	now := time.Now()
-	ConfigInstance.logFilename = fmt.Sprintf("output-%s.txt", now.Format("20060102-150405"))
-	ConfigInstance.logDir = filepath.Join(pwd, LogDir)
+	ConfigInstance.LogFilename = fmt.Sprintf("output-%s.txt", now.Format("20060102-150405"))
+	ConfigInstance.LogDir = filepath.Join(pwd, LogDir)
 	return nil
 }

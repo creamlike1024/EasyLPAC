@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"fyne.io/fyne/v2"
+	"fyne.io/fyne/v2/container"
 	"fyne.io/fyne/v2/dialog"
 	"fyne.io/fyne/v2/theme"
 	"fyne.io/fyne/v2/widget"
@@ -25,17 +26,24 @@ var NotificationListTitle *widget.Label
 
 var FreeSpaceLabel *widget.Label
 var OpenLogButton *widget.Button
-var RefreshProfileButton *widget.Button
-var RefreshNotificationButton *widget.Button
+var RefreshButton *widget.Button
 var ProcessNotificationButton *widget.Button
 var RemoveNotificationButton *widget.Button
 
-var RefreshChipInfoButton *widget.Button
 var EidLabel *widget.Label
 var DefaultDpAddressLabel *widget.Label
 var RootDsAddressLabel *widget.Label
 var EuiccInfo2TextGrid *widget.TextGrid
 var CopyEidButton *widget.Button
+
+var ApduDriverSelect *widget.Select
+var ApduDriverRefreshButton *widget.Button
+
+var Tabs *container.AppTabs
+var ProfileTab *container.TabItem
+var NotificationTab *container.TabItem
+var ChipInfoTab *container.TabItem
+var AboutTab *container.TabItem
 
 func InitWidgets() {
 	StatusProcessBar = widget.NewProgressBarInfinite()
@@ -44,18 +52,34 @@ func InitWidgets() {
 	StatusLabel = widget.NewLabel("Ready.")
 
 	DownloadButton = widget.NewButton("Download", func() {
+		if ConfigInstance.DriverIFID == "" {
+			SelectCardReaderDialog()
+			return
+		}
 		d := InitDownloadDialog()
 		d.Show()
 	})
 	DownloadButton.SetIcon(theme.DownloadIcon())
 
 	DiscoveryButton = widget.NewButton("Discovery", func() {
+		if ConfigInstance.DriverIFID == "" {
+			SelectCardReaderDialog()
+			return
+		}
 		d := dialog.NewInformation("WIP", "Work in Progress", WMain)
 		d.Show()
 	})
 	DiscoveryButton.SetIcon(theme.SearchIcon())
 
 	SetNicknameButton = widget.NewButton("Nickname", func() {
+		if ConfigInstance.DriverIFID == "" {
+			SelectCardReaderDialog()
+			return
+		}
+		if RefreshProfileNeeded {
+			RefreshNeededDialog()
+			return
+		}
 		if SelectedProfile < 0 || SelectedProfile >= len(Profiles) {
 			SelectItemDialog()
 			return
@@ -66,6 +90,14 @@ func InitWidgets() {
 	SetNicknameButton.SetIcon(theme.DocumentCreateIcon())
 
 	DeleteButton = widget.NewButton("Delete", func() {
+		if ConfigInstance.DriverIFID == "" {
+			SelectCardReaderDialog()
+			return
+		}
+		if RefreshProfileNeeded {
+			RefreshNeededDialog()
+			return
+		}
 		if SelectedProfile < 0 || SelectedProfile >= len(Profiles) {
 			SelectItemDialog()
 			return
@@ -106,6 +138,14 @@ func InitWidgets() {
 	DeleteButton.SetIcon(theme.DeleteIcon())
 
 	EnableButton = widget.NewButton("Enable", func() {
+		if ConfigInstance.DriverIFID == "" {
+			SelectCardReaderDialog()
+			return
+		}
+		if RefreshProfileNeeded {
+			RefreshNeededDialog()
+			return
+		}
 		if SelectedProfile < 0 || SelectedProfile >= len(Profiles) {
 			SelectItemDialog()
 			return
@@ -171,6 +211,14 @@ func InitWidgets() {
 	NotificationListTitle = widget.NewLabel(fmt.Sprintf("%s\t%19s\t\t\t\t%s\t\t\t\t%s", "Seq", "ICCID", "Operation", "Server"))
 
 	ProcessNotificationButton = widget.NewButton("Process", func() {
+		if ConfigInstance.DriverIFID == "" {
+			SelectCardReaderDialog()
+			return
+		}
+		if RefreshNotificationNeeded {
+			RefreshNeededDialog()
+			return
+		}
 		if SelectedNotification < 0 || SelectedNotification >= len(Notifications) {
 			SelectItemDialog()
 			return
@@ -202,6 +250,14 @@ func InitWidgets() {
 	ProcessNotificationButton.SetIcon(theme.MediaPlayIcon())
 
 	RemoveNotificationButton = widget.NewButton("Remove", func() {
+		if ConfigInstance.DriverIFID == "" {
+			SelectCardReaderDialog()
+			return
+		}
+		if RefreshNotificationNeeded {
+			RefreshNeededDialog()
+			return
+		}
 		if SelectedNotification < 0 || SelectedNotification >= len(Notifications) {
 			SelectItemDialog()
 			return
@@ -218,23 +274,8 @@ func InitWidgets() {
 
 	OpenLogButton = widget.NewButton("Open Log", OpenLog)
 	OpenLogButton.SetIcon(theme.FolderOpenIcon())
-
-	RefreshProfileButton = widget.NewButton("Refresh", func() {
-		RefreshProfile()
-		RefreshChipInfo()
-	})
-	RefreshProfileButton.SetIcon(theme.ViewRefreshIcon())
-
-	RefreshNotificationButton = widget.NewButton("Refresh", func() {
-		RefreshNotification()
-		RefreshChipInfo()
-	})
-	RefreshNotificationButton.SetIcon(theme.ViewRefreshIcon())
-
-	RefreshChipInfoButton = widget.NewButton("Refresh", func() {
-		RefreshChipInfo()
-	})
-	RefreshChipInfoButton.SetIcon(theme.ViewRefreshIcon())
+	RefreshButton = widget.NewButton("Refresh", Refresh)
+	RefreshButton.SetIcon(theme.ViewRefreshIcon())
 
 	EidLabel = widget.NewLabel("")
 	DefaultDpAddressLabel = widget.NewLabel("")
@@ -254,4 +295,11 @@ func InitWidgets() {
 	})
 	CopyEidButton.SetIcon(theme.ContentCopyIcon())
 	CopyEidButton.Hide()
+	ApduDriverSelect = widget.NewSelect([]string{}, func(s string) {
+		SetDriverIfid(s)
+	})
+	ApduDriverRefreshButton = widget.NewButton("", func() {
+		RefreshApduDriver()
+	})
+	ApduDriverRefreshButton.SetIcon(theme.SearchReplaceIcon())
 }

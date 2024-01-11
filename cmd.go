@@ -20,8 +20,8 @@ func runLpac(args []string) (json.RawMessage, error) {
 		LockButtonChan <- false
 	}()
 
-	// Save to logFile
-	lpacPath := filepath.Join(ConfigInstance.lpacDir, ConfigInstance.exeName)
+	// Save to LogFile
+	lpacPath := filepath.Join(ConfigInstance.LpacDir, ConfigInstance.EXEName)
 	command := lpacPath
 	for _, arg := range args {
 		command += fmt.Sprintf(" %s", arg)
@@ -33,7 +33,13 @@ func runLpac(args []string) (json.RawMessage, error) {
 	cmd := exec.Command(lpacPath, args...)
 	HideCmdWindow(cmd)
 
-	cmd.Dir = ConfigInstance.lpacDir
+	cmd.Dir = ConfigInstance.LpacDir
+
+	cmd.Env = []string{
+		fmt.Sprintf("APDU_INTERFACE=%s", ConfigInstance.APDUInterface),
+		fmt.Sprintf("HTTP_INTERFACE=%s", ConfigInstance.HTTPInterface),
+		fmt.Sprintf("DRIVER_IFID=%s", ConfigInstance.DriverIFID),
+	}
 
 	var stdout bytes.Buffer
 	var stderr bytes.Buffer
@@ -112,17 +118,17 @@ func LpacProfileDelete(iccid string) error {
 
 func LpacProfileDownload(info PullInfo) {
 	args := []string{"profile", "download"}
-	if info.smdp != "" {
-		args = append(args, "-s", info.smdp)
+	if info.SMDP != "" {
+		args = append(args, "-s", info.SMDP)
 	}
-	if info.matchID != "" {
-		args = append(args, "-m", info.matchID)
+	if info.MatchID != "" {
+		args = append(args, "-m", info.MatchID)
 	}
-	if info.confirmCode != "" {
-		args = append(args, "-c", info.confirmCode)
+	if info.ConfirmCode != "" {
+		args = append(args, "-c", info.ConfirmCode)
 	}
-	if info.imei != "" {
-		args = append(args, "-i", info.imei)
+	if info.IMEI != "" {
+		args = append(args, "-i", info.IMEI)
 	}
 	_, err := runLpac(args)
 	if err != nil {
@@ -182,4 +188,17 @@ func LpacNotificationRemove(seq int) error {
 		return err
 	}
 	return nil
+}
+
+func LpacDriverApduList() ([]ApduDriver, error) {
+	args := []string{"driver", "apdu", "list"}
+	payload, err := runLpac(args)
+	if err != nil {
+		return nil, err
+	}
+	var apduDrivers []ApduDriver
+	if err = json.Unmarshal(payload, &apduDrivers); err != nil {
+		return nil, err
+	}
+	return apduDrivers, nil
 }

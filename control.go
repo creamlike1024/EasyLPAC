@@ -13,6 +13,9 @@ const StatusReady = 0
 var SelectedProfile int
 var SelectedNotification int
 
+var RefreshProfileNeeded bool
+var RefreshNotificationNeeded bool
+
 var StatusChan chan int
 var LockButtonChan chan bool
 
@@ -73,16 +76,30 @@ func RefreshChipInfo() {
 	FreeSpaceLabel.SetText(fmt.Sprintf("Free space: %.2f KB", freeSpace))
 }
 
+func RefreshApduDriver() {
+	var err error
+	ApduDrivers, err = LpacDriverApduList()
+	if err != nil {
+		ErrDialog(err)
+	}
+	var options []string
+	for _, d := range ApduDrivers {
+		options = append(options, d.Name)
+	}
+	ApduDriverSelect.SetOptions(options)
+	ApduDriverSelect.Refresh()
+}
+
 func OpenLog() {
 	var err error
 
 	switch runtime.GOOS {
 	case "windows":
-		err = exec.Command("explorer", ConfigInstance.logDir).Start()
+		err = exec.Command("explorer", ConfigInstance.LogDir).Start()
 	case "darwin":
-		err = exec.Command("open", "-R", ConfigInstance.logDir).Start()
+		err = exec.Command("open", "-R", ConfigInstance.LogDir).Start()
 	case "linux":
-		err = exec.Command("xdg-open", ConfigInstance.logDir).Start()
+		err = exec.Command("xdg-open", ConfigInstance.LogDir).Start()
 	default:
 		err = fmt.Errorf("unsupported platform, please open log file manually")
 		ErrDialog(err)
@@ -90,6 +107,33 @@ func OpenLog() {
 
 	if err != nil {
 		ErrDialog(err)
+	}
+}
+
+func Refresh() {
+	switch tab := Tabs.Selected(); tab {
+	case ProfileTab:
+		if ConfigInstance.DriverIFID == "" {
+			SelectCardReaderDialog()
+			return
+		}
+		RefreshProfile()
+		RefreshChipInfo()
+		RefreshProfileNeeded = false
+	case NotificationTab:
+		if ConfigInstance.DriverIFID == "" {
+			SelectCardReaderDialog()
+			return
+		}
+		RefreshNotification()
+		RefreshChipInfo()
+		RefreshNotificationNeeded = false
+	case ChipInfoTab:
+		if ConfigInstance.DriverIFID == "" {
+			SelectCardReaderDialog()
+			return
+		}
+		RefreshChipInfo()
 	}
 }
 
@@ -118,8 +162,7 @@ func LockButton() {
 			DownloadButton.Disable()
 			DiscoveryButton.Disable()
 			SetNicknameButton.Disable()
-			RefreshProfileButton.Disable()
-			RefreshNotificationButton.Disable()
+			RefreshButton.Disable()
 			EnableButton.Disable()
 			DeleteButton.Disable()
 			ProcessNotificationButton.Disable()
@@ -128,12 +171,28 @@ func LockButton() {
 			DownloadButton.Enable()
 			DiscoveryButton.Enable()
 			SetNicknameButton.Enable()
-			RefreshProfileButton.Enable()
-			RefreshNotificationButton.Enable()
+			RefreshButton.Enable()
 			EnableButton.Enable()
 			DeleteButton.Enable()
 			ProcessNotificationButton.Enable()
 			RemoveNotificationButton.Enable()
+		}
+	}
+}
+
+func SetDriverIfid(name string) {
+	for _, d := range ApduDrivers {
+		if name == d.Name {
+			if ConfigInstance.DriverIFID == "" {
+				ConfigInstance.DriverIFID = d.Env
+			} else if ConfigInstance.DriverIFID == d.Env {
+				// 未改变读卡器，不刷新状态
+				return
+			} else {
+				ConfigInstance.DriverIFID = d.Env
+				RefreshProfileNeeded = true
+				RefreshNotificationNeeded = true
+			}
 		}
 	}
 }

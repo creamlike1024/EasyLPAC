@@ -3,10 +3,10 @@ package main
 import "encoding/json"
 
 type PullInfo struct {
-	smdp        string
-	matchID     string
-	confirmCode string
-	imei        string
+	SMDP        string
+	MatchID     string
+	ConfirmCode string
+	IMEI        string
 }
 
 type LpacReturnValue struct {
@@ -69,6 +69,12 @@ type Notification struct {
 	Iccid                      string `json:"iccid"`
 }
 
+type ApduDriver struct {
+	Env  string `json:"env"`
+	Name string `json:"name"`
+}
+
 var Profiles []Profile
 var Notifications []Notification
 var ChipInfo EuiccInfo
+var ApduDrivers []ApduDriver
