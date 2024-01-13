@@ -202,3 +202,12 @@ func LpacDriverApduList() ([]ApduDriver, error) {
 	}
 	return apduDrivers, nil
 }
+
+func LpacChipDefaultSmdp(smdp string) error {
+	args := []string{"chip", "defaultsmdp", smdp}
+	_, err := runLpac(args)
+	if err != nil {
+		return err
+	}
+	return nil
+}

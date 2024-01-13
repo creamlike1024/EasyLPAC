@@ -15,6 +15,7 @@ var SelectedNotification int
 
 var RefreshProfileNeeded bool
 var RefreshNotificationNeeded bool
+var RefreshChipInfoNeeded bool
 
 var StatusChan chan int
 var LockButtonChan chan bool
@@ -61,13 +62,14 @@ func RefreshChipInfo() {
 	}
 
 	EidLabel.SetText(fmt.Sprintf("EID: %s", ChipInfo.EidValue))
-	DefaultDpAddressLabel.SetText(fmt.Sprintf("Default DP Address:  %s", convertToString(ChipInfo.EuiccConfiguredAddresses.DefaultDpAddress)))
-	RootDsAddressLabel.SetText(fmt.Sprintf("Root DS Address:  %s", convertToString(ChipInfo.EuiccConfiguredAddresses.RootDsAddress)))
+	DefaultDpAddressLabel.SetText(fmt.Sprintf("Default SM-DP+ Address:  %s", convertToString(ChipInfo.EuiccConfiguredAddresses.DefaultDpAddress)))
+	RootDsAddressLabel.SetText(fmt.Sprintf("Root SM-DS Address:  %s", convertToString(ChipInfo.EuiccConfiguredAddresses.RootDsAddress)))
 	bytes, err := json.MarshalIndent(ChipInfo.EUICCInfo2, "", "  ")
 	if err != nil {
 		ErrDialog(fmt.Errorf("chip Info: failed to decode EUICCInfo2\n%s", err))
 	}
 	CopyEidButton.Show()
+	SetDefaultSmdpButton.Show()
 
 	EuiccInfo2TextGrid.SetText(string(bytes))
 
@@ -97,7 +99,7 @@ func OpenLog() {
 	case "windows":
 		err = exec.Command("explorer", ConfigInstance.LogDir).Start()
 	case "darwin":
-		err = exec.Command("open", "-R", ConfigInstance.LogDir).Start()
+		err = exec.Command("open", ConfigInstance.LogDir).Start()
 	case "linux":
 		err = exec.Command("xdg-open", ConfigInstance.LogDir).Start()
 	default:
@@ -120,6 +122,7 @@ func Refresh() {
 		RefreshProfile()
 		RefreshChipInfo()
 		RefreshProfileNeeded = false
+		RefreshChipInfoNeeded = false
 	case NotificationTab:
 		if ConfigInstance.DriverIFID == "" {
 			SelectCardReaderDialog()
@@ -128,12 +131,14 @@ func Refresh() {
 		RefreshNotification()
 		RefreshChipInfo()
 		RefreshNotificationNeeded = false
+		RefreshChipInfoNeeded = false
 	case ChipInfoTab:
 		if ConfigInstance.DriverIFID == "" {
 			SelectCardReaderDialog()
 			return
 		}
 		RefreshChipInfo()
+		RefreshChipInfoNeeded = false
 	}
 }
 
@@ -167,6 +172,7 @@ func LockButton() {
 			DeleteButton.Disable()
 			ProcessNotificationButton.Disable()
 			RemoveNotificationButton.Disable()
+			SetDefaultSmdpButton.Disable()
 		} else {
 			DownloadButton.Enable()
 			DiscoveryButton.Enable()
@@ -176,6 +182,7 @@ func LockButton() {
 			DeleteButton.Enable()
 			ProcessNotificationButton.Enable()
 			RemoveNotificationButton.Enable()
+			SetDefaultSmdpButton.Enable()
 		}
 	}
 }
@@ -192,6 +199,7 @@ func SetDriverIfid(name string) {
 				ConfigInstance.DriverIFID = d.Env
 				RefreshProfileNeeded = true
 				RefreshNotificationNeeded = true
+				RefreshChipInfoNeeded = true
 			}
 		}
 	}

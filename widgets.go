@@ -35,6 +35,7 @@ var DefaultDpAddressLabel *widget.Label
 var RootDsAddressLabel *widget.Label
 var EuiccInfo2TextGrid *widget.TextGrid
 var CopyEidButton *widget.Button
+var SetDefaultSmdpButton *widget.Button
 
 var ApduDriverSelect *widget.Select
 var ApduDriverRefreshButton *widget.Button
@@ -167,23 +168,31 @@ func InitWidgets() {
 			return widget.NewRichText()
 		},
 		func(i widget.ListItemID, o fyne.CanvasObject) {
-			text := fmt.Sprintf("%s\t\t%s\t\t\t%s",
-				Profiles[i].Iccid,
-				Profiles[i].ProfileState,
-				Profiles[i].ServiceProviderName)
-			if Profiles[i].ProfileNickname != nil {
-				text += fmt.Sprintf("\t\t\t%s", Profiles[i].ProfileNickname)
-			}
+			var text string
+			text = fmt.Sprintf("%s\t\t", Profiles[i].Iccid)
 			if Profiles[i].ProfileState == "enabled" {
-				text = "**" + text + "**"
+				text += fmt.Sprintf("*%s*", Profiles[i].ProfileState)
+			} else {
+				text += fmt.Sprintf("%s", Profiles[i].ProfileState)
 			}
+			text += fmt.Sprintf("\t\t\t%s", Profiles[i].ServiceProviderName)
+			if Profiles[i].ProfileNickname != nil {
+				// fyne tab space 为 5
+				tabNum := 5 - len(Profiles[i].ServiceProviderName)/5
+				for x := 1; x <= tabNum; x++ {
+					text += "\t"
+				}
+				text += fmt.Sprintf("%s", Profiles[i].ProfileNickname)
+			}
+			text = "`" + text + "`"
 			o.(*widget.RichText).ParseMarkdown(text)
 		})
 	ProfileList.OnSelected = func(id widget.ListItemID) {
 		SelectedProfile = id
 	}
 
-	ProfileListTitle = widget.NewLabel(fmt.Sprintf("%19s\t\t\t%s\t\t\t%s\t\t\t\t%s", "ICCID", "Profile State", "Provider", "Nickname"))
+	ProfileListTitle = widget.NewLabel(fmt.Sprintf("%s\t\t\t\t\t\t%s\t\t%s\t\t\t\t%s", "ICCID", "Profile State", "Provider", "Nickname"))
+	ProfileListTitle.TextStyle = fyne.TextStyle{Bold: true}
 
 	NotificationList = widget.NewList(
 		func() int {
@@ -193,22 +202,20 @@ func InitWidgets() {
 			return widget.NewRichText()
 		},
 		func(i widget.ListItemID, o fyne.CanvasObject) {
-			text := fmt.Sprintf("%-4d%27s\t\t%s",
+			text := fmt.Sprintf("%-5d\t%s\t\t%s",
 				Notifications[i].SeqNumber,
 				Notifications[i].Iccid,
 				Notifications[i].ProfileManagementOperation)
-			if Notifications[i].ProfileManagementOperation == "install" {
-				text += fmt.Sprintf("\t\t\t\t%s", Notifications[i].NotificationAddress)
-			} else {
-				text += fmt.Sprintf("\t\t\t%s", Notifications[i].NotificationAddress)
-			}
+			text += fmt.Sprintf("\t\t\t%s", Notifications[i].NotificationAddress)
+			text = "`" + text + "`"
 			o.(*widget.RichText).ParseMarkdown(text)
 		})
 	NotificationList.OnSelected = func(id widget.ListItemID) {
 		SelectedNotification = id
 	}
 
-	NotificationListTitle = widget.NewLabel(fmt.Sprintf("%s\t%19s\t\t\t\t%s\t\t\t\t%s", "Seq", "ICCID", "Operation", "Server"))
+	NotificationListTitle = widget.NewLabel(fmt.Sprintf("%s\t\t%s\t\t\t\t\t\t%s\t\t\t%s", "Seq", "ICCID", "Operation", "Server"))
+	NotificationListTitle.TextStyle = fyne.TextStyle{Bold: true}
 
 	ProcessNotificationButton = widget.NewButton("Process", func() {
 		if ConfigInstance.DriverIFID == "" {
@@ -295,6 +302,20 @@ func InitWidgets() {
 	})
 	CopyEidButton.SetIcon(theme.ContentCopyIcon())
 	CopyEidButton.Hide()
+	SetDefaultSmdpButton = widget.NewButton("", func() {
+		if ConfigInstance.DriverIFID == "" {
+			SelectCardReaderDialog()
+			return
+		}
+		if RefreshChipInfoNeeded {
+			RefreshNeededDialog()
+			return
+		}
+		d := InitSetDefaultSmdpDialog()
+		d.Show()
+	})
+	SetDefaultSmdpButton.SetIcon(theme.DocumentCreateIcon())
+	SetDefaultSmdpButton.Hide()
 	ApduDriverSelect = widget.NewSelect([]string{}, func(s string) {
 		SetDriverIfid(s)
 	})

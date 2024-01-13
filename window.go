@@ -15,8 +15,8 @@ var WMain fyne.Window
 func InitMainWindow() fyne.Window {
 	w := App.NewWindow("EasyLPAC")
 	w.Resize(fyne.Size{
-		Width:  800,
-		Height: 500,
+		Width:  820,
+		Height: 520,
 	})
 	w.SetMaster()
 
@@ -31,7 +31,7 @@ func InitMainWindow() fyne.Window {
 	topToolBar := container.NewBorder(
 		layout.NewSpacer(),
 		nil,
-		container.New(layout.NewHBoxLayout(), OpenLogButton, spacer, RefreshButton),
+		container.New(layout.NewHBoxLayout(), OpenLogButton, spacer, RefreshButton, spacer),
 		FreeSpaceLabel,
 		container.NewBorder(
 			nil,
@@ -50,7 +50,7 @@ func InitMainWindow() fyne.Window {
 			nil,
 			nil,
 			nil,
-			container.NewHBox(DownloadButton, spacer, DiscoveryButton, spacer, SetNicknameButton, spacer, EnableButton, spacer, DeleteButton),
+			container.NewHBox(DownloadButton, spacer, SetNicknameButton, spacer, EnableButton, spacer, DeleteButton),
 			statusBar),
 		nil,
 		nil,
@@ -91,7 +91,7 @@ func InitMainWindow() fyne.Window {
 		nil,
 		nil,
 		container.NewBorder(
-			container.NewVBox(container.NewHBox(EidLabel, CopyEidButton), DefaultDpAddressLabel, RootDsAddressLabel),
+			container.NewVBox(container.NewHBox(EidLabel, CopyEidButton), container.NewHBox(DefaultDpAddressLabel, SetDefaultSmdpButton), RootDsAddressLabel),
 			nil,
 			nil,
 			nil,
@@ -129,13 +129,13 @@ lpac GUI Frontend
 
 func InitDownloadDialog() dialog.Dialog {
 	smdp := widget.NewEntry()
-	smdp.PlaceHolder = "Leave it empty to use default SMDP"
+	smdp.PlaceHolder = "Leave it empty to use default SM-DP+"
 	matchID := widget.NewEntry()
 	matchID.PlaceHolder = "Activation code. Optional"
 	confirmCode := widget.NewEntry()
 	confirmCode.PlaceHolder = "Optional"
 	imei := widget.NewEntry()
-	imei.PlaceHolder = "The IMEI sent to SM-DP. Optional"
+	imei.PlaceHolder = "The IMEI sent to SM-DP+. Optional"
 
 	form := []*widget.FormItem{
 		{Text: "SM-DP+", Widget: smdp},
@@ -180,6 +180,27 @@ func InitSetNicknameDialog() dialog.Dialog {
 	}, WMain)
 	d.Resize(fyne.Size{
 		Width:  400,
+		Height: 200,
+	})
+	return d
+}
+
+func InitSetDefaultSmdpDialog() dialog.Dialog {
+	entry := widget.NewEntry()
+	entry.SetPlaceHolder("Leave it empty to remove default SM-DP+ setting")
+	form := []*widget.FormItem{
+		{Text: "Default SM-DP+", Widget: entry},
+	}
+	d := dialog.NewForm("Set Default SM-DP+", "Submit", "Cancel", form, func(b bool) {
+		if b {
+			if err := LpacChipDefaultSmdp(entry.Text); err != nil {
+				ErrDialog(err)
+			}
+			RefreshChipInfo()
+		}
+	}, WMain)
+	d.Resize(fyne.Size{
+		Width:  510,
 		Height: 200,
 	})
 	return d
