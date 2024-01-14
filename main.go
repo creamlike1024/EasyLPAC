@@ -1,8 +1,10 @@
 package main
 
 import (
+	"fmt"
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/app"
+	"fyne.io/fyne/v2/dialog"
 	"os"
 	"path/filepath"
 )
@@ -40,10 +42,21 @@ func main() {
 	defer ConfigInstance.LogFile.Close()
 
 	WMain = InitMainWindow()
-	RefreshApduDriver()
-	if ApduDrivers != nil {
-		ApduDriverSelect.SetSelectedIndex(0)
+
+	_, err = os.Stat(filepath.Join(ConfigInstance.LpacDir, ConfigInstance.EXEName))
+	if err != nil {
+		d := dialog.NewError(fmt.Errorf("lpac not found\nPlease make sure you have put lpac binary in the `lpac` folder"), WMain)
+		d.SetOnClosed(func() {
+			os.Exit(127)
+		})
+		d.Show()
+	} else {
+		RefreshApduDriver()
+		if ApduDrivers != nil {
+			ApduDriverSelect.SetSelectedIndex(0)
+		}
 	}
+
 	WMain.Show()
 
 	App.Run()

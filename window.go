@@ -16,7 +16,7 @@ func InitMainWindow() fyne.Window {
 	w := App.NewWindow("EasyLPAC")
 	w.Resize(fyne.Size{
 		Width:  820,
-		Height: 520,
+		Height: 515,
 	})
 	w.SetMaster()
 
