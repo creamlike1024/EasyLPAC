@@ -139,15 +139,17 @@ func LpacProfileDownload(info PullInfo) {
 	}
 }
 
-func LpacProfileDiscovery() error {
-	// args := []string{"profile", "discovery"}
-	// payload,err := runLpac(args)
-	// if err != nil {
-	// 	ErrDialog(err)
-	// }else {
-	//
-	// }
-	return nil
+func LpacProfileDiscovery() ([]DiscoveryResult, error) {
+	args := []string{"profile", "discovery"}
+	payload, err := runLpac(args)
+	if err != nil {
+		return nil, err
+	}
+	var data []DiscoveryResult
+	if err = json.Unmarshal(payload, &data); err != nil {
+		return nil, err
+	}
+	return data, nil
 }
 
 func LpacProfileNickname(iccid, nickname string) error {
