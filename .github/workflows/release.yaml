@@ -58,12 +58,22 @@ jobs:
         if: runner.os == 'macOS'
         run: |
           go install fyne.io/fyne/v2/cmd/fyne@latest
-          go build -ldflags="-s -w"
+          fyne package -icon asset/icon.png
+          cd EasyLPAC.app/Contents/MacOS
           mkdir lpac
           wget https://github.com/creamlike1024/lpac/releases/download/v2024.1.3/lpac-macos-universal.zip -O lpac.zip
-          unzip lpac.zip -d lpac
-          chmod +x EasyLPAC && chmod +x lpac/*
-          zip -r EasyLPAC-macOS-universal-with-lpac.zip EasyLPAC lpac
+          unzip lpac.zip -d lpac && rm lpac.zip
+          chmod +x lpac/*
+          cd $GITHUB_WORKSPACE
+          zip -r EasyLPAC-macOS-universal-with-lpac.zip EasyLPAC.app
+          mkdir dmg && cp -r EasyLPAC.app dmg
+          hdiutil create -volname "EasyLPAC" -srcfolder dmg -ov -format UDRW EasyLPAC.dmg
+          hdiutil attach EasyLPAC.dmg
+          cp asset/icon.icns /Volumes/EasyLPAC/.VolumeIcon.icns
+          SetFile -c icnC /Volumes/EasyLPAC/.VolumeIcon.icns
+          SetFile -a C /Volumes/EasyLPAC
+          hdiutil detach /Volumes/EasyLPAC
+          hdiutil convert EasyLPAC.dmg -format UDZO -o EasyLPAC-macOS-universal-with-lpac.dmg
 
       - name: Upload Artifact
         uses: actions/upload-artifact@v3
@@ -73,6 +83,7 @@ jobs:
             EasyLPAC-windows-x86_64-with-lpac.zip
             EasyLPAC-linux-x86_64.tar.gz
             EasyLPAC-macOS-universal-with-lpac.zip
+            EasyLPAC-macOS-universal-with-lpac.dmg
 
       - name: Release
         uses: softprops/action-gh-release@v1
@@ -82,3 +93,4 @@ jobs:
             EasyLPAC-windows-x86_64-with-lpac.zip
             EasyLPAC-linux-x86_64.tar.gz
             EasyLPAC-macOS-universal-with-lpac.zip
+            EasyLPAC-macOS-universal-with-lpac.dmg
