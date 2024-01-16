@@ -15,13 +15,13 @@ var WMain fyne.Window
 func InitMainWindow() fyne.Window {
 	w := App.NewWindow("EasyLPAC")
 	w.Resize(fyne.Size{
-		Width:  820,
-		Height: 515,
+		Width:  830,
+		Height: 545,
 	})
 	w.SetMaster()
 
 	statusBar := container.NewGridWrap(fyne.Size{
-		Width:  120,
+		Width:  100,
 		Height: 36,
 	}, StatusLabel, StatusProcessBar)
 
@@ -50,7 +50,7 @@ func InitMainWindow() fyne.Window {
 			nil,
 			nil,
 			nil,
-			container.NewHBox(DownloadButton, spacer, DiscoveryButton, spacer, SetNicknameButton, spacer, EnableButton, spacer, DeleteButton),
+			container.NewHBox(ProfileMaskCheck, DownloadButton, spacer, DiscoveryButton, spacer, SetNicknameButton, spacer, EnableButton, spacer, DeleteButton),
 			statusBar),
 		nil,
 		nil,
@@ -68,7 +68,7 @@ func InitMainWindow() fyne.Window {
 			nil,
 			nil,
 			nil,
-			container.NewHBox(ProcessNotificationButton, spacer, RemoveNotificationButton),
+			container.NewHBox(NotificationMaskCheck, spacer, ProcessNotificationButton, spacer, RemoveNotificationButton),
 			statusBar),
 		nil,
 		nil,

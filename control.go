@@ -16,6 +16,8 @@ var SelectedNotification int
 var RefreshProfileNeeded bool
 var RefreshNotificationNeeded bool
 var RefreshChipInfoNeeded bool
+var ProfileMaskNeeded bool
+var NotificationMaskNeeded bool
 
 var StatusChan chan int
 var LockButtonChan chan bool
@@ -173,6 +175,8 @@ func LockButton() {
 			ProcessNotificationButton.Disable()
 			RemoveNotificationButton.Disable()
 			SetDefaultSmdpButton.Disable()
+			ProfileMaskCheck.Disable()
+			NotificationMaskCheck.Disable()
 		} else {
 			DownloadButton.Enable()
 			DiscoveryButton.Enable()
@@ -183,6 +187,8 @@ func LockButton() {
 			ProcessNotificationButton.Enable()
 			RemoveNotificationButton.Enable()
 			SetDefaultSmdpButton.Enable()
+			ProfileMaskCheck.Enable()
+			NotificationMaskCheck.Enable()
 		}
 	}
 }

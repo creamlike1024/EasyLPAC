@@ -13,14 +13,14 @@ var App fyne.App
 
 func init() {
 	App = app.New()
+	App.Settings().SetTheme(&myTheme{})
 
 	StatusChan = make(chan int)
 	LockButtonChan = make(chan bool)
 	SelectedProfile = -1
 	SelectedNotification = -1
 
-	err := LoadConfig()
-	if err != nil {
+	if err := LoadConfig(); err != nil {
 		panic(err)
 	}
 
