@@ -62,20 +62,15 @@ func InitWidgets() {
 
 	StatusLabel = widget.NewLabel("Ready.")
 
-	DownloadButton = widget.NewButton("Download", downloadButtonFunc)
-	DownloadButton.SetIcon(theme.DownloadIcon())
+	DownloadButton = &widget.Button{Text: "Download", OnTapped: downloadButtonFunc, Icon: theme.DownloadIcon()}
 
-	DiscoveryButton = widget.NewButton("Discovery", discoveryButtonFunc)
-	DiscoveryButton.SetIcon(theme.SearchIcon())
+	DiscoveryButton = &widget.Button{Text: "Discovery", OnTapped: discoveryButtonFunc, Icon: theme.SearchIcon()}
 
-	SetNicknameButton = widget.NewButton("Nickname", setNicknameButtonFunc)
-	SetNicknameButton.SetIcon(theme.DocumentCreateIcon())
+	SetNicknameButton = &widget.Button{Text: "Nickname", OnTapped: setNicknameButtonFunc, Icon: theme.DocumentCreateIcon()}
 
-	DeleteButton = widget.NewButton("Delete", deleteButtonFunc)
-	DeleteButton.SetIcon(theme.DeleteIcon())
+	DeleteButton = &widget.Button{Text: "Delete", OnTapped: deleteButtonFunc, Icon: theme.DeleteIcon()}
 
-	EnableButton = widget.NewButton("Enable", enableButtonFunc)
-	EnableButton.SetIcon(theme.ConfirmIcon())
+	EnableButton = &widget.Button{Text: "Enable", OnTapped: enableButtonFunc, Icon: theme.ConfirmIcon()}
 
 	ProfileList = initProfileList()
 
@@ -91,19 +86,15 @@ func InitWidgets() {
 		&widget.Label{Text: "Operation\t\t\t", TextStyle: fyne.TextStyle{Bold: true}},
 		&widget.Label{Text: "Server", TextStyle: fyne.TextStyle{Bold: true}})
 
-	ProcessNotificationButton = widget.NewButton("Process", processNotificationButtonFunc)
-	ProcessNotificationButton.SetIcon(theme.MediaPlayIcon())
+	ProcessNotificationButton = &widget.Button{Text: "Process", OnTapped: processNotificationButtonFunc, Icon: theme.MediaPlayIcon()}
 
-	RemoveNotificationButton = widget.NewButton("Remove", removeNotificationButtonFunc)
-	RemoveNotificationButton.SetIcon(theme.DeleteIcon())
+	RemoveNotificationButton = &widget.Button{Text: "Remove", OnTapped: removeNotificationButtonFunc, Icon: theme.DeleteIcon()}
 
 	FreeSpaceLabel = widget.NewLabel("")
 
-	OpenLogButton = widget.NewButton("Open Log", OpenLog)
-	OpenLogButton.SetIcon(theme.FolderOpenIcon())
+	OpenLogButton = &widget.Button{Text: "Open Log", OnTapped: OpenLog, Icon: theme.FolderOpenIcon()}
 
-	RefreshButton = widget.NewButton("Refresh", Refresh)
-	RefreshButton.SetIcon(theme.ViewRefreshIcon())
+	RefreshButton = &widget.Button{Text: "Refresh", OnTapped: Refresh, Icon: theme.ViewRefreshIcon()}
 
 	ProfileMaskCheck = widget.NewCheck("Mask", func(b bool) {
 		if b {
@@ -128,19 +119,14 @@ func InitWidgets() {
 	DefaultDpAddressLabel = widget.NewLabel("")
 	RootDsAddressLabel = widget.NewLabel("")
 	EuiccInfo2TextGrid = widget.NewTextGrid()
-	CopyEidButton = widget.NewButton("Copy", copyEidButtonFunc)
-	CopyEidButton.SetIcon(theme.ContentCopyIcon())
+	CopyEidButton = &widget.Button{Text: "Copy", OnTapped: copyEidButtonFunc, Icon: theme.ContentCopyIcon()}
 	CopyEidButton.Hide()
-	SetDefaultSmdpButton = widget.NewButton("", setDefaultSmdpButtonFunc)
-	SetDefaultSmdpButton.SetIcon(theme.DocumentCreateIcon())
+	SetDefaultSmdpButton = &widget.Button{OnTapped: setDefaultSmdpButtonFunc, Icon: theme.DocumentCreateIcon()}
 	SetDefaultSmdpButton.Hide()
 	ApduDriverSelect = widget.NewSelect([]string{}, func(s string) {
 		SetDriverIfid(s)
 	})
-	ApduDriverRefreshButton = widget.NewButton("", func() {
-		RefreshApduDriver()
-	})
-	ApduDriverRefreshButton.SetIcon(theme.SearchReplaceIcon())
+	ApduDriverRefreshButton = &widget.Button{OnTapped: func() { RefreshApduDriver() }, Icon: theme.SearchReplaceIcon()}
 }
 
 func downloadButtonFunc() {

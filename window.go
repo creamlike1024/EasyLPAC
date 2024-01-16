@@ -128,14 +128,10 @@ lpac GUI Frontend
 }
 
 func InitDownloadDialog() dialog.Dialog {
-	smdp := widget.NewEntry()
-	smdp.PlaceHolder = "Leave it empty to use default SM-DP+"
-	matchID := widget.NewEntry()
-	matchID.PlaceHolder = "Activation code. Optional"
-	confirmCode := widget.NewEntry()
-	confirmCode.PlaceHolder = "Optional"
-	imei := widget.NewEntry()
-	imei.PlaceHolder = "The IMEI sent to SM-DP+. Optional"
+	smdp := &widget.Entry{PlaceHolder: "Leave it empty to use default SM-DP+"}
+	matchID := &widget.Entry{PlaceHolder: "Activation code. Optional"}
+	confirmCode := &widget.Entry{PlaceHolder: "Optional"}
+	imei := &widget.Entry{PlaceHolder: "The IMEI sent to SM-DP+. Optional"}
 
 	form := []*widget.FormItem{
 		{Text: "SM-DP+", Widget: smdp},
@@ -146,11 +142,12 @@ func InitDownloadDialog() dialog.Dialog {
 
 	d := dialog.NewForm("Download", "Submit", "Cancel", form, func(b bool) {
 		if b {
-			var pullConfig PullInfo
-			pullConfig.SMDP = smdp.Text
-			pullConfig.MatchID = matchID.Text
-			pullConfig.ConfirmCode = confirmCode.Text
-			pullConfig.IMEI = imei.Text
+			pullConfig := PullInfo{
+				SMDP:        smdp.Text,
+				MatchID:     matchID.Text,
+				ConfirmCode: confirmCode.Text,
+				IMEI:        imei.Text,
+			}
 			LpacProfileDownload(pullConfig)
 			RefreshProfile()
 			RefreshNotification()
@@ -165,8 +162,7 @@ func InitDownloadDialog() dialog.Dialog {
 }
 
 func InitSetNicknameDialog() dialog.Dialog {
-	entry := widget.NewEntry()
-	entry.SetPlaceHolder("Leave it empty to remove nickname")
+	entry := &widget.Entry{PlaceHolder: "Leave it empty to remove nickname", TextStyle: fyne.TextStyle{Monospace: true}}
 	form := []*widget.FormItem{
 		{Text: "Nickname", Widget: entry},
 	}
@@ -186,8 +182,7 @@ func InitSetNicknameDialog() dialog.Dialog {
 }
 
 func InitSetDefaultSmdpDialog() dialog.Dialog {
-	entry := widget.NewEntry()
-	entry.SetPlaceHolder("Leave it empty to remove default SM-DP+ setting")
+	entry := &widget.Entry{PlaceHolder: "Leave it empty to remove default SM-DP+ setting"}
 	form := []*widget.FormItem{
 		{Text: "Default SM-DP+", Widget: entry},
 	}

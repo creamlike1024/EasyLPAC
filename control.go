@@ -177,6 +177,8 @@ func LockButton() {
 			SetDefaultSmdpButton.Disable()
 			ProfileMaskCheck.Disable()
 			NotificationMaskCheck.Disable()
+			ApduDriverSelect.Disable()
+			ApduDriverRefreshButton.Disable()
 		} else {
 			DownloadButton.Enable()
 			DiscoveryButton.Enable()
@@ -189,6 +191,8 @@ func LockButton() {
 			SetDefaultSmdpButton.Enable()
 			ProfileMaskCheck.Enable()
 			NotificationMaskCheck.Enable()
+			ApduDriverSelect.Enable()
+			ApduDriverRefreshButton.Enable()
 		}
 	}
 }
