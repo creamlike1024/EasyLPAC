@@ -46,7 +46,7 @@ jobs:
       - name: Build for Windows
         if: runner.os == 'Linux'
         run: |
-          fyne-cross windows -icon asset/icon2.png
+          fyne-cross windows -icon assets/icon2.png
           cd fyne-cross/bin/windows-amd64
           mkdir lpac
           wget https://github.com/creamlike1024/lpac/releases/download/v2024.1.3/lpac-windows-x86_64-cygwin.zip -O lpac.zip
@@ -58,22 +58,22 @@ jobs:
         if: runner.os == 'macOS'
         run: |
           go install fyne.io/fyne/v2/cmd/fyne@latest
-          fyne package -icon asset/icon.png
+          fyne package -icon assets/icon.png
           cd EasyLPAC.app/Contents/MacOS
           mkdir lpac
           wget https://github.com/creamlike1024/lpac/releases/download/v2024.1.3/lpac-macos-universal.zip -O lpac.zip
           unzip lpac.zip -d lpac && rm lpac.zip
           chmod +x lpac/*
           cd $GITHUB_WORKSPACE
-          zip -r EasyLPAC-macOS-x86_64-with-lpac.zip EasyLPAC.app
+          zip -r EasyLPAC-macOS-universal-with-lpac.zip EasyLPAC.app
           mkdir dmg && cp -r EasyLPAC.app dmg
           hdiutil create -volname "EasyLPAC" -srcfolder dmg -ov -format UDRW EasyLPAC.dmg
           hdiutil attach EasyLPAC.dmg
-          cp asset/icon.icns /Volumes/EasyLPAC/.VolumeIcon.icns
+          cp assets/icon.icns /Volumes/EasyLPAC/.VolumeIcon.icns
           SetFile -c icnC /Volumes/EasyLPAC/.VolumeIcon.icns
           SetFile -a C /Volumes/EasyLPAC
           hdiutil detach /Volumes/EasyLPAC
-          hdiutil convert EasyLPAC.dmg -format UDZO -o EasyLPAC-macOS-x86_64-with-lpac.dmg
+          hdiutil convert EasyLPAC.dmg -format UDZO -o EasyLPAC-macOS-universal-with-lpac.dmg
 
       - name: Upload Artifact
         uses: actions/upload-artifact@v3
@@ -82,8 +82,8 @@ jobs:
           path: |
             EasyLPAC-windows-x86_64-with-lpac.zip
             EasyLPAC-linux-x86_64.tar.gz
-            EasyLPAC-macOS-x86_64-with-lpac.zip
-            EasyLPAC-macOS-x86_64-with-lpac.dmg
+            EasyLPAC-macOS-universal-with-lpac.zip
+            EasyLPAC-macOS-universal-with-lpac.dmg
 
       - name: Release
         uses: softprops/action-gh-release@v1
@@ -92,5 +92,5 @@ jobs:
           files: |
             EasyLPAC-windows-x86_64-with-lpac.zip
             EasyLPAC-linux-x86_64.tar.gz
-            EasyLPAC-macOS-x86_64-with-lpac.zip
-            EasyLPAC-macOS-x86_64-with-lpac.dmg
+            EasyLPAC-macOS-universal-with-lpac.zip
+            EasyLPAC-macOS-universal-with-lpac.dmg

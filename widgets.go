@@ -23,7 +23,7 @@ var SetNicknameButton *widget.Button
 var DownloadButton *widget.Button
 var DiscoveryButton *widget.Button
 var DeleteButton *widget.Button
-var EnableButton *widget.Button
+var SwitchStateButton *widget.Button
 var ProcessNotificationButton *widget.Button
 var RemoveNotificationButton *widget.Button
 
@@ -42,7 +42,7 @@ var NotificationMaskCheck *widget.Check
 var EidLabel *widget.Label
 var DefaultDpAddressLabel *widget.Label
 var RootDsAddressLabel *widget.Label
-var EuiccInfo2TextGrid *widget.TextGrid
+var EuiccInfo2Entry *ReadOnlyEntry
 var CopyEidButton *widget.Button
 var SetDefaultSmdpButton *widget.Button
 
@@ -54,6 +54,35 @@ var ProfileTab *container.TabItem
 var NotificationTab *container.TabItem
 var ChipInfoTab *container.TabItem
 var AboutTab *container.TabItem
+
+type ReadOnlyEntry struct{ widget.Entry }
+
+func (entry *ReadOnlyEntry) TypedRune(r rune)            {}
+func (entry *ReadOnlyEntry) TypedKey(key *fyne.KeyEvent) {}
+func (entry *ReadOnlyEntry) TypedShortcut(shortcut fyne.Shortcut) {
+	switch shortcut := shortcut.(type) {
+	case *fyne.ShortcutCopy:
+		entry.Entry.TypedShortcut(shortcut)
+	}
+}
+
+func (entry *ReadOnlyEntry) TappedSecondary(ev *fyne.PointEvent) {
+	c := fyne.CurrentApp().Driver().AllWindows()[0].Clipboard()
+	copyItem := fyne.NewMenuItem("Copy", func() {
+		c.SetContent(entry.SelectedText())
+	})
+	menu := fyne.NewMenu("", copyItem)
+	widget.ShowPopUpMenuAtPosition(menu, fyne.CurrentApp().Driver().AllWindows()[0].Canvas(), ev.AbsolutePosition)
+}
+
+func NewReadOnlyEntry() *ReadOnlyEntry {
+	entry := &ReadOnlyEntry{}
+	entry.ExtendBaseWidget(entry) // 确保自定义的 widget 被正确地初始化
+	entry.MultiLine = true        // 支持多行文本
+	entry.TextStyle = fyne.TextStyle{Italic: true}
+	entry.Wrapping = fyne.TextWrapOff
+	return entry
+}
 
 func InitWidgets() {
 	StatusProcessBar = widget.NewProgressBarInfinite()
@@ -70,7 +99,7 @@ func InitWidgets() {
 
 	DeleteButton = &widget.Button{Text: "Delete", OnTapped: deleteButtonFunc, Icon: theme.DeleteIcon()}
 
-	EnableButton = &widget.Button{Text: "Enable", OnTapped: enableButtonFunc, Icon: theme.ConfirmIcon()}
+	SwitchStateButton = &widget.Button{Text: "Enable", OnTapped: switchStateButtonFunc, Icon: theme.ConfirmIcon()}
 
 	ProfileList = initProfileList()
 
@@ -118,7 +147,8 @@ func InitWidgets() {
 	EidLabel = widget.NewLabel("")
 	DefaultDpAddressLabel = widget.NewLabel("")
 	RootDsAddressLabel = widget.NewLabel("")
-	EuiccInfo2TextGrid = widget.NewTextGrid()
+	EuiccInfo2Entry = NewReadOnlyEntry()
+	EuiccInfo2Entry.Hide()
 	CopyEidButton = &widget.Button{Text: "Copy", OnTapped: copyEidButtonFunc, Icon: theme.ContentCopyIcon()}
 	CopyEidButton.Hide()
 	SetDefaultSmdpButton = &widget.Button{OnTapped: setDefaultSmdpButtonFunc, Icon: theme.DocumentCreateIcon()}
@@ -279,7 +309,7 @@ func deleteButtonFunc() {
 	d.Show()
 }
 
-func enableButtonFunc() {
+func switchStateButtonFunc() {
 	if ConfigInstance.DriverIFID == "" {
 		SelectCardReaderDialog()
 		return
@@ -292,12 +322,22 @@ func enableButtonFunc() {
 		SelectItemDialog()
 		return
 	}
-	if err := LpacProfileEnable(Profiles[SelectedProfile].Iccid); err != nil {
-		ErrDialog(err)
+	if ProfileStateAllowDisable {
+		if err := LpacProfileDisable(Profiles[SelectedProfile].Iccid); err != nil {
+			ErrDialog(err)
+		}
+	} else {
+		if err := LpacProfileEnable(Profiles[SelectedProfile].Iccid); err != nil {
+			ErrDialog(err)
+		}
 	}
 	RefreshProfile()
 	RefreshNotification()
 	RefreshChipInfo()
+	if ProfileStateAllowDisable {
+		SwitchStateButton.SetText("Enable")
+		SwitchStateButton.SetIcon(theme.ConfirmIcon())
+	}
 }
 
 func processNotificationButtonFunc() {
@@ -493,6 +533,15 @@ func initProfileList() *widget.List {
 		},
 		OnSelected: func(id widget.ListItemID) {
 			SelectedProfile = id
+			if Profiles[SelectedProfile].ProfileState == "enabled" {
+				ProfileStateAllowDisable = true
+				SwitchStateButton.SetText("Disable")
+				SwitchStateButton.SetIcon(theme.CancelIcon())
+			} else {
+				ProfileStateAllowDisable = false
+				SwitchStateButton.SetText("Enable")
+				SwitchStateButton.SetIcon(theme.ConfirmIcon())
+			}
 		}}
 }
 
@@ -547,5 +596,4 @@ func initNotificationList() *widget.List {
 		OnSelected: func(id widget.ListItemID) {
 			SelectedNotification = id
 		}}
-
 }

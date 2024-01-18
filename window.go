@@ -15,7 +15,7 @@ var WMain fyne.Window
 func InitMainWindow() fyne.Window {
 	w := App.NewWindow("EasyLPAC")
 	w.Resize(fyne.Size{
-		Width:  830,
+		Width:  850,
 		Height: 545,
 	})
 	w.SetMaster()
@@ -50,7 +50,7 @@ func InitMainWindow() fyne.Window {
 			nil,
 			nil,
 			nil,
-			container.NewHBox(ProfileMaskCheck, DownloadButton, spacer, DiscoveryButton, spacer, SetNicknameButton, spacer, EnableButton, spacer, DeleteButton),
+			container.NewHBox(ProfileMaskCheck, DownloadButton, spacer, DiscoveryButton, spacer, SetNicknameButton, spacer, SwitchStateButton, spacer, DeleteButton),
 			statusBar),
 		nil,
 		nil,
@@ -95,7 +95,8 @@ func InitMainWindow() fyne.Window {
 			nil,
 			nil,
 			nil,
-			container.NewScroll(EuiccInfo2TextGrid)))
+			container.NewScroll(EuiccInfo2Entry),
+		))
 	ChipInfoTab = container.NewTabItem("Chip Info", chipInfoTabContent)
 
 	thankstoText := widget.NewRichTextFromMarkdown(`

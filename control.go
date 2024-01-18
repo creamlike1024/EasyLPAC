@@ -18,6 +18,7 @@ var RefreshNotificationNeeded bool
 var RefreshChipInfoNeeded bool
 var ProfileMaskNeeded bool
 var NotificationMaskNeeded bool
+var ProfileStateAllowDisable bool
 
 var StatusChan chan int
 var LockButtonChan chan bool
@@ -72,9 +73,10 @@ func RefreshChipInfo() {
 	}
 	CopyEidButton.Show()
 	SetDefaultSmdpButton.Show()
+	EuiccInfo2Entry.Show()
 
-	EuiccInfo2TextGrid.SetText(string(bytes))
-
+	// EuiccInfo2TextGrid.SetText(string(bytes))
+	EuiccInfo2Entry.SetText(string(bytes))
 	// 计算剩余空间
 	freeSpace := float32(ChipInfo.EUICCInfo2.ExtCardResource.FreeNonVolatileMemory) / 1024
 	FreeSpaceLabel.SetText(fmt.Sprintf("Free space: %.2f KB", freeSpace))
@@ -91,6 +93,8 @@ func RefreshApduDriver() {
 		options = append(options, d.Name)
 	}
 	ApduDriverSelect.SetOptions(options)
+	ApduDriverSelect.ClearSelected()
+	ConfigInstance.DriverIFID = ""
 	ApduDriverSelect.Refresh()
 }
 
@@ -170,7 +174,7 @@ func LockButton() {
 			DiscoveryButton.Disable()
 			SetNicknameButton.Disable()
 			RefreshButton.Disable()
-			EnableButton.Disable()
+			SwitchStateButton.Disable()
 			DeleteButton.Disable()
 			ProcessNotificationButton.Disable()
 			RemoveNotificationButton.Disable()
@@ -184,7 +188,7 @@ func LockButton() {
 			DiscoveryButton.Enable()
 			SetNicknameButton.Enable()
 			RefreshButton.Enable()
-			EnableButton.Enable()
+			SwitchStateButton.Enable()
 			DeleteButton.Enable()
 			ProcessNotificationButton.Enable()
 			RemoveNotificationButton.Enable()

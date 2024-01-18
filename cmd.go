@@ -107,6 +107,15 @@ func LpacProfileEnable(iccid string) error {
 	return nil
 }
 
+func LpacProfileDisable(iccid string) error {
+	args := []string{"profile", "disable", iccid}
+	_, err := runLpac(args)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
 func LpacProfileDelete(iccid string) error {
 	args := []string{"profile", "delete", iccid}
 	_, err := runLpac(args)
