@@ -51,7 +51,7 @@ func runLpac(args []string) (json.RawMessage, error) {
 	err := cmd.Run()
 	if err != nil {
 		if len(bytes.TrimSpace(stderr.Bytes())) != 0 {
-			return nil, fmt.Errorf("lpac error:\n%s", stderr.String())
+			return nil, fmt.Errorf("%s", stderr.String())
 		}
 	}
 
@@ -63,7 +63,7 @@ func runLpac(args []string) (json.RawMessage, error) {
 			return nil, err
 		}
 		if resp.Payload.Code != 0 {
-			return nil, fmt.Errorf("lpac error: %s", resp.Payload.Message)
+			return nil, fmt.Errorf("message: %s\ndata: %s\n", resp.Payload.Message, resp.Payload.Data)
 		}
 	}
 	if err := scanner.Err(); err != nil {

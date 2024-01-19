@@ -1,11 +1,13 @@
 package main
 
 import (
+	"fmt"
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/canvas"
 	"fyne.io/fyne/v2/container"
 	"fyne.io/fyne/v2/dialog"
 	"fyne.io/fyne/v2/layout"
+	"fyne.io/fyne/v2/theme"
 	"fyne.io/fyne/v2/widget"
 	"image/color"
 )
@@ -203,7 +205,9 @@ func InitSetDefaultSmdpDialog() dialog.Dialog {
 }
 
 func ErrDialog(err error) {
-	d := dialog.NewError(err, WMain)
+	l := &widget.Label{Text: fmt.Sprintf("%v", err), TextStyle: fyne.TextStyle{Monospace: true}}
+	content := container.NewVBox(container.NewCenter(container.NewHBox(widget.NewIcon(theme.ErrorIcon()), widget.NewLabel("lpac error:"))), container.NewCenter(l))
+	d := dialog.NewCustom("Error", "OK", content, WMain)
 	d.Show()
 }
 
