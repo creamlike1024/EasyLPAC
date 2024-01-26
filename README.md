@@ -8,9 +8,9 @@ Download: [GitHub Release](https://github.com/creamlike1024/EasyLPAC/releases/la
 
 The Windows release and macOS release have lpac binary included.
 
-For linux, currently there is special package for various popular distributions (Sorry), you need put lpac binary to the lpac folder
+For linux, currently there is no special package for various popular distributions (Sorry), you need put lpac binary to the lpac folder
 
-Currently, only pcsc APDUINTERFAC and curl HTTPINTERFACE are supported.
+Currently, only APDUINTERFACE for pcsc and HTTPINTERFACE for curl are supported.
 
 # FAQ
 
