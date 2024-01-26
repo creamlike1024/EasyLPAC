@@ -207,7 +207,9 @@ func InitSetDefaultSmdpDialog() dialog.Dialog {
 
 func ErrDialog(err error) {
 	l := &widget.Label{Text: fmt.Sprintf("%v", err), TextStyle: fyne.TextStyle{Monospace: true}}
-	content := container.NewVBox(container.NewCenter(container.NewHBox(widget.NewIcon(theme.ErrorIcon()), widget.NewLabel("lpac error:"))), container.NewCenter(l))
+	content := container.NewVBox(container.NewCenter(container.NewHBox(widget.NewIcon(theme.ErrorIcon()), widget.NewLabel("lpac error:"))),
+		container.NewCenter(l),
+		container.NewCenter(widget.NewLabel("Please check the log for details")))
 	d := dialog.NewCustom("Error", "OK", content, WMain)
 	d.Show()
 }

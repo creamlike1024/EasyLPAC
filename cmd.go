@@ -63,7 +63,7 @@ func runLpac(args []string) (json.RawMessage, error) {
 			return nil, err
 		}
 		if resp.Payload.Code != 0 {
-			return nil, fmt.Errorf("message: %s\ndata: %s\n", resp.Payload.Message, resp.Payload.Data)
+			return nil, fmt.Errorf("message: %s\ndata: %s", resp.Payload.Message, resp.Payload.Data)
 		}
 	}
 	if err := scanner.Err(); err != nil {
