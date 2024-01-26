@@ -21,6 +21,7 @@ func InitMainWindow() fyne.Window {
 		Height: 545,
 	})
 	w.SetMaster()
+	SetFixedWindowSize(&w)
 
 	statusBar := container.NewGridWrap(fyne.Size{
 		Width:  100,
