@@ -63,7 +63,24 @@ func runLpac(args []string) (json.RawMessage, error) {
 			return nil, err
 		}
 		if resp.Payload.Code != 0 {
-			return nil, fmt.Errorf("message: %s\ndata: %s", resp.Payload.Message, resp.Payload.Data)
+			var dataString string
+			// 外层
+			var jsonString string
+			_ = json.Unmarshal(resp.Payload.Data, &jsonString)
+			// 内层
+			var result map[string]interface{}
+			err = json.Unmarshal([]byte(jsonString), &result)
+			if err != nil {
+				dataString = jsonString
+			} else {
+				formattedJSON, err := json.MarshalIndent(result, "", "  ")
+				if err != nil {
+					dataString = jsonString
+				} else {
+					dataString = string(formattedJSON)
+				}
+			}
+			return nil, fmt.Errorf("stage: %s\ndata: %s", resp.Payload.Message, dataString)
 		}
 	}
 	if err := scanner.Err(); err != nil {
