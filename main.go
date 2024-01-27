@@ -1,6 +1,7 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/app"
@@ -20,6 +21,9 @@ func init() {
 	SelectedProfile = -1
 	SelectedNotification = -1
 	RefreshNeeded = true
+	if err := json.Unmarshal(CIRegistryJSON, &CIRegistry); err != nil {
+		panic(err)
+	}
 
 	if err := LoadConfig(); err != nil {
 		panic(err)

@@ -73,6 +73,7 @@ func RefreshChipInfo() {
 	CopyEidButton.Show()
 	SetDefaultSmdpButton.Show()
 	EuiccInfo2Entry.Show()
+	ViewCertInfoButton.Show()
 
 	// EuiccInfo2TextGrid.SetText(string(bytes))
 	EuiccInfo2Entry.SetText(string(bytes))

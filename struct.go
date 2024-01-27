@@ -1,6 +1,9 @@
 package main
 
-import "encoding/json"
+import (
+	_ "embed"
+	"encoding/json"
+)
 
 type PullInfo struct {
 	SMDP        string
@@ -83,3 +86,14 @@ var Profiles []Profile
 var Notifications []Notification
 var ChipInfo EuiccInfo
 var ApduDrivers []ApduDriver
+
+type CertificateIdentifier struct {
+	Name  string `json:"name"`
+	Type  string `json:"type"`
+	KeyID string `json:"key-id"`
+}
+
+var CIRegistry []CertificateIdentifier
+
+//go:embed ci-registry.json
+var CIRegistryJSON []byte

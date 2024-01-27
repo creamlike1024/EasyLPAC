@@ -45,6 +45,7 @@ var RootDsAddressLabel *widget.Label
 var EuiccInfo2Entry *ReadOnlyEntry
 var CopyEidButton *widget.Button
 var SetDefaultSmdpButton *widget.Button
+var ViewCertInfoButton *widget.Button
 
 var ApduDriverSelect *widget.Select
 var ApduDriverRefreshButton *widget.Button
@@ -153,6 +154,8 @@ func InitWidgets() {
 	CopyEidButton.Hide()
 	SetDefaultSmdpButton = &widget.Button{OnTapped: func() { go setDefaultSmdpButtonFunc() }, Icon: theme.DocumentCreateIcon()}
 	SetDefaultSmdpButton.Hide()
+	ViewCertInfoButton = &widget.Button{Text: "Certificate Identifier Info", OnTapped: func() { go viewCertInfoButtonFunc() }, Icon: theme.InfoIcon()}
+	ViewCertInfoButton.Hide()
 	ApduDriverSelect = widget.NewSelect([]string{}, func(s string) { SetDriverIfid(s) })
 	ApduDriverRefreshButton = &widget.Button{OnTapped: func() { go RefreshApduDriver() }, Icon: theme.SearchReplaceIcon()}
 }
@@ -450,6 +453,47 @@ func setDefaultSmdpButtonFunc() {
 		return
 	}
 	d := InitSetDefaultSmdpDialog()
+	d.Show()
+}
+
+func viewCertInfoButtonFunc() {
+	var cis []CertificateIdentifier
+	isKeyExist := func(keyID string) bool {
+		for _, v := range ChipInfo.EUICCInfo2.EuiccCiPKIDListForSigning {
+			if v == keyID {
+				for _, v := range ChipInfo.EUICCInfo2.EuiccCiPKIDListForVerification {
+					if v == keyID {
+						return true
+					}
+				}
+			}
+		}
+		return false
+	}
+	for _, v := range CIRegistry {
+		if isKeyExist(v.KeyID) {
+			cis = append(cis, v)
+		}
+	}
+	list := widget.NewList(
+		func() int {
+			return len(cis)
+		},
+		func() fyne.CanvasObject {
+			return container.NewVBox(&widget.Label{TextStyle: fyne.TextStyle{Monospace: true}},
+				&widget.Label{TextStyle: fyne.TextStyle{Monospace: true}},
+				&widget.Label{TextStyle: fyne.TextStyle{Monospace: true}})
+		},
+		func(i widget.ListItemID, o fyne.CanvasObject) {
+			o.(*fyne.Container).Objects[0].(*widget.Label).SetText(fmt.Sprintf("Name: %s", cis[i].Name))
+			o.(*fyne.Container).Objects[1].(*widget.Label).SetText(fmt.Sprintf("Type: %s", cis[i].Type))
+			o.(*fyne.Container).Objects[2].(*widget.Label).SetText(fmt.Sprintf("KeyID: %s", cis[i].KeyID))
+		})
+	d := dialog.NewCustom("Certificate Identifier", "OK", list, WMain)
+	d.Resize(fyne.Size{
+		Width:  600,
+		Height: 500,
+	})
 	d.Show()
 }
 
