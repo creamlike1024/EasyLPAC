@@ -10,7 +10,18 @@ import (
 type myTheme struct{}
 
 func (myTheme) Color(n fyne.ThemeColorName, v fyne.ThemeVariant) color.Color {
-	return theme.DefaultTheme().Color(n, v)
+	switch n {
+	case theme.ColorNamePrimary:
+		return color.NRGBA{R: 0xf6, G: 0x5d, B: 0x29, A: 0xff}
+	case theme.ColorNameHyperlink:
+		return color.NRGBA{R: 0xf6, G: 0x5d, B: 0x29, A: 0xff}
+	case theme.ColorNameFocus:
+		return color.NRGBA{R: 0xf5, G: 0x65, B: 0x08, A: 0x2a}
+	case theme.ColorNameSelection:
+		return color.NRGBA{R: 0xf5, G: 0x65, B: 0x08, A: 0x2a}
+	default:
+		return theme.DefaultTheme().Color(n, v)
+	}
 }
 
 func (myTheme) Font(s fyne.TextStyle) fyne.Resource {
