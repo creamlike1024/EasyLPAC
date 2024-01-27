@@ -6,10 +6,12 @@ import (
 	"encoding/json"
 	"fmt"
 	"fyne.io/fyne/v2/dialog"
+	"github.com/mattn/go-runewidth"
 	"io"
 	"os/exec"
 	"path/filepath"
 	"strconv"
+	"strings"
 )
 
 func runLpac(args []string) (json.RawMessage, error) {
@@ -80,7 +82,30 @@ func runLpac(args []string) (json.RawMessage, error) {
 					dataString = string(formattedJSON)
 				}
 			}
-			return nil, fmt.Errorf("stage: %s\ndata: %s", resp.Payload.Message, dataString)
+			wrapText := func(text string, maxWidth int) string {
+				var result strings.Builder
+				lines := strings.Split(text, "\n")
+				for _, line := range lines {
+					var currentWidth int
+					var currentLine strings.Builder
+					for _, runeValue := range line {
+						// 使用字符宽度而不是长度，让包含 CJK 字符的字符串也能正确限制显示长度
+						runeWidth := runewidth.RuneWidth(runeValue)
+						if currentWidth+runeWidth > maxWidth {
+							result.WriteString(currentLine.String() + "\n")
+							currentLine.Reset()
+							currentWidth = 0
+						}
+						currentLine.WriteRune(runeValue)
+						currentWidth += runeWidth
+					}
+					if currentLine.Len() > 0 {
+						result.WriteString(currentLine.String() + "\n")
+					}
+				}
+				return result.String()
+			}
+			return nil, fmt.Errorf("stage: %s\ndata: %s", resp.Payload.Message, wrapText(dataString, 90))
 		}
 	}
 	if err := scanner.Err(); err != nil {
