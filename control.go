@@ -3,6 +3,7 @@ package main
 import (
 	"encoding/json"
 	"fmt"
+	"math"
 	"os/exec"
 	"runtime"
 )
@@ -13,9 +14,7 @@ const StatusReady = 0
 var SelectedProfile int
 var SelectedNotification int
 
-var RefreshProfileNeeded bool
-var RefreshNotificationNeeded bool
-var RefreshChipInfoNeeded bool
+var RefreshNeeded bool
 var ProfileMaskNeeded bool
 var NotificationMaskNeeded bool
 var ProfileStateAllowDisable bool
@@ -78,8 +77,8 @@ func RefreshChipInfo() {
 	// EuiccInfo2TextGrid.SetText(string(bytes))
 	EuiccInfo2Entry.SetText(string(bytes))
 	// 计算剩余空间
-	freeSpace := float32(ChipInfo.EUICCInfo2.ExtCardResource.FreeNonVolatileMemory) / 1024
-	FreeSpaceLabel.SetText(fmt.Sprintf("Free space: %.2f KB", freeSpace))
+	freeSpace := float64(ChipInfo.EUICCInfo2.ExtCardResource.FreeNonVolatileMemory) / 1024
+	FreeSpaceLabel.SetText(fmt.Sprintf("Free space: %.2f KB", math.Round(freeSpace*100)/100))
 }
 
 func RefreshApduDriver() {
@@ -119,33 +118,14 @@ func OpenLog() {
 }
 
 func Refresh() {
-	switch tab := Tabs.Selected(); tab {
-	case ProfileTab:
-		if ConfigInstance.DriverIFID == "" {
-			SelectCardReaderDialog()
-			return
-		}
-		RefreshProfile()
-		RefreshChipInfo()
-		RefreshProfileNeeded = false
-		RefreshChipInfoNeeded = false
-	case NotificationTab:
-		if ConfigInstance.DriverIFID == "" {
-			SelectCardReaderDialog()
-			return
-		}
-		RefreshNotification()
-		RefreshChipInfo()
-		RefreshNotificationNeeded = false
-		RefreshChipInfoNeeded = false
-	case ChipInfoTab:
-		if ConfigInstance.DriverIFID == "" {
-			SelectCardReaderDialog()
-			return
-		}
-		RefreshChipInfo()
-		RefreshChipInfoNeeded = false
+	if ConfigInstance.DriverIFID == "" {
+		SelectCardReaderDialog()
+		return
 	}
+	RefreshProfile()
+	RefreshNotification()
+	RefreshChipInfo()
+	RefreshNeeded = false
 }
 
 func UpdateStatusBar() {
@@ -211,9 +191,7 @@ func SetDriverIfid(name string) {
 				return
 			} else {
 				ConfigInstance.DriverIFID = d.Env
-				RefreshProfileNeeded = true
-				RefreshNotificationNeeded = true
-				RefreshChipInfoNeeded = true
+				RefreshNeeded = true
 			}
 		}
 	}

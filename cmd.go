@@ -143,7 +143,16 @@ func LpacProfileDownload(info PullInfo) {
 	if err != nil {
 		ErrDialog(err)
 	} else {
-		d := dialog.NewInformation("Info", "Downloaded successfully", WMain)
+		notificationOrigin := Notifications
+		Refresh()
+		d := dialog.NewConfirm("Send Install Notification",
+			"Download successful\nSend the install notification now?\n",
+			func(b bool) {
+				if b {
+					downloadNotification := findNewNotification(notificationOrigin, Notifications)
+					go processNotification(downloadNotification.SeqNumber)
+				}
+			}, WMain)
 		d.Show()
 	}
 }

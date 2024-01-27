@@ -152,10 +152,10 @@ func InitDownloadDialog() dialog.Dialog {
 				ConfirmCode: confirmCode.Text,
 				IMEI:        imei.Text,
 			}
-			LpacProfileDownload(pullConfig)
-			RefreshProfile()
-			RefreshNotification()
-			RefreshChipInfo()
+			go func() {
+				RefreshNotification()
+				LpacProfileDownload(pullConfig)
+			}()
 		}
 	}, WMain)
 	d.Resize(fyne.Size{
@@ -206,29 +206,37 @@ func InitSetDefaultSmdpDialog() dialog.Dialog {
 }
 
 func ErrDialog(err error) {
-	l := &widget.Label{Text: fmt.Sprintf("%v", err), TextStyle: fyne.TextStyle{Monospace: true}}
-	content := container.NewVBox(container.NewCenter(container.NewHBox(widget.NewIcon(theme.ErrorIcon()), widget.NewLabel("lpac error:"))),
-		container.NewCenter(l),
-		container.NewCenter(widget.NewLabel("Please check the log for details")))
-	d := dialog.NewCustom("Error", "OK", content, WMain)
-	d.Show()
+	go func() {
+		l := &widget.Label{Text: fmt.Sprintf("%v", err), TextStyle: fyne.TextStyle{Monospace: true}}
+		content := container.NewVBox(container.NewCenter(container.NewHBox(widget.NewIcon(theme.ErrorIcon()), widget.NewLabel("lpac error:"))),
+			container.NewCenter(l),
+			container.NewCenter(widget.NewLabel("Please check the log for details")))
+		d := dialog.NewCustom("Error", "OK", content, WMain)
+		d.Show()
+	}()
 }
 
 func SelectItemDialog() {
-	d := dialog.NewInformation("Info", "Please select a item.", WMain)
-	d.Resize(fyne.Size{
-		Width:  220,
-		Height: 160,
-	})
-	d.Show()
+	go func() {
+		d := dialog.NewInformation("Info", "Please select a item.", WMain)
+		d.Resize(fyne.Size{
+			Width:  220,
+			Height: 160,
+		})
+		d.Show()
+	}()
 }
 
 func SelectCardReaderDialog() {
-	d := dialog.NewInformation("Info", "Please select a card reader.", WMain)
-	d.Show()
+	go func() {
+		d := dialog.NewInformation("Info", "Please select a card reader.", WMain)
+		d.Show()
+	}()
 }
 
 func RefreshNeededDialog() {
-	d := dialog.NewInformation("Info", "Card reader changed.\nPlease refresh before proceeding.", WMain)
-	d.Show()
+	go func() {
+		d := dialog.NewInformation("Info", "Please refresh before proceeding.\n", WMain)
+		d.Show()
+	}()
 }

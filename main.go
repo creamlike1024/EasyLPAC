@@ -19,6 +19,7 @@ func init() {
 	LockButtonChan = make(chan bool)
 	SelectedProfile = -1
 	SelectedNotification = -1
+	RefreshNeeded = true
 
 	if err := LoadConfig(); err != nil {
 		panic(err)
