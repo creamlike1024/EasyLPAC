@@ -4,11 +4,23 @@
 
 Download: [GitHub Release](https://github.com/creamlike1024/EasyLPAC/releases/latest)
 
+Linux release was built on Ubuntu 22.04, you may need to build by yourself if you can't run it
+
+System Requirement
+- Windows 7+
+- MacOS 12+
+- Linux: ? glibc and opengl support.
+- FreeBSD: unknown
+
+For Linux you need install `libpcsclite1`, `pcscd` and `libcurl` which are dependencies of lpac
+
 # Usage
 
 The Windows release and macOS release have lpac binary included.
 
-For linux, currently there is no special package for various popular distributions (Sorry), you need put lpac binary to the lpac folder
+For linux, currently there is no special package for various popular distributions (Sorry), you need to place the lpac binaries in the lpac folder.
+
+For FreeBSD, you need compile lpac by yourself and place the lpac binaries in the lpac folder.
 
 Currently, only APDUINTERFACE for pcsc and HTTPINTERFACE for curl are supported.
 
@@ -29,7 +41,8 @@ If you see `SCardListReaders() failed` and `APDU library init error`, that means
 
 ## Will it send notification automatically?
 
-No. Any notification generated from any operation(install, delete, enable, disable) on the profile will not be automatically processed.
-You should process them manually in the Notification Tab
+EasyLPAC will ask you to send notification after install or delete operation.
 
-Unless you remove notification manually, the notification will be kept in your eUICC, including those have been successfully processed.
+Other notification(enable, disable) will not be automatically processed. You should process them manually in the Notification Tab
+
+The notification will be kept in your eUICC, including those have been successfully processed. You should manually remove them or click confirm when the program asks you to remove them.
