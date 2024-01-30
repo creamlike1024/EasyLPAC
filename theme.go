@@ -28,9 +28,6 @@ func (myTheme) Font(s fyne.TextStyle) fyne.Resource {
 	if s.Monospace {
 		return resourceNotoSansMonoCJKscRegular
 	}
-	if s.Italic {
-		return resourceDejaVuSansMonoRegular
-	}
 	return theme.DefaultTheme().Font(s)
 }
 

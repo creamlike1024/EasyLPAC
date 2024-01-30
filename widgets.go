@@ -80,7 +80,7 @@ func NewReadOnlyEntry() *ReadOnlyEntry {
 	entry := &ReadOnlyEntry{}
 	entry.ExtendBaseWidget(entry) // 确保自定义的 widget 被正确地初始化
 	entry.MultiLine = true        // 支持多行文本
-	entry.TextStyle = fyne.TextStyle{Italic: true}
+	entry.TextStyle = fyne.TextStyle{Monospace: true}
 	entry.Wrapping = fyne.TextWrapOff
 	return entry
 }
