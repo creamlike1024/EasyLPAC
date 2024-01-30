@@ -10,6 +10,8 @@ import (
 	"path/filepath"
 )
 
+const Version = "0.6.3"
+
 var App fyne.App
 
 func init() {
@@ -24,11 +26,9 @@ func init() {
 	if err := json.Unmarshal(CIRegistryJSON, &CIRegistry); err != nil {
 		panic(err)
 	}
-
 	if err := LoadConfig(); err != nil {
 		panic(err)
 	}
-
 	if _, err := os.Stat(ConfigInstance.LogDir); os.IsNotExist(err) {
 		os.Mkdir(ConfigInstance.LogDir, 0755)
 	}
@@ -63,6 +63,5 @@ func main() {
 	}
 
 	WMain.Show()
-
 	App.Run()
 }

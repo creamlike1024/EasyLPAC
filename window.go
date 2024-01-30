@@ -119,10 +119,10 @@ lpac GUI Frontend
 [Github](https://github.com/creamlike1024/EasyLPAC) Repo `)
 
 	aboutTabContent := container.NewBorder(
-		layout.NewSpacer(),
-		layout.NewSpacer(),
-		layout.NewSpacer(),
-		layout.NewSpacer(),
+		nil,
+		container.NewHBox(widget.NewLabel(fmt.Sprintf("Version: %s", Version))),
+		nil,
+		nil,
 		container.NewCenter(container.NewVBox(thankstoText, aboutText)))
 	AboutTab = container.NewTabItem("About", aboutTabContent)
 
