@@ -10,7 +10,8 @@ import (
 	"path/filepath"
 )
 
-const Version = "0.6.3"
+const Version = "0.6.4"
+const CIRegistryVersion = "2024-02-04"
 
 var App fyne.App
 
@@ -23,7 +24,7 @@ func init() {
 	SelectedProfile = -1
 	SelectedNotification = -1
 	RefreshNeeded = true
-	if err := json.Unmarshal(CIRegistryJSON, &CIRegistry); err != nil {
+	if err := json.Unmarshal(CIRegistryByte, &CIRegistry); err != nil {
 		panic(err)
 	}
 	if err := LoadConfig(); err != nil {

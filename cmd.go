@@ -183,7 +183,7 @@ func LpacProfileDownload(info PullInfo) {
 	}
 	_, err := runLpac(args)
 	if err != nil {
-		ErrDialog(err)
+		ShowErrDialog(err)
 	} else {
 		notificationOrigin := Notifications
 		Refresh()

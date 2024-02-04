@@ -109,6 +109,8 @@ func InitMainWindow() fyne.Window {
 
 [lpac](https://github.com/estkme-group/lpac) C-based eUICC LPA
 
+[eUICC Manual](https://euicc-manual.septs.app) eUICC Developer Manual
+
 [fyne](https://github.com/fyne-io/fyne) Material Design GUI toolkit`)
 
 	aboutText := widget.NewRichTextFromMarkdown(`
@@ -120,7 +122,9 @@ lpac GUI Frontend
 
 	aboutTabContent := container.NewBorder(
 		nil,
-		container.NewHBox(widget.NewLabel(fmt.Sprintf("Version: %s", Version))),
+		container.NewBorder(nil, nil,
+			widget.NewLabel(fmt.Sprintf("Version: %s", Version)),
+			widget.NewLabel(fmt.Sprintf("CI-Registry Data: %s", CIRegistryVersion))),
 		nil,
 		nil,
 		container.NewCenter(container.NewVBox(thankstoText, aboutText)))
@@ -175,7 +179,7 @@ func InitSetNicknameDialog() dialog.Dialog {
 	d := dialog.NewForm("Set Nickname", "Submit", "Cancel", form, func(b bool) {
 		if b {
 			if err := LpacProfileNickname(Profiles[SelectedProfile].Iccid, entry.Text); err != nil {
-				ErrDialog(err)
+				ShowErrDialog(err)
 			}
 			RefreshProfile()
 		}
@@ -195,7 +199,7 @@ func InitSetDefaultSmdpDialog() dialog.Dialog {
 	d := dialog.NewForm("Set Default SM-DP+", "Submit", "Cancel", form, func(b bool) {
 		if b {
 			if err := LpacChipDefaultSmdp(entry.Text); err != nil {
-				ErrDialog(err)
+				ShowErrDialog(err)
 			}
 			RefreshChipInfo()
 		}
@@ -207,7 +211,7 @@ func InitSetDefaultSmdpDialog() dialog.Dialog {
 	return d
 }
 
-func ErrDialog(err error) {
+func ShowErrDialog(err error) {
 	go func() {
 		l := &widget.Label{Text: fmt.Sprintf("%v", err), TextStyle: fyne.TextStyle{Monospace: true}}
 		content := container.NewVBox(container.NewCenter(container.NewHBox(widget.NewIcon(theme.ErrorIcon()), widget.NewLabel("lpac error"))),
@@ -218,7 +222,7 @@ func ErrDialog(err error) {
 	}()
 }
 
-func SelectItemDialog() {
+func ShowSelectItemDialog() {
 	go func() {
 		d := dialog.NewInformation("Info", "Please select a item.", WMain)
 		d.Resize(fyne.Size{
@@ -229,14 +233,14 @@ func SelectItemDialog() {
 	}()
 }
 
-func SelectCardReaderDialog() {
+func ShowSelectCardReaderDialog() {
 	go func() {
 		d := dialog.NewInformation("Info", "Please select a card reader.", WMain)
 		d.Show()
 	}()
 }
 
-func RefreshNeededDialog() {
+func ShowRefreshNeededDialog() {
 	go func() {
 		d := dialog.NewInformation("Info", "Please refresh before proceeding.\n", WMain)
 		d.Show()

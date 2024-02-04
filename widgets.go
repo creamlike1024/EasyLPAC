@@ -9,13 +9,14 @@ import (
 	"fyne.io/fyne/v2/dialog"
 	"fyne.io/fyne/v2/theme"
 	"fyne.io/fyne/v2/widget"
-	"github.com/atotto/clipboard"
 	"github.com/mattn/go-runewidth"
 	"golang.org/x/net/publicsuffix"
 	"image/color"
 	"strings"
 	"time"
 )
+
+const FontTabWidth = 4
 
 var StatusProcessBar *widget.ProgressBarInfinite
 var StatusLabel *widget.Label
@@ -73,7 +74,7 @@ func (entry *ReadOnlyEntry) TappedSecondary(ev *fyne.PointEvent) {
 		c.SetContent(entry.SelectedText())
 	})
 	menu := fyne.NewMenu("", copyItem)
-	widget.ShowPopUpMenuAtPosition(menu, fyne.CurrentApp().Driver().AllWindows()[0].Canvas(), ev.AbsolutePosition)
+	widget.ShowPopUpMenuAtPosition(menu, fyne.CurrentApp().Driver().CanvasForObject(entry), ev.AbsolutePosition)
 }
 
 func NewReadOnlyEntry() *ReadOnlyEntry {
@@ -154,7 +155,7 @@ func InitWidgets() {
 	CopyEidButton.Hide()
 	SetDefaultSmdpButton = &widget.Button{OnTapped: func() { go setDefaultSmdpButtonFunc() }, Icon: theme.DocumentCreateIcon()}
 	SetDefaultSmdpButton.Hide()
-	ViewCertInfoButton = &widget.Button{Text: "Certificate Identifier Info", OnTapped: func() { go viewCertInfoButtonFunc() }, Icon: theme.InfoIcon()}
+	ViewCertInfoButton = &widget.Button{Text: "Certificate Identifier", OnTapped: func() { go viewCertInfoButtonFunc() }, Icon: theme.InfoIcon()}
 	ViewCertInfoButton.Hide()
 	ApduDriverSelect = widget.NewSelect([]string{}, func(s string) { SetDriverIfid(s) })
 	ApduDriverRefreshButton = &widget.Button{OnTapped: func() { go RefreshApduDriver() }, Icon: theme.SearchReplaceIcon()}
@@ -162,11 +163,11 @@ func InitWidgets() {
 
 func downloadButtonFunc() {
 	if ConfigInstance.DriverIFID == "" {
-		SelectCardReaderDialog()
+		ShowSelectCardReaderDialog()
 		return
 	}
 	if RefreshNeeded == true {
-		RefreshNeededDialog()
+		ShowRefreshNeededDialog()
 		return
 	}
 	d := InitDownloadDialog()
@@ -175,11 +176,11 @@ func downloadButtonFunc() {
 
 func discoveryButtonFunc() {
 	if ConfigInstance.DriverIFID == "" {
-		SelectCardReaderDialog()
+		ShowSelectCardReaderDialog()
 		return
 	}
 	if RefreshNeeded == true {
-		RefreshNeededDialog()
+		ShowRefreshNeededDialog()
 		return
 	}
 	discoveryFunc := func() {
@@ -192,7 +193,7 @@ func discoveryButtonFunc() {
 		}()
 		<-ch
 		if err != nil {
-			ErrDialog(err)
+			ShowErrDialog(err)
 			return
 		}
 		if len(data) != 0 {
@@ -218,7 +219,7 @@ func discoveryButtonFunc() {
 			}
 			downloadButton := widget.NewButton("Download", func() {
 				if selectedProfile == -1 {
-					SelectItemDialog()
+					ShowSelectItemDialog()
 				} else {
 					d.Hide()
 					go LpacProfileDownload(PullInfo{
@@ -272,15 +273,15 @@ func discoveryButtonFunc() {
 
 func setNicknameButtonFunc() {
 	if ConfigInstance.DriverIFID == "" {
-		SelectCardReaderDialog()
+		ShowSelectCardReaderDialog()
 		return
 	}
 	if RefreshNeeded {
-		RefreshNeededDialog()
+		ShowRefreshNeededDialog()
 		return
 	}
 	if SelectedProfile < 0 || SelectedProfile >= len(Profiles) {
-		SelectItemDialog()
+		ShowSelectItemDialog()
 		return
 	}
 	d := InitSetNicknameDialog()
@@ -289,15 +290,15 @@ func setNicknameButtonFunc() {
 
 func deleteButtonFunc() {
 	if ConfigInstance.DriverIFID == "" {
-		SelectCardReaderDialog()
+		ShowSelectCardReaderDialog()
 		return
 	}
 	if RefreshNeeded {
-		RefreshNeededDialog()
+		ShowRefreshNeededDialog()
 		return
 	}
 	if SelectedProfile < 0 || SelectedProfile >= len(Profiles) {
-		SelectItemDialog()
+		ShowSelectItemDialog()
 		return
 	}
 	if Profiles[SelectedProfile].ProfileState == "enabled" {
@@ -326,7 +327,7 @@ func deleteButtonFunc() {
 				go func() {
 					notificationOrigin := Notifications
 					if err := LpacProfileDelete(Profiles[SelectedProfile].Iccid); err != nil {
-						ErrDialog(err)
+						ShowErrDialog(err)
 						Refresh()
 					} else {
 						Refresh()
@@ -349,24 +350,24 @@ func deleteButtonFunc() {
 
 func switchStateButtonFunc() {
 	if ConfigInstance.DriverIFID == "" {
-		SelectCardReaderDialog()
+		ShowSelectCardReaderDialog()
 		return
 	}
 	if RefreshNeeded {
-		RefreshNeededDialog()
+		ShowRefreshNeededDialog()
 		return
 	}
 	if SelectedProfile < 0 || SelectedProfile >= len(Profiles) {
-		SelectItemDialog()
+		ShowSelectItemDialog()
 		return
 	}
 	if ProfileStateAllowDisable {
 		if err := LpacProfileDisable(Profiles[SelectedProfile].Iccid); err != nil {
-			ErrDialog(err)
+			ShowErrDialog(err)
 		}
 	} else {
 		if err := LpacProfileEnable(Profiles[SelectedProfile].Iccid); err != nil {
-			ErrDialog(err)
+			ShowErrDialog(err)
 		}
 	}
 	Refresh()
@@ -378,15 +379,15 @@ func switchStateButtonFunc() {
 
 func processNotificationButtonFunc() {
 	if ConfigInstance.DriverIFID == "" {
-		SelectCardReaderDialog()
+		ShowSelectCardReaderDialog()
 		return
 	}
 	if RefreshNeeded {
-		RefreshNeededDialog()
+		ShowRefreshNeededDialog()
 		return
 	}
 	if SelectedNotification < 0 || SelectedNotification >= len(Notifications) {
-		SelectItemDialog()
+		ShowSelectItemDialog()
 		return
 	}
 	seq := Notifications[SelectedNotification].SeqNumber
@@ -395,15 +396,15 @@ func processNotificationButtonFunc() {
 
 func removeNotificationButtonFunc() {
 	if ConfigInstance.DriverIFID == "" {
-		SelectCardReaderDialog()
+		ShowSelectCardReaderDialog()
 		return
 	}
 	if RefreshNeeded {
-		RefreshNeededDialog()
+		ShowRefreshNeededDialog()
 		return
 	}
 	if SelectedNotification < 0 || SelectedNotification >= len(Notifications) {
-		SelectItemDialog()
+		ShowSelectItemDialog()
 		return
 	}
 	notificationText := fmt.Sprintf("%d\t\t%s\t\t%s\t\t%s\n\n",
@@ -419,7 +420,7 @@ func removeNotificationButtonFunc() {
 		func(b bool) {
 			if b {
 				if err := LpacNotificationRemove(Notifications[SelectedNotification].SeqNumber); err != nil {
-					ErrDialog(err)
+					ShowErrDialog(err)
 				}
 				RefreshNotification()
 				RefreshChipInfo()
@@ -431,25 +432,19 @@ func removeNotificationButtonFunc() {
 }
 
 func copyEidButtonFunc() {
-	err := clipboard.WriteAll(ChipInfo.EidValue)
-	if err != nil {
-		ErrDialog(err)
-	} else {
-		go func() {
-			CopyEidButton.SetText("Copied!")
-			time.Sleep(2 * time.Second)
-			CopyEidButton.SetText("Copy")
-		}()
-	}
+	WMain.Clipboard().SetContent(ChipInfo.EidValue)
+	CopyEidButton.SetText("Copied!")
+	time.Sleep(2 * time.Second)
+	CopyEidButton.SetText("Copy")
 }
 
 func setDefaultSmdpButtonFunc() {
 	if ConfigInstance.DriverIFID == "" {
-		SelectCardReaderDialog()
+		ShowSelectCardReaderDialog()
 		return
 	}
 	if RefreshNeeded {
-		RefreshNeededDialog()
+		ShowRefreshNeededDialog()
 		return
 	}
 	d := InitSetDefaultSmdpDialog()
@@ -457,7 +452,13 @@ func setDefaultSmdpButtonFunc() {
 }
 
 func viewCertInfoButtonFunc() {
-	var cis []CertificateIdentifier
+	selectedCI := -1
+	type ciWidgetEl struct {
+		C     string
+		CN    string
+		KeyID string
+	}
+	var ciWidgetEls []ciWidgetEl
 	isKeyExist := func(keyID string) bool {
 		for _, v := range ChipInfo.EUICCInfo2.EuiccCiPKIDListForSigning {
 			if v == keyID {
@@ -470,26 +471,88 @@ func viewCertInfoButtonFunc() {
 		}
 		return false
 	}
+	countryCodeToEmoji := func(countryCode string) string {
+		if len(countryCode) != 2 {
+			return "🌎"
+		}
+		countryCode = strings.ToUpper(countryCode)
+		rune1 := rune(countryCode[0]-'A') + 0x1F1E6
+		rune2 := rune(countryCode[1]-'A') + 0x1F1E6
+		return string([]rune{rune1, rune2})
+	}
 	for _, v := range CIRegistry {
 		if isKeyExist(v.KeyID) {
-			cis = append(cis, v)
+			var c, cn string
+			if v.CN != nil {
+				cn = v.CN.(string)
+			} else {
+				cn = "Unknown"
+			}
+			if v.C != nil {
+				c = v.C.(string)
+			} else {
+				c = ""
+			}
+			ciWidgetEls = append(ciWidgetEls, ciWidgetEl{
+				C:     c,
+				CN:    cn,
+				KeyID: v.KeyID,
+			})
 		}
 	}
-	list := widget.NewList(
-		func() int {
-			return len(cis)
+	list := &widget.List{
+		Length: func() int {
+			return len(ciWidgetEls)
 		},
-		func() fyne.CanvasObject {
-			return container.NewVBox(&widget.Label{TextStyle: fyne.TextStyle{Monospace: true}},
-				&widget.Label{TextStyle: fyne.TextStyle{Monospace: true}},
+		CreateItem: func() fyne.CanvasObject {
+			return container.NewVBox(container.NewBorder(nil, nil, &widget.Label{TextStyle: fyne.TextStyle{Monospace: true}}, &widget.Label{}),
 				&widget.Label{TextStyle: fyne.TextStyle{Monospace: true}})
 		},
-		func(i widget.ListItemID, o fyne.CanvasObject) {
-			o.(*fyne.Container).Objects[0].(*widget.Label).SetText(fmt.Sprintf("Name: %s", cis[i].Name))
-			o.(*fyne.Container).Objects[1].(*widget.Label).SetText(fmt.Sprintf("Type: %s", cis[i].Type))
-			o.(*fyne.Container).Objects[2].(*widget.Label).SetText(fmt.Sprintf("KeyID: %s", cis[i].KeyID))
-		})
-	d := dialog.NewCustom("Certificate Identifier", "OK", list, WMain)
+		UpdateItem: func(i widget.ListItemID, o fyne.CanvasObject) {
+			o.(*fyne.Container).Objects[0].(*fyne.Container).Objects[0].(*widget.Label).SetText(fmt.Sprintf("CN: %s", ciWidgetEls[i].CN))
+			o.(*fyne.Container).Objects[0].(*fyne.Container).Objects[1].(*widget.Label).SetText(countryCodeToEmoji(ciWidgetEls[i].C))
+			o.(*fyne.Container).Objects[1].(*widget.Label).SetText(fmt.Sprintf("KeyID: %s", ciWidgetEls[i].KeyID))
+		},
+		OnSelected: func(id widget.ListItemID) {
+			selectedCI = id
+		},
+		OnUnselected: func(id widget.ListItemID) {
+			selectedCI = -1
+		},
+	}
+	certDataButtonFunc := func() {
+		if selectedCI == -1 {
+			ShowSelectItemDialog()
+		} else {
+			for _, v := range CIRegistry {
+				if v.KeyID == ciWidgetEls[selectedCI].KeyID && v.CertData != nil {
+					entry := NewReadOnlyEntry()
+					entry.SetText(v.CertData.(string))
+					w := App.NewWindow(v.KeyID)
+					w.Resize(fyne.Size{
+						Width:  550,
+						Height: 600,
+					})
+					w.SetContent(entry)
+					w.Show()
+					return
+				}
+			}
+			d := dialog.NewInformation("No Data",
+				"The information of this certificate is not included.\n"+
+					"If you have any information about this certificate,\n"+
+					"you can report it to euicc-dev-manual@septs.pw\n"+
+					"Thank you",
+				WMain)
+			d.Show()
+		}
+	}
+	certDataButton := &widget.Button{
+		Text:     "Certificate Info",
+		OnTapped: certDataButtonFunc,
+		Icon:     theme.InfoIcon(),
+	}
+	d := dialog.NewCustom("Certificate Identifier", "OK", container.NewBorder(nil, container.NewCenter(certDataButton), nil, nil, list), WMain)
 	d.Resize(fyne.Size{
 		Width:  600,
 		Height: 500,
@@ -505,15 +568,15 @@ func initProfileList() *widget.List {
 		CreateItem: func() fyne.CanvasObject {
 			spacer := canvas.NewRectangle(color.Transparent)
 			spacer.SetMinSize(fyne.NewSize(1, 1))
-			iccidLabel := &widget.Label{TextStyle: fyne.TextStyle{Monospace: true}}
-			stateLabel := &widget.Label{TextStyle: fyne.TextStyle{Monospace: true}}
+			iccidLabel := &widget.Label{TextStyle: fyne.TextStyle{Monospace: true, TabWidth: FontTabWidth}}
+			stateLabel := &widget.Label{TextStyle: fyne.TextStyle{Monospace: true, TabWidth: FontTabWidth}}
 			enabledIcon := widget.NewIcon(theme.ConfirmIcon())
 			enabledIcon.Hide()
 			stateFillLabel := widget.NewLabel("")
 			profileIcon := widget.NewIcon(theme.FileImageIcon())
 			stateContainer := container.NewHBox(stateLabel, enabledIcon, spacer, stateFillLabel, profileIcon)
-			providerLabel := &widget.Label{TextStyle: fyne.TextStyle{Monospace: true}}
-			nicknameLabel := &widget.Label{TextStyle: fyne.TextStyle{Monospace: true}}
+			providerLabel := &widget.Label{TextStyle: fyne.TextStyle{Monospace: true, TabWidth: FontTabWidth}}
+			nicknameLabel := &widget.Label{TextStyle: fyne.TextStyle{Monospace: true, TabWidth: FontTabWidth}}
 			return container.NewHBox(iccidLabel, stateContainer, providerLabel, nicknameLabel)
 		},
 		UpdateItem: func(i widget.ListItemID, o fyne.CanvasObject) {
@@ -593,6 +656,9 @@ func initProfileList() *widget.List {
 				SwitchStateButton.SetText("Enable")
 				SwitchStateButton.SetIcon(theme.ConfirmIcon())
 			}
+		},
+		OnUnselected: func(id widget.ListItemID) {
+			SelectedProfile = -1
 		}}
 }
 
@@ -602,10 +668,10 @@ func initNotificationList() *widget.List {
 			return len(Notifications)
 		},
 		CreateItem: func() fyne.CanvasObject {
-			seqLabel := &widget.Label{TextStyle: fyne.TextStyle{Monospace: true}}
-			iccidLabel := &widget.Label{TextStyle: fyne.TextStyle{Monospace: true}}
-			operationLabel := &widget.Label{TextStyle: fyne.TextStyle{Monospace: true}}
-			notificationAddress := &widget.Label{TextStyle: fyne.TextStyle{Monospace: true}}
+			seqLabel := &widget.Label{TextStyle: fyne.TextStyle{Monospace: true, TabWidth: FontTabWidth}}
+			iccidLabel := &widget.Label{TextStyle: fyne.TextStyle{Monospace: true, TabWidth: FontTabWidth}}
+			operationLabel := &widget.Label{TextStyle: fyne.TextStyle{Monospace: true, TabWidth: FontTabWidth}}
+			notificationAddress := &widget.Label{TextStyle: fyne.TextStyle{Monospace: true, TabWidth: FontTabWidth}}
 			return container.NewHBox(seqLabel, iccidLabel, operationLabel, notificationAddress)
 		},
 		UpdateItem: func(i widget.ListItemID, o fyne.CanvasObject) {
@@ -650,12 +716,15 @@ func initNotificationList() *widget.List {
 		},
 		OnSelected: func(id widget.ListItemID) {
 			SelectedNotification = id
+		},
+		OnUnselected: func(id widget.ListItemID) {
+			SelectedNotification = -1
 		}}
 }
 
 func processNotification(seq int) {
 	if err := LpacNotificationProcess(seq); err != nil {
-		ErrDialog(err)
+		ShowErrDialog(err)
 		RefreshNotification()
 	} else {
 		notification := Notification{}
@@ -675,12 +744,12 @@ func processNotification(seq int) {
 			container.NewVBox(
 				&widget.Label{Text: "Successfully processed notification.", Alignment: fyne.TextAlignCenter},
 				&widget.Label{Text: "Do you want to remove this notification now?", Alignment: fyne.TextAlignCenter},
-				&widget.Label{Text: notificationText, TextStyle: fyne.TextStyle{Monospace: true}}),
+				&widget.Label{Text: notificationText, TextStyle: fyne.TextStyle{Monospace: true, TabWidth: FontTabWidth}}),
 			func(b bool) {
 				if b {
 					go func() {
 						if err := LpacNotificationRemove(seq); err != nil {
-							ErrDialog(err)
+							ShowErrDialog(err)
 						}
 						RefreshNotification()
 						RefreshChipInfo()

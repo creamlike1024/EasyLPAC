@@ -19,10 +19,6 @@ jobs:
       - name: Checkout repo
         uses: actions/checkout@v4
 
-      - name: Download CI-Registry
-        run:  |
-          wget https://github.com/CursedHardware/euicc-registry/raw/main/ci-registry.json -O ci-registry.json
-
       - name: Setup go
         uses: actions/setup-go@v4
         with:

@@ -26,31 +26,29 @@ func RefreshProfile() {
 	var err error
 	Profiles, err = LpacProfileList()
 	if err != nil {
-		ErrDialog(err)
+		ShowErrDialog(err)
 	}
 	// 刷新 List
 	ProfileList.Refresh()
 	ProfileList.UnselectAll()
-	SelectedProfile = -1
 }
 
 func RefreshNotification() {
 	var err error
 	Notifications, err = LpacNotificationList()
 	if err != nil {
-		ErrDialog(err)
+		ShowErrDialog(err)
 	}
 	// 刷新 List
 	NotificationList.Refresh()
 	NotificationList.UnselectAll()
-	SelectedNotification = -1
 }
 
 func RefreshChipInfo() {
 	var err error
 	ChipInfo, err = LpacChipInfo()
 	if err != nil {
-		ErrDialog(err)
+		ShowErrDialog(err)
 	}
 
 	convertToString := func(value interface{}) string {
@@ -68,7 +66,7 @@ func RefreshChipInfo() {
 	RootDsAddressLabel.SetText(fmt.Sprintf("Root SM-DS Address:  %s", convertToString(ChipInfo.EuiccConfiguredAddresses.RootDsAddress)))
 	bytes, err := json.MarshalIndent(ChipInfo.EUICCInfo2, "", "  ")
 	if err != nil {
-		ErrDialog(fmt.Errorf("chip Info: failed to decode EUICCInfo2\n%s", err))
+		ShowErrDialog(fmt.Errorf("chip Info: failed to decode EUICCInfo2\n%s", err))
 	}
 	CopyEidButton.Show()
 	SetDefaultSmdpButton.Show()
@@ -86,7 +84,7 @@ func RefreshApduDriver() {
 	var err error
 	ApduDrivers, err = LpacDriverApduList()
 	if err != nil {
-		ErrDialog(err)
+		ShowErrDialog(err)
 	}
 	var options []string
 	for _, d := range ApduDrivers {
@@ -110,17 +108,17 @@ func OpenLog() {
 		err = exec.Command("xdg-open", ConfigInstance.LogDir).Start()
 	default:
 		err = fmt.Errorf("unsupported platform, please open log file manually")
-		ErrDialog(err)
+		ShowErrDialog(err)
 	}
 
 	if err != nil {
-		ErrDialog(err)
+		ShowErrDialog(err)
 	}
 }
 
 func Refresh() {
 	if ConfigInstance.DriverIFID == "" {
-		SelectCardReaderDialog()
+		ShowSelectCardReaderDialog()
 		return
 	}
 	RefreshProfile()
