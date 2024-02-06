@@ -24,6 +24,17 @@ For FreeBSD, you need compile lpac by yourself and place the lpac binaries in th
 
 Currently, only APDUINTERFACE for pcsc and HTTPINTERFACE for curl are supported.
 
+Step
+- Connect your PCSC smartcard reader to computer and plug in your eUICC
+- Open EasyLPAC
+
+# Screenshots
+<p>
+<a href="https://github.com/creamlike1024/EasyLPAC/blob/master/screenshots/chipinfo.png"><img src="https://github.com/creamlike1024/EasyLPAC/blob/master/screenshots/chipinfo.png?raw=true"  height="180px"/></a>
+<a href="https://github.com/creamlike1024/EasyLPAC/blob/master/screenshots/notification.png"><img src="https://github.com/creamlike1024/EasyLPAC/blob/master/screenshots/notification.png?raw=true" height="180px"/></a>
+<a href="https://github.com/creamlike1024/EasyLPAC/blob/master/screenshots/profile.png"><img src="https://github.com/creamlike1024/EasyLPAC/blob/master/screenshots/profile.png?raw=true" height="180px"/></a>
+</p>
+
 # FAQ
 
 ## macOS `SCardTransmit() failed: 80100016`
