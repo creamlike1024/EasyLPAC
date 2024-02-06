@@ -201,7 +201,7 @@ func discoveryButtonFunc() {
 		}
 		if len(data) != 0 {
 			var d *dialog.CustomDialog
-			selectedProfile := -1
+			selectedProfile := Unselected
 			foundLabel := widget.NewLabel("")
 			if len(data) == 1 {
 				foundLabel.SetText(fmt.Sprintf("%d profile found.", len(data)))
@@ -221,7 +221,7 @@ func discoveryButtonFunc() {
 				selectedProfile = id
 			}
 			downloadButton := widget.NewButton("Download", func() {
-				if selectedProfile == -1 {
+				if selectedProfile == Unselected {
 					ShowSelectItemDialog()
 				} else {
 					d.Hide()
@@ -283,7 +283,7 @@ func setNicknameButtonFunc() {
 		ShowRefreshNeededDialog()
 		return
 	}
-	if SelectedProfile < 0 || SelectedProfile >= len(Profiles) {
+	if SelectedProfile == Unselected {
 		ShowSelectItemDialog()
 		return
 	}
@@ -300,7 +300,7 @@ func deleteProfileButtonFunc() {
 		ShowRefreshNeededDialog()
 		return
 	}
-	if SelectedProfile < 0 || SelectedProfile >= len(Profiles) {
+	if SelectedProfile == Unselected {
 		ShowSelectItemDialog()
 		return
 	}
@@ -360,7 +360,7 @@ func switchStateButtonFunc() {
 		ShowRefreshNeededDialog()
 		return
 	}
-	if SelectedProfile < 0 || SelectedProfile >= len(Profiles) {
+	if SelectedProfile == Unselected {
 		ShowSelectItemDialog()
 		return
 	}
@@ -389,7 +389,7 @@ func processNotificationButtonFunc() {
 		ShowRefreshNeededDialog()
 		return
 	}
-	if SelectedNotification < 0 || SelectedNotification >= len(Notifications) {
+	if SelectedNotification == Unselected {
 		ShowSelectItemDialog()
 		return
 	}
@@ -406,7 +406,7 @@ func removeNotificationButtonFunc() {
 		ShowRefreshNeededDialog()
 		return
 	}
-	if SelectedNotification < 0 || SelectedNotification >= len(Notifications) {
+	if SelectedNotification == Unselected {
 		ShowSelectItemDialog()
 		return
 	}
@@ -455,43 +455,46 @@ func setDefaultSmdpButtonFunc() {
 }
 
 func viewCertInfoButtonFunc() {
-	selectedCI := -1
+	selectedCI := Unselected
 	type ciWidgetEl struct {
 		C     string
 		CN    string
 		KeyID string
 	}
 	var ciWidgetEls []ciWidgetEl
-	isKeyExist := func(keyID string) bool {
-		for _, v := range ChipInfo.EUICCInfo2.EuiccCiPKIDListForSigning {
-			if v == keyID {
-				for _, v := range ChipInfo.EUICCInfo2.EuiccCiPKIDListForVerification {
-					if v == keyID {
-						return true
+	// chipinfo 中 signing 和 verification 同时存在则有效
+	for _, idForVerification := range ChipInfo.EUICCInfo2.EuiccCiPKIDListForVerification {
+		for _, idForSigning := range ChipInfo.EUICCInfo2.EuiccCiPKIDListForSigning {
+			if idForSigning == idForVerification {
+				// 有效 keyid，查找 CIRegistry
+				var foundCI bool
+				for _, v := range CIRegistry {
+					if v.KeyID == idForSigning {
+						var c, cn string
+						if v.C != nil {
+							c = v.C.(string)
+						}
+						if v.CN != nil {
+							cn = v.CN.(string)
+						}
+						ciWidgetEls = append(ciWidgetEls, ciWidgetEl{
+							C:     c,
+							CN:    cn,
+							KeyID: v.KeyID,
+						})
+						foundCI = true
+						break
 					}
 				}
+				// 有效 keyid 但是不在 CIRegistry
+				if !foundCI {
+					ciWidgetEls = append(ciWidgetEls, ciWidgetEl{
+						C:     "",
+						CN:    "Unknown",
+						KeyID: idForSigning,
+					})
+				}
 			}
-		}
-		return false
-	}
-	for _, v := range CIRegistry {
-		if isKeyExist(v.KeyID) {
-			var c, cn string
-			if v.CN != nil {
-				cn = v.CN.(string)
-			} else {
-				cn = "Unknown"
-			}
-			if v.C != nil {
-				c = v.C.(string)
-			} else {
-				c = ""
-			}
-			ciWidgetEls = append(ciWidgetEls, ciWidgetEl{
-				C:     c,
-				CN:    cn,
-				KeyID: v.KeyID,
-			})
 		}
 	}
 	list := &widget.List{
@@ -511,11 +514,11 @@ func viewCertInfoButtonFunc() {
 			selectedCI = id
 		},
 		OnUnselected: func(id widget.ListItemID) {
-			selectedCI = -1
+			selectedCI = Unselected
 		},
 	}
 	certDataButtonFunc := func() {
-		if selectedCI == -1 {
+		if selectedCI == Unselected {
 			ShowSelectItemDialog()
 		} else {
 			for _, v := range CIRegistry {
@@ -622,10 +625,9 @@ func initProfileList() *widget.List {
 			}
 			providerName := Profiles[i].ServiceProviderName
 			if Profiles[i].ProfileNickname != nil {
-				// tab space 随字体变化
 				width := runewidth.StringWidth(Profiles[i].ServiceProviderName)
 				tabNum := 6 - width/6
-				// Fixme: 使用更合理的方法排版
+				// Fixme: 使用 Grid Layout 排版
 				if width == 23 || width == 29 {
 					tabNum -= 1
 				}
@@ -652,7 +654,7 @@ func initProfileList() *widget.List {
 			}
 		},
 		OnUnselected: func(id widget.ListItemID) {
-			SelectedProfile = -1
+			SelectedProfile = Unselected
 		}}
 }
 
@@ -712,7 +714,7 @@ func initNotificationList() *widget.List {
 			SelectedNotification = id
 		},
 		OnUnselected: func(id widget.ListItemID) {
-			SelectedNotification = -1
+			SelectedNotification = Unselected
 		}}
 }
 

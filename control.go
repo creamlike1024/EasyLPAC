@@ -10,6 +10,7 @@ import (
 
 const StatusProcess = 1
 const StatusReady = 0
+const Unselected = -1
 
 var SelectedProfile int
 var SelectedNotification int
@@ -196,12 +197,11 @@ func LockButton() {
 func SetDriverIfid(name string) {
 	for _, d := range ApduDrivers {
 		if name == d.Name {
+			// 未选择过读卡器
 			if ConfigInstance.DriverIFID == "" {
 				ConfigInstance.DriverIFID = d.Env
-			} else if ConfigInstance.DriverIFID == d.Env {
-				// 未改变读卡器，不刷新状态
-				return
 			} else {
+				// 选择过读卡器，要求刷新
 				ConfigInstance.DriverIFID = d.Env
 				RefreshNeeded = true
 			}

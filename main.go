@@ -21,8 +21,8 @@ func init() {
 
 	StatusChan = make(chan int)
 	LockButtonChan = make(chan bool)
-	SelectedProfile = -1
-	SelectedNotification = -1
+	SelectedProfile = Unselected
+	SelectedNotification = Unselected
 	RefreshNeeded = true
 	if err := json.Unmarshal(CIRegistryByte, &CIRegistry); err != nil {
 		panic(err)
