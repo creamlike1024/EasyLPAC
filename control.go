@@ -64,20 +64,33 @@ func RefreshChipInfo() {
 	EidLabel.SetText(fmt.Sprintf("EID: %s", ChipInfo.EidValue))
 	DefaultDpAddressLabel.SetText(fmt.Sprintf("Default SM-DP+ Address:  %s", convertToString(ChipInfo.EuiccConfiguredAddresses.DefaultDpAddress)))
 	RootDsAddressLabel.SetText(fmt.Sprintf("Root SM-DS Address:  %s", convertToString(ChipInfo.EuiccConfiguredAddresses.RootDsAddress)))
+	// eUICC Manufactor Label
+	var EUICCManufactorerLabelContent string
+	for _, v := range EUMRegistry {
+		if ChipInfo.EidValue[:8] == v.Prefix {
+			EUICCManufactorerLabelContent = fmt.Sprintf("Manufacturer: [%s](%s) %s", v.Manufacturer, v.Link, CountryCodeToEmoji(v.Country))
+		}
+	}
+	if EUICCManufactorerLabelContent == "" {
+		EUICCManufacturerLabel.ParseMarkdown("Manufacturer: Unknown")
+	} else {
+		EUICCManufacturerLabel.ParseMarkdown(EUICCManufactorerLabelContent)
+	}
+	// EUICCInfo2 entry
 	bytes, err := json.MarshalIndent(ChipInfo.EUICCInfo2, "", "  ")
 	if err != nil {
 		ShowErrDialog(fmt.Errorf("chip Info: failed to decode EUICCInfo2\n%s", err))
 	}
-	CopyEidButton.Show()
-	SetDefaultSmdpButton.Show()
-	EuiccInfo2Entry.Show()
-	ViewCertInfoButton.Show()
-
-	// EuiccInfo2TextGrid.SetText(string(bytes))
 	EuiccInfo2Entry.SetText(string(bytes))
 	// 计算剩余空间
 	freeSpace := float64(ChipInfo.EUICCInfo2.ExtCardResource.FreeNonVolatileMemory) / 1024
 	FreeSpaceLabel.SetText(fmt.Sprintf("Free space: %.2f KB", math.Round(freeSpace*100)/100))
+
+	CopyEidButton.Show()
+	SetDefaultSmdpButton.Show()
+	EuiccInfo2Entry.Show()
+	ViewCertInfoButton.Show()
+	EUICCManufacturerLabel.Show()
 }
 
 func RefreshApduDriver() {
@@ -154,7 +167,7 @@ func LockButton() {
 			SetNicknameButton.Disable()
 			RefreshButton.Disable()
 			SwitchStateButton.Disable()
-			DeleteButton.Disable()
+			DeleteProfileButton.Disable()
 			ProcessNotificationButton.Disable()
 			RemoveNotificationButton.Disable()
 			SetDefaultSmdpButton.Disable()
@@ -168,7 +181,7 @@ func LockButton() {
 			SetNicknameButton.Enable()
 			RefreshButton.Enable()
 			SwitchStateButton.Enable()
-			DeleteButton.Enable()
+			DeleteProfileButton.Enable()
 			ProcessNotificationButton.Enable()
 			RemoveNotificationButton.Enable()
 			SetDefaultSmdpButton.Enable()

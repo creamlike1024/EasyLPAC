@@ -98,3 +98,15 @@ var CIRegistry []CertificateIdentifier
 
 //go:embed ci-registry.json
 var CIRegistryByte []byte
+
+type EUMIdentifier struct {
+	Prefix       string `json:"prefix"`
+	Manufacturer string `json:"manufacturer"`
+	Link         string `json:"link"`
+	Country      string `json:"country"`
+}
+
+var EUMRegistry []EUMIdentifier
+
+//go:embed eum-registry.json
+var EUMRegistryByte []byte

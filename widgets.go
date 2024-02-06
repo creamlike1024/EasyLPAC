@@ -23,7 +23,7 @@ var StatusLabel *widget.Label
 var SetNicknameButton *widget.Button
 var DownloadButton *widget.Button
 var DiscoveryButton *widget.Button
-var DeleteButton *widget.Button
+var DeleteProfileButton *widget.Button
 var SwitchStateButton *widget.Button
 var ProcessNotificationButton *widget.Button
 var RemoveNotificationButton *widget.Button
@@ -47,6 +47,7 @@ var EuiccInfo2Entry *ReadOnlyEntry
 var CopyEidButton *widget.Button
 var SetDefaultSmdpButton *widget.Button
 var ViewCertInfoButton *widget.Button
+var EUICCManufacturerLabel *widget.RichText
 
 var ApduDriverSelect *widget.Select
 var ApduDriverRefreshButton *widget.Button
@@ -99,7 +100,7 @@ func InitWidgets() {
 
 	SetNicknameButton = &widget.Button{Text: "Nickname", OnTapped: func() { go setNicknameButtonFunc() }, Icon: theme.DocumentCreateIcon()}
 
-	DeleteButton = &widget.Button{Text: "Delete", OnTapped: func() { go deleteButtonFunc() }, Icon: theme.DeleteIcon()}
+	DeleteProfileButton = &widget.Button{Text: "Delete", OnTapped: func() { go deleteProfileButtonFunc() }, Icon: theme.DeleteIcon()}
 
 	SwitchStateButton = &widget.Button{Text: "Enable", OnTapped: func() { go switchStateButtonFunc() }, Icon: theme.ConfirmIcon()}
 
@@ -157,6 +158,8 @@ func InitWidgets() {
 	SetDefaultSmdpButton.Hide()
 	ViewCertInfoButton = &widget.Button{Text: "Certificate Identifier", OnTapped: func() { go viewCertInfoButtonFunc() }, Icon: theme.InfoIcon()}
 	ViewCertInfoButton.Hide()
+	EUICCManufacturerLabel = widget.NewRichText()
+	EUICCManufacturerLabel.Hide()
 	ApduDriverSelect = widget.NewSelect([]string{}, func(s string) { SetDriverIfid(s) })
 	ApduDriverRefreshButton = &widget.Button{OnTapped: func() { go RefreshApduDriver() }, Icon: theme.SearchReplaceIcon()}
 }
@@ -288,7 +291,7 @@ func setNicknameButtonFunc() {
 	d.Show()
 }
 
-func deleteButtonFunc() {
+func deleteProfileButtonFunc() {
 	if ConfigInstance.DriverIFID == "" {
 		ShowSelectCardReaderDialog()
 		return
@@ -471,15 +474,6 @@ func viewCertInfoButtonFunc() {
 		}
 		return false
 	}
-	countryCodeToEmoji := func(countryCode string) string {
-		if len(countryCode) != 2 {
-			return "🌎"
-		}
-		countryCode = strings.ToUpper(countryCode)
-		rune1 := rune(countryCode[0]-'A') + 0x1F1E6
-		rune2 := rune(countryCode[1]-'A') + 0x1F1E6
-		return string([]rune{rune1, rune2})
-	}
 	for _, v := range CIRegistry {
 		if isKeyExist(v.KeyID) {
 			var c, cn string
@@ -510,7 +504,7 @@ func viewCertInfoButtonFunc() {
 		},
 		UpdateItem: func(i widget.ListItemID, o fyne.CanvasObject) {
 			o.(*fyne.Container).Objects[0].(*fyne.Container).Objects[0].(*widget.Label).SetText(fmt.Sprintf("CN: %s", ciWidgetEls[i].CN))
-			o.(*fyne.Container).Objects[0].(*fyne.Container).Objects[1].(*widget.Label).SetText(countryCodeToEmoji(ciWidgetEls[i].C))
+			o.(*fyne.Container).Objects[0].(*fyne.Container).Objects[1].(*widget.Label).SetText(CountryCodeToEmoji(ciWidgetEls[i].C))
 			o.(*fyne.Container).Objects[1].(*widget.Label).SetText(fmt.Sprintf("KeyID: %s", ciWidgetEls[i].KeyID))
 		},
 		OnSelected: func(id widget.ListItemID) {
@@ -771,4 +765,14 @@ func findNewNotification(first, second []Notification) Notification {
 		}
 	}
 	return Notification{}
+}
+
+func CountryCodeToEmoji(countryCode string) string {
+	if len(countryCode) != 2 {
+		return "🌎"
+	}
+	countryCode = strings.ToUpper(countryCode)
+	rune1 := rune(countryCode[0]-'A') + 0x1F1E6
+	rune2 := rune(countryCode[1]-'A') + 0x1F1E6
+	return string([]rune{rune1, rune2})
 }

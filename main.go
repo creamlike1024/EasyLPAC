@@ -10,8 +10,8 @@ import (
 	"path/filepath"
 )
 
-const Version = "0.6.4"
-const CIRegistryVersion = "2024-02-04"
+const Version = "0.6.5"
+const EUICCDataVersion = "2024-02-06"
 
 var App fyne.App
 
@@ -25,6 +25,9 @@ func init() {
 	SelectedNotification = -1
 	RefreshNeeded = true
 	if err := json.Unmarshal(CIRegistryByte, &CIRegistry); err != nil {
+		panic(err)
+	}
+	if err := json.Unmarshal(EUMRegistryByte, &EUMRegistry); err != nil {
 		panic(err)
 	}
 	if err := LoadConfig(); err != nil {
