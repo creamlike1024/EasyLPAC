@@ -87,14 +87,14 @@ var Notifications []Notification
 var ChipInfo EuiccInfo
 var ApduDrivers []ApduDriver
 
-type CertificateIdentifier struct {
+type CertificateIssuer struct {
 	C        interface{} `json:"C"`
 	CN       interface{} `json:"CN"`
 	KeyID    string      `json:"keyID"`
 	CertData interface{} `json:"certData"`
 }
 
-var CIRegistry []CertificateIdentifier
+var CIRegistry []CertificateIssuer
 
 //go:embed ci-registry.json
 var CIRegistryByte []byte

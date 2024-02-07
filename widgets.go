@@ -156,7 +156,7 @@ func InitWidgets() {
 	CopyEidButton.Hide()
 	SetDefaultSmdpButton = &widget.Button{OnTapped: func() { go setDefaultSmdpButtonFunc() }, Icon: theme.DocumentCreateIcon()}
 	SetDefaultSmdpButton.Hide()
-	ViewCertInfoButton = &widget.Button{Text: "Certificate Identifier", OnTapped: func() { go viewCertInfoButtonFunc() }, Icon: theme.InfoIcon()}
+	ViewCertInfoButton = &widget.Button{Text: "Certificate Issuer", OnTapped: func() { go viewCertInfoButtonFunc() }, Icon: theme.InfoIcon()}
 	ViewCertInfoButton.Hide()
 	EUICCManufacturerLabel = widget.NewRichText()
 	EUICCManufacturerLabel.Hide()
@@ -549,7 +549,7 @@ func viewCertInfoButtonFunc() {
 		OnTapped: certDataButtonFunc,
 		Icon:     theme.InfoIcon(),
 	}
-	d := dialog.NewCustom("Certificate Identifier", "OK", container.NewBorder(nil, container.NewCenter(certDataButton), nil, nil, list), WMain)
+	d := dialog.NewCustom("Certificate Issuer", "OK", container.NewBorder(nil, container.NewCenter(certDataButton), nil, nil, list), WMain)
 	d.Resize(fyne.Size{
 		Width:  600,
 		Height: 500,
