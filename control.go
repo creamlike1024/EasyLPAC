@@ -67,9 +67,12 @@ func RefreshChipInfo() {
 	RootDsAddressLabel.SetText(fmt.Sprintf("Root SM-DS Address:  %s", convertToString(ChipInfo.EuiccConfiguredAddresses.RootDsAddress)))
 	// eUICC Manufactor Label
 	var EUICCManufactorerLabelContent string
-	for _, v := range EUMRegistry {
-		if ChipInfo.EidValue[:8] == v.Prefix {
-			EUICCManufactorerLabelContent = fmt.Sprintf("Manufacturer: [%s](%s) %s", v.Manufacturer, v.Link, CountryCodeToEmoji(v.Country))
+	// 仅在获取到 EidValue 时进行切片
+	if len(ChipInfo.EidValue) >= 8 {
+		for _, v := range EUMRegistry {
+			if ChipInfo.EidValue[:8] == v.Prefix {
+				EUICCManufactorerLabelContent = fmt.Sprintf("Manufacturer: [%s](%s) %s", v.Manufacturer, v.Link, CountryCodeToEmoji(v.Country))
+			}
 		}
 	}
 	if EUICCManufactorerLabelContent == "" {
