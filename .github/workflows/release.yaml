@@ -51,15 +51,6 @@ jobs:
           cp fyne-cross/bin/linux-arm64/EasyLPAC .
           tar zcf EasyLPAC-linux-arm64.tar.gz EasyLPAC lpac
 
-      - name: Build for FreeBSD
-        if: runner.os=='Linux'
-        run: |
-          fyne-cross freebsd -arch=amd64,arm64 -icon assets/icon64.png
-          cp fyne-cross/bin/freebsd-amd64/EasyLPAC .
-          tar zcf EasyLPAC-freebsd-x86_64.tar.gz EasyLPAC lpac
-          cp fyne-cross/bin/freebsd-arm64/EasyLPAC .
-          tar zcf EasyLPAC-freebsd-arm64.tar.gz EasyLPAC lpac
-
       - name: Build for Windows
         if: runner.os == 'Linux'
         run: |
@@ -102,8 +93,6 @@ jobs:
             EasyLPAC-linux-i386.tar.gz
             EasyLPAC-linux-arm.tar.gz
             EasyLPAC-linux-arm64.tar.gz
-            EasyLPAC-freebsd-x86_64.tar.gz
-            EasyLPAC-freebsd-arm64.tar.gz
             EasyLPAC-macOS-universal-with-lpac.zip
             EasyLPAC-macOS-universal-with-lpac.dmg
 
@@ -117,7 +106,5 @@ jobs:
             EasyLPAC-linux-i386.tar.gz
             EasyLPAC-linux-arm.tar.gz
             EasyLPAC-linux-arm64.tar.gz
-            EasyLPAC-freebsd-x86_64.tar.gz
-            EasyLPAC-freebsd-arm64.tar.gz
             EasyLPAC-macOS-universal-with-lpac.zip
             EasyLPAC-macOS-universal-with-lpac.dmg

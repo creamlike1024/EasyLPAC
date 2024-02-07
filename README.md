@@ -9,8 +9,7 @@ Linux release was built on Ubuntu 22.04, you may need to build by yourself if yo
 System Requirement
 - Windows 7+
 - MacOS 12+
-- Linux: ? glibc and opengl support.
-- FreeBSD: unknown
+- Linux: ? glibc, glfw, gtk3dialog.
 
 For Linux you need install `libpcsclite1`, `pcscd` and `libcurl` which are dependencies of lpac
 
@@ -19,8 +18,6 @@ For Linux you need install `libpcsclite1`, `pcscd` and `libcurl` which are depen
 The Windows release and macOS release have lpac binary included.
 
 For linux, currently there is no special package for various popular distributions (Sorry), you need to place the lpac binaries in the lpac folder.
-
-For FreeBSD, you need compile lpac by yourself and place the lpac binaries in the lpac folder.
 
 Currently, only APDUINTERFACE for pcsc and HTTPINTERFACE for curl are supported.
 
