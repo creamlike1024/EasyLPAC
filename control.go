@@ -27,7 +27,7 @@ func RefreshProfile() {
 	var err error
 	Profiles, err = LpacProfileList()
 	if err != nil {
-		ShowErrDialog(err)
+		ShowLpacErrDialog(err)
 	}
 	// 刷新 List
 	ProfileList.Refresh()
@@ -38,7 +38,7 @@ func RefreshNotification() {
 	var err error
 	Notifications, err = LpacNotificationList()
 	if err != nil {
-		ShowErrDialog(err)
+		ShowLpacErrDialog(err)
 	}
 	// 刷新 List
 	NotificationList.Refresh()
@@ -49,7 +49,7 @@ func RefreshChipInfo() {
 	var err error
 	ChipInfo, err = LpacChipInfo()
 	if err != nil {
-		ShowErrDialog(err)
+		ShowLpacErrDialog(err)
 	}
 
 	convertToString := func(value interface{}) string {
@@ -83,7 +83,7 @@ func RefreshChipInfo() {
 	// EUICCInfo2 entry
 	bytes, err := json.MarshalIndent(ChipInfo.EUICCInfo2, "", "  ")
 	if err != nil {
-		ShowErrDialog(fmt.Errorf("chip Info: failed to decode EUICCInfo2\n%s", err))
+		ShowLpacErrDialog(fmt.Errorf("chip Info: failed to decode EUICCInfo2\n%s", err))
 	}
 	EuiccInfo2Entry.SetText(string(bytes))
 	// 计算剩余空间
@@ -101,7 +101,7 @@ func RefreshApduDriver() {
 	var err error
 	ApduDrivers, err = LpacDriverApduList()
 	if err != nil {
-		ShowErrDialog(err)
+		ShowLpacErrDialog(err)
 	}
 	var options []string
 	for _, d := range ApduDrivers {
@@ -125,11 +125,11 @@ func OpenLog() {
 		err = exec.Command("xdg-open", ConfigInstance.LogDir).Start()
 	default:
 		err = fmt.Errorf("unsupported platform, please open log file manually")
-		ShowErrDialog(err)
+		ShowLpacErrDialog(err)
 	}
 
 	if err != nil {
-		ShowErrDialog(err)
+		ShowLpacErrDialog(err)
 	}
 }
 

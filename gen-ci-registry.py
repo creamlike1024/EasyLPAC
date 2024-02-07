@@ -13,7 +13,7 @@ soup = BeautifulSoup(webpage, 'html.parser')
 
 certdata_results = []
 
-anchors = ['#gsma-root', '#gsma-test',
+anchors = ['#gsma-root', '#sgp26',
            '#mainland-china', '#independent', '#unknown']
 
 

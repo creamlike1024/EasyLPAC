@@ -9,10 +9,12 @@ import (
 	"fyne.io/fyne/v2/layout"
 	"fyne.io/fyne/v2/theme"
 	"fyne.io/fyne/v2/widget"
+	nativeDialog "github.com/sqweek/dialog"
 	"image/color"
 )
 
 var WMain fyne.Window
+var spacer *canvas.Rectangle
 
 func InitMainWindow() fyne.Window {
 	w := App.NewWindow("EasyLPAC")
@@ -28,8 +30,8 @@ func InitMainWindow() fyne.Window {
 		Height: 36,
 	}, StatusLabel, StatusProcessBar)
 
-	spacer := canvas.NewRectangle(color.Transparent)
-	spacer.SetMinSize(fyne.NewSize(1, 36))
+	spacer = canvas.NewRectangle(color.Transparent)
+	spacer.SetMinSize(fyne.NewSize(1, 1))
 
 	topToolBar := container.NewBorder(
 		layout.NewSpacer(),
@@ -138,35 +140,105 @@ lpac GUI Frontend
 }
 
 func InitDownloadDialog() dialog.Dialog {
-	smdp := &widget.Entry{PlaceHolder: "Leave it empty to use default SM-DP+"}
-	matchID := &widget.Entry{PlaceHolder: "Activation code. Optional"}
-	confirmCode := &widget.Entry{PlaceHolder: "Optional"}
-	imei := &widget.Entry{PlaceHolder: "The IMEI sent to SM-DP+. Optional"}
+	smdpEntry := &widget.Entry{PlaceHolder: "Leave it empty to use default SM-DP+"}
+	matchIDEntry := &widget.Entry{PlaceHolder: "Activation code. Optional"}
+	confirmCodeEntry := &widget.Entry{PlaceHolder: "Optional"}
+	imeiEntry := &widget.Entry{PlaceHolder: "The IMEI sent to SM-DP+. Optional"}
 
-	form := []*widget.FormItem{
-		{Text: "SM-DP+", Widget: smdp},
-		{Text: "Matching ID", Widget: matchID},
-		{Text: "Confirm Code", Widget: confirmCode},
-		{Text: "IMEI", Widget: imei},
+	formItems := []*widget.FormItem{
+		{Text: "SM-DP+", Widget: smdpEntry},
+		{Text: "Matching ID", Widget: matchIDEntry},
+		{Text: "Confirm Code", Widget: confirmCodeEntry},
+		{Text: "IMEI", Widget: imeiEntry},
 	}
 
-	d := dialog.NewForm("Download", "Submit", "Cancel", form, func(b bool) {
-		if b {
+	form := widget.NewForm(formItems...)
+	var d dialog.Dialog
+	cancelButton := &widget.Button{
+		Text: "Cancel",
+		Icon: theme.CancelIcon(),
+		OnTapped: func() {
+			d.Hide()
+		},
+	}
+	downloadButton := &widget.Button{
+		Text:       "Download",
+		Icon:       theme.ConfirmIcon(),
+		Importance: widget.HighImportance,
+		OnTapped: func() {
 			pullConfig := PullInfo{
-				SMDP:        smdp.Text,
-				MatchID:     matchID.Text,
-				ConfirmCode: confirmCode.Text,
-				IMEI:        imei.Text,
+				SMDP:        smdpEntry.Text,
+				MatchID:     matchIDEntry.Text,
+				ConfirmCode: confirmCodeEntry.Text,
+				IMEI:        imeiEntry.Text,
 			}
 			go func() {
 				RefreshNotification()
 				LpacProfileDownload(pullConfig)
 			}()
-		}
-	}, WMain)
+			d.Hide()
+		},
+	}
+	// 回调函数需要操作 selectQRCodeButton，预先声明
+	var selectQRCodeButton *widget.Button
+	selectQRCodeButton = &widget.Button{
+		Text: "Scan image file",
+		Icon: theme.FileImageIcon(),
+		OnTapped: func() {
+			go func() {
+				fileBuilder := nativeDialog.File().Title("Select a QR Code image file")
+				fileBuilder.Filters = []nativeDialog.FileFilter{
+					{
+						Desc:       "Image (*.png, *.jpg, *.jpeg)",
+						Extensions: []string{"PNG", "JPG", "JPEG"},
+					},
+					{
+						Desc:       "All files (*.*)",
+						Extensions: []string{"*"},
+					},
+				}
+
+				selectQRCodeButton.Disable()
+				cancelButton.Disable()
+				downloadButton.Disable()
+
+				filename, err := fileBuilder.Load()
+				if err != nil {
+					if err.Error() != "Cancelled" {
+						panic(err)
+					}
+				} else {
+					result, err := ScanQRCodeImageFile(filename)
+					if err != nil {
+						dError := dialog.NewError(err, WMain)
+						dError.Show()
+					} else {
+						pullInfo, err := DecodeLPADownloadConfig(result.String())
+						if err != nil {
+							dError := dialog.NewError(err, WMain)
+							dError.Show()
+						} else {
+							smdpEntry.SetText(pullInfo.SMDP)
+							matchIDEntry.SetText(pullInfo.MatchID)
+						}
+					}
+				}
+
+				selectQRCodeButton.Enable()
+				cancelButton.Enable()
+				downloadButton.Enable()
+			}()
+		},
+	}
+	d = dialog.NewCustomWithoutButtons("Download", container.NewBorder(
+		nil,
+		container.NewVBox(spacer, container.NewCenter(selectQRCodeButton), spacer, container.NewCenter(container.NewHBox(cancelButton, spacer, downloadButton))),
+		nil,
+		nil,
+		form), WMain)
 	d.Resize(fyne.Size{
 		Width:  500,
-		Height: 300,
+		Height: 340,
 	})
 	return d
 }
@@ -179,7 +251,7 @@ func InitSetNicknameDialog() dialog.Dialog {
 	d := dialog.NewForm("Set Nickname", "Submit", "Cancel", form, func(b bool) {
 		if b {
 			if err := LpacProfileNickname(Profiles[SelectedProfile].Iccid, entry.Text); err != nil {
-				ShowErrDialog(err)
+				ShowLpacErrDialog(err)
 			}
 			RefreshProfile()
 		}
@@ -199,7 +271,7 @@ func InitSetDefaultSmdpDialog() dialog.Dialog {
 	d := dialog.NewForm("Set Default SM-DP+", "Submit", "Cancel", form, func(b bool) {
 		if b {
 			if err := LpacChipDefaultSmdp(entry.Text); err != nil {
-				ShowErrDialog(err)
+				ShowLpacErrDialog(err)
 			}
 			RefreshChipInfo()
 		}
@@ -211,7 +283,7 @@ func InitSetDefaultSmdpDialog() dialog.Dialog {
 	return d
 }
 
-func ShowErrDialog(err error) {
+func ShowLpacErrDialog(err error) {
 	go func() {
 		l := &widget.Label{Text: fmt.Sprintf("%v", err), TextStyle: fyne.TextStyle{Monospace: true}}
 		content := container.NewVBox(container.NewCenter(container.NewHBox(widget.NewIcon(theme.ErrorIcon()), widget.NewLabel("lpac error"))),

@@ -196,7 +196,7 @@ func discoveryButtonFunc() {
 		}()
 		<-ch
 		if err != nil {
-			ShowErrDialog(err)
+			ShowLpacErrDialog(err)
 			return
 		}
 		if len(data) != 0 {
@@ -330,7 +330,7 @@ func deleteProfileButtonFunc() {
 				go func() {
 					notificationOrigin := Notifications
 					if err := LpacProfileDelete(Profiles[SelectedProfile].Iccid); err != nil {
-						ShowErrDialog(err)
+						ShowLpacErrDialog(err)
 						Refresh()
 					} else {
 						Refresh()
@@ -366,11 +366,11 @@ func switchStateButtonFunc() {
 	}
 	if ProfileStateAllowDisable {
 		if err := LpacProfileDisable(Profiles[SelectedProfile].Iccid); err != nil {
-			ShowErrDialog(err)
+			ShowLpacErrDialog(err)
 		}
 	} else {
 		if err := LpacProfileEnable(Profiles[SelectedProfile].Iccid); err != nil {
-			ShowErrDialog(err)
+			ShowLpacErrDialog(err)
 		}
 	}
 	Refresh()
@@ -423,7 +423,7 @@ func removeNotificationButtonFunc() {
 		func(b bool) {
 			if b {
 				if err := LpacNotificationRemove(Notifications[SelectedNotification].SeqNumber); err != nil {
-					ShowErrDialog(err)
+					ShowLpacErrDialog(err)
 				}
 				RefreshNotification()
 				RefreshChipInfo()
@@ -720,7 +720,7 @@ func initNotificationList() *widget.List {
 
 func processNotification(seq int) {
 	if err := LpacNotificationProcess(seq); err != nil {
-		ShowErrDialog(err)
+		ShowLpacErrDialog(err)
 		RefreshNotification()
 	} else {
 		notification := Notification{}
@@ -745,7 +745,7 @@ func processNotification(seq int) {
 				if b {
 					go func() {
 						if err := LpacNotificationRemove(seq); err != nil {
-							ShowErrDialog(err)
+							ShowLpacErrDialog(err)
 						}
 						RefreshNotification()
 						RefreshChipInfo()
@@ -767,14 +767,4 @@ func findNewNotification(first, second []Notification) Notification {
 		}
 	}
 	return Notification{}
-}
-
-func CountryCodeToEmoji(countryCode string) string {
-	if len(countryCode) != 2 {
-		return "🌎"
-	}
-	countryCode = strings.ToUpper(countryCode)
-	rune1 := rune(countryCode[0]-'A') + 0x1F1E6
-	rune2 := rune(countryCode[1]-'A') + 0x1F1E6
-	return string([]rune{rune1, rune2})
 }
