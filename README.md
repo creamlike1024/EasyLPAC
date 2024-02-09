@@ -4,22 +4,16 @@
 
 Download: [GitHub Release](https://github.com/creamlike1024/EasyLPAC/releases/latest)
 
-Linux release was built on Ubuntu 22.04, you may need to build by yourself if you can't run it
-
 System Requirement
 - Windows 7+
 - MacOS 12+
-- Linux: ? glibc, glfw, gtk3dialog.
+- ~~Linux: ? glibc, glfw, gtk3dialog~~ Packaging for various distributions works in progress
 
-For Linux you need install `libpcsclite1`, `pcscd` and `libcurl` which are dependencies of lpac
+Currently, only APDUINTERFACE for pcsc and HTTPINTERFACE for curl are supported.
 
 # Usage
 
-The Windows release and macOS release have lpac binary included.
-
-For linux, currently there is no special package for various popular distributions (Sorry), you need to place the lpac binaries in the lpac folder.
-
-Currently, only APDUINTERFACE for pcsc and HTTPINTERFACE for curl are supported.
+Releases have lpac binary included
 
 Step
 - Connect your PCSC smartcard reader to computer and plug in your eUICC

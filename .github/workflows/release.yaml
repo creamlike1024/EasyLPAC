@@ -36,13 +36,13 @@ jobs:
           go install fyne.io/fyne/v2/cmd/fyne@latest
           go install github.com/fyne-io/fyne-cross@latest
 
-      - name: Build for Linux
-        if: runner.os == 'Linux'
-        run: |
-          go build -ldflags="-s -w"
-          mkdir lpac
-          chmod +x EasyLPAC
-          tar zcf EasyLPAC-linux-x86_64.tar.gz EasyLPAC lpac
+#      - name: Build for Linux
+#        if: runner.os == 'Linux'
+#        run: |
+#          go build -ldflags="-s -w"
+#          mkdir lpac
+#          chmod +x EasyLPAC
+#          tar zcf EasyLPAC-linux-x86_64.tar.gz EasyLPAC lpac
 
       - name: Build for Windows
         if: runner.os == 'Linux'
@@ -82,7 +82,6 @@ jobs:
           name: build-artifacts
           path: |
             EasyLPAC-windows-x86_64-with-lpac.zip
-            EasyLPAC-linux-x86_64.tar.gz
             EasyLPAC-macOS-universal-with-lpac.zip
             EasyLPAC-macOS-universal-with-lpac.dmg
 
@@ -92,6 +91,5 @@ jobs:
         with:
           files: |
             EasyLPAC-windows-x86_64-with-lpac.zip
-            EasyLPAC-linux-x86_64.tar.gz
             EasyLPAC-macOS-universal-with-lpac.zip
             EasyLPAC-macOS-universal-with-lpac.dmg
