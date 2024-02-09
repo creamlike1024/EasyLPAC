@@ -203,6 +203,8 @@ func InitDownloadDialog() dialog.Dialog {
 		Icon: theme.FileImageIcon(),
 		OnTapped: func() {
 			go func() {
+				disableButtons()
+				defer enableButtons()
 				fileBuilder := nativeDialog.File().Title("Select a QR Code image file")
 				fileBuilder.Filters = []nativeDialog.FileFilter{
 					{
@@ -215,9 +217,6 @@ func InitDownloadDialog() dialog.Dialog {
 					},
 				}
 
-				disableButtons()
-				defer enableButtons()
-
 				filename, err := fileBuilder.Load()
 				if err != nil {
 					if err.Error() != "Cancelled" {
@@ -229,7 +228,7 @@ func InitDownloadDialog() dialog.Dialog {
 						dError := dialog.NewError(err, WMain)
 						dError.Show()
 					} else {
-						pullInfo, err := DecodeLPADownloadConfig(result.String())
+						pullInfo, err := DecodeLpaActivationCode(result.String())
 						if err != nil {
 							dError := dialog.NewError(err, WMain)
 							dError.Show()
@@ -243,15 +242,15 @@ func InitDownloadDialog() dialog.Dialog {
 		},
 	}
 	pasteFromClipboardButton = &widget.Button{
-		Text: "Paste QR Code or LPAString from clipboard", // TODO: 这玩意儿叫这个名字吗
+		Text: "Paste QR Code or LPA:1 Activation Code from clipboard",
 		Icon: theme.ContentPasteIcon(),
 		OnTapped: func() {
 			go func() {
+				disableButtons()
+				defer enableButtons()
 				var err error
 				var pullInfo PullInfo
 				var qrResult *gozxing.Result
-				disableButtons()
-				defer enableButtons()
 
 				format, result, err := PasteFromClipboard()
 				if err != nil {
@@ -263,16 +262,29 @@ func InitDownloadDialog() dialog.Dialog {
 				case clipboard.FmtImage:
 					qrResult, err = ScanQRCodeImageBytes(result)
 					if err != nil {
-						break // Deal with error later
+						dError := dialog.NewError(err, WMain)
+						dError.Show()
+						return
 					}
-					pullInfo, err = DecodeLPADownloadConfig(qrResult.String())
+					pullInfo, err = DecodeLpaActivationCode(qrResult.String())
 				case clipboard.FmtText:
-					// TODO: 不清楚规范是不是这样，对着 https://source.android.com/docs/core/connect/esim-test-profiles 写的
-					lpaString := string(result)
-					if !strings.HasPrefix(lpaString, "LPA:") {
-						lpaString = "LPA:" + lpaString
+					completeLpaActivationCode := func(input string) string {
+						// 如果输入已经以 LPA:1$ 开始，则认为它是完整的
+						if strings.HasPrefix(input, "LPA:1$") {
+							return input
+						}
+						// 1$rspAddr$matchID
+						if strings.HasPrefix(input, "1$") {
+							return "LPA:" + input
+						}
+						// $rspAddr$matchID
+						if strings.HasPrefix(input, "$") {
+							return "LPA:1" + input
+						}
+						// rspAddr$matchID
+						return "LPA:1$" + input
 					}
-					pullInfo, err = DecodeLPADownloadConfig(lpaString)
+					pullInfo, err = DecodeLpaActivationCode(completeLpaActivationCode(string(result)))
 				default:
 					// Unreachable, should not be here.
 					panic(nil)
@@ -287,16 +299,17 @@ func InitDownloadDialog() dialog.Dialog {
 			}()
 		},
 	}
-	downsideButtons := container.NewHBox(selectQRCodeButton, pasteFromClipboardButton)
 	d = dialog.NewCustomWithoutButtons("Download", container.NewBorder(
 		nil,
-		container.NewVBox(spacer, container.NewCenter(downsideButtons), spacer, container.NewCenter(container.NewHBox(cancelButton, spacer, downloadButton))),
+		container.NewVBox(spacer, container.NewCenter(selectQRCodeButton), spacer,
+			container.NewCenter(pasteFromClipboardButton), spacer,
+			container.NewCenter(container.NewHBox(cancelButton, spacer, downloadButton))),
 		nil,
 		nil,
 		form), WMain)
 	d.Resize(fyne.Size{
-		Width:  500,
-		Height: 340,
+		Width:  520,
+		Height: 380,
 	})
 	return d
 }

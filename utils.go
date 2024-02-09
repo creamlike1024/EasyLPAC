@@ -22,13 +22,13 @@ func CountryCodeToEmoji(countryCode string) string {
 	return string([]rune{rune1, rune2})
 }
 
-func DecodeLPADownloadConfig(s string) (PullInfo, error) {
+func DecodeLpaActivationCode(s string) (PullInfo, error) {
 	strs := strings.Split(s, "$")
 	if len(strs) != 3 {
-		return PullInfo{}, errors.New("QR code or LPA string format error")
+		return PullInfo{}, errors.New("QR code or LPA Activation Code format error")
 	}
 	if strings.TrimSpace(strs[0]) != "LPA:1" {
-		return PullInfo{}, errors.New("QR Code or LPA string format error")
+		return PullInfo{}, errors.New("QR Code or LPA Activation Code format error")
 	}
 	return PullInfo{
 		SMDP:        strs[1],
@@ -98,5 +98,5 @@ func PasteFromClipboard() (clipboard.Format, []byte, error) {
 	if len(result) != 0 {
 		return clipboard.FmtImage, result, nil
 	}
-	return clipboard.FmtText, nil, errors.New("failed to get content from clipboard")
+	return clipboard.FmtText, nil, errors.New("failed to read clipboard: not text or image")
 }
