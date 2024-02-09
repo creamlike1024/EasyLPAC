@@ -22,7 +22,7 @@ for anchor in anchors:
                 'prefix': li.code.text.strip(),
                 'manufacturer': li.find('a').text.split(' (')[0].strip(),
                 'link': li.find('a')['href'],
-                'country': li.code.next_sibling.strip().strip('()')
+                'country': li.code.next_sibling.strip()[1:3]
             })
 
 
