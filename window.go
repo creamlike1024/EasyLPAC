@@ -9,8 +9,11 @@ import (
 	"fyne.io/fyne/v2/layout"
 	"fyne.io/fyne/v2/theme"
 	"fyne.io/fyne/v2/widget"
+	"github.com/makiuchi-d/gozxing"
 	nativeDialog "github.com/sqweek/dialog"
+	"golang.design/x/clipboard"
 	"image/color"
+	"strings"
 )
 
 var WMain fyne.Window
@@ -179,8 +182,22 @@ func InitDownloadDialog() dialog.Dialog {
 			d.Hide()
 		},
 	}
-	// 回调函数需要操作 selectQRCodeButton，预先声明
+	// 回调函数需要操作这两个 Button，预先声明
 	var selectQRCodeButton *widget.Button
+	var pasteFromClipboardButton *widget.Button
+	disableButtons := func() {
+		cancelButton.Disable()
+		downloadButton.Disable()
+		selectQRCodeButton.Disable()
+		pasteFromClipboardButton.Disable()
+	}
+	enableButtons := func() {
+		cancelButton.Enable()
+		downloadButton.Enable()
+		selectQRCodeButton.Enable()
+		pasteFromClipboardButton.Enable()
+	}
+
 	selectQRCodeButton = &widget.Button{
 		Text: "Scan image file",
 		Icon: theme.FileImageIcon(),
@@ -198,9 +215,8 @@ func InitDownloadDialog() dialog.Dialog {
 					},
 				}
 
-				selectQRCodeButton.Disable()
-				cancelButton.Disable()
-				downloadButton.Disable()
+				disableButtons()
+				defer enableButtons()
 
 				filename, err := fileBuilder.Load()
 				if err != nil {
@@ -223,16 +239,58 @@ func InitDownloadDialog() dialog.Dialog {
 						}
 					}
 				}
-
-				selectQRCodeButton.Enable()
-				cancelButton.Enable()
-				downloadButton.Enable()
 			}()
 		},
 	}
+	pasteFromClipboardButton = &widget.Button{
+		Text: "Paste QR Code or LPAString from clipboard", // TODO: 这玩意儿叫这个名字吗
+		Icon: theme.ContentPasteIcon(),
+		OnTapped: func() {
+			go func() {
+				var err error
+				var pullInfo PullInfo
+				var qrResult *gozxing.Result
+				disableButtons()
+				defer enableButtons()
+
+				format, result, err := PasteFromClipboard()
+				if err != nil {
+					dError := dialog.NewError(err, WMain)
+					dError.Show()
+					return
+				}
+				switch format {
+				case clipboard.FmtImage:
+					qrResult, err = ScanQRCodeImageBytes(result)
+					if err != nil {
+						break // Deal with error later
+					}
+					pullInfo, err = DecodeLPADownloadConfig(qrResult.String())
+				case clipboard.FmtText:
+					// TODO: 不清楚规范是不是这样，对着 https://source.android.com/docs/core/connect/esim-test-profiles 写的
+					lpaString := string(result)
+					if !strings.HasPrefix(lpaString, "LPA:") {
+						lpaString = "LPA:" + lpaString
+					}
+					pullInfo, err = DecodeLPADownloadConfig(lpaString)
+				default:
+					// Unreachable, should not be here.
+					panic(nil)
+				}
+				if err != nil {
+					dError := dialog.NewError(err, WMain)
+					dError.Show()
+					return
+				}
+				smdpEntry.SetText(pullInfo.SMDP)
+				matchIDEntry.SetText(pullInfo.MatchID)
+			}()
+		},
+	}
+	downsideButtons := container.NewHBox(selectQRCodeButton, pasteFromClipboardButton)
 	d = dialog.NewCustomWithoutButtons("Download", container.NewBorder(
 		nil,
-		container.NewVBox(spacer, container.NewCenter(selectQRCodeButton), spacer, container.NewCenter(container.NewHBox(cancelButton, spacer, downloadButton))),
+		container.NewVBox(spacer, container.NewCenter(downsideButtons), spacer, container.NewCenter(container.NewHBox(cancelButton, spacer, downloadButton))),
 		nil,
 		nil,
 		form), WMain)
