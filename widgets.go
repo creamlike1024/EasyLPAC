@@ -734,24 +734,39 @@ func processNotification(seq int) {
 			notification.Iccid,
 			notification.ProfileManagementOperation,
 			notification.NotificationAddress)
-		d := dialog.NewCustomConfirm("Remove Notification",
-			"Remove",
-			"Not Now",
-			container.NewVBox(
-				&widget.Label{Text: "Successfully processed notification.", Alignment: fyne.TextAlignCenter},
-				&widget.Label{Text: "Do you want to remove this notification now?", Alignment: fyne.TextAlignCenter},
-				&widget.Label{Text: notificationText, TextStyle: fyne.TextStyle{Monospace: true, TabWidth: FontTabWidth}}),
-			func(b bool) {
-				if b {
-					go func() {
-						if err := LpacNotificationRemove(seq); err != nil {
-							ShowLpacErrDialog(err)
-						}
-						RefreshNotification()
-						RefreshChipInfo()
-					}()
-				}
-			}, WMain)
+		var d *dialog.CustomDialog
+		notNowButton := &widget.Button{
+			Text: "Not Now",
+			Icon: theme.CancelIcon(),
+			OnTapped: func() {
+				d.Hide()
+			},
+		}
+		removeButton := &widget.Button{
+			Text: "Remove",
+			Icon: theme.DeleteIcon(),
+			OnTapped: func() {
+				go func() {
+					d.Hide()
+					if err := LpacNotificationRemove(seq); err != nil {
+						ShowLpacErrDialog(err)
+					}
+					RefreshNotification()
+					RefreshChipInfo()
+				}()
+			},
+		}
+		d = dialog.NewCustomWithoutButtons("Remove Notification",
+			container.NewBorder(
+				nil,
+				container.NewCenter(container.NewHBox(notNowButton, spacer, removeButton)),
+				nil,
+				nil,
+				container.NewVBox(
+					&widget.Label{Text: "Successfully processed notification.", Alignment: fyne.TextAlignCenter},
+					&widget.Label{Text: "Do you want to remove this notification now?", Alignment: fyne.TextAlignCenter},
+					&widget.Label{Text: notificationText, TextStyle: fyne.TextStyle{Monospace: true, TabWidth: FontTabWidth}})),
+			WMain)
 		d.Show()
 	}
 }

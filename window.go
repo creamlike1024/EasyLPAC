@@ -169,6 +169,7 @@ func InitDownloadDialog() dialog.Dialog {
 		Icon:       theme.ConfirmIcon(),
 		Importance: widget.HighImportance,
 		OnTapped: func() {
+			d.Hide()
 			pullConfig := PullInfo{
 				SMDP:        smdpEntry.Text,
 				MatchID:     matchIDEntry.Text,
@@ -179,7 +180,6 @@ func InitDownloadDialog() dialog.Dialog {
 				RefreshNotification()
 				LpacProfileDownload(pullConfig)
 			}()
-			d.Hide()
 		},
 	}
 	// 回调函数需要操作这两个 Button，预先声明
