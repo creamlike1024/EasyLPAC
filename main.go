@@ -17,7 +17,7 @@ var App fyne.App
 
 func init() {
 	App = app.New()
-	App.Settings().SetTheme(&myTheme{})
+	App.Settings().SetTheme(&MyTheme{})
 
 	StatusChan = make(chan int)
 	LockButtonChan = make(chan bool)
@@ -34,21 +34,24 @@ func init() {
 		panic(err)
 	}
 	if _, err := os.Stat(ConfigInstance.LogDir); os.IsNotExist(err) {
-		os.Mkdir(ConfigInstance.LogDir, 0755)
+		err := os.Mkdir(ConfigInstance.LogDir, 0755)
+		if err != nil {
+			panic(err)
+		}
 	}
 }
 
 func main() {
-	go UpdateStatusBar()
-	go LockButton()
-	InitWidgets()
-
 	var err error
 	ConfigInstance.LogFile, err = os.Create(filepath.Join(ConfigInstance.LogDir, ConfigInstance.LogFilename))
 	if err != nil {
 		panic(err)
 	}
 	defer ConfigInstance.LogFile.Close()
+
+	InitWidgets()
+	go UpdateStatusBarListener()
+	go LockButtonListener()
 
 	WMain = InitMainWindow()
 

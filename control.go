@@ -3,6 +3,7 @@ package main
 import (
 	"encoding/json"
 	"fmt"
+	"fyne.io/fyne/v2/widget"
 	"math"
 	"os/exec"
 	"runtime"
@@ -65,20 +66,20 @@ func RefreshChipInfo() {
 	EidLabel.SetText(fmt.Sprintf("EID: %s", ChipInfo.EidValue))
 	DefaultDpAddressLabel.SetText(fmt.Sprintf("Default SM-DP+ Address:  %s", convertToString(ChipInfo.EuiccConfiguredAddresses.DefaultDpAddress)))
 	RootDsAddressLabel.SetText(fmt.Sprintf("Root SM-DS Address:  %s", convertToString(ChipInfo.EuiccConfiguredAddresses.RootDsAddress)))
-	// eUICC Manufactor Label
-	var EUICCManufactorerLabelContent string
+	// eUICC Manufacturer Label
+	var EUICCManufacturerLabelContent string
 	// 仅在获取到 EidValue 时进行切片
 	if len(ChipInfo.EidValue) >= 8 {
 		for _, v := range EUMRegistry {
 			if ChipInfo.EidValue[:8] == v.Prefix {
-				EUICCManufactorerLabelContent = fmt.Sprintf("Manufacturer: [%s](%s) %s", v.Manufacturer, v.Link, CountryCodeToEmoji(v.Country))
+				EUICCManufacturerLabelContent = fmt.Sprintf("Manufacturer: [%s](%s) %s", v.Manufacturer, v.Link, CountryCodeToEmoji(v.Country))
 			}
 		}
 	}
-	if EUICCManufactorerLabelContent == "" {
+	if EUICCManufacturerLabelContent == "" {
 		EUICCManufacturerLabel.ParseMarkdown("Manufacturer: Unknown")
 	} else {
-		EUICCManufacturerLabel.ParseMarkdown(EUICCManufactorerLabelContent)
+		EUICCManufacturerLabel.ParseMarkdown(EUICCManufacturerLabelContent)
 	}
 	// EUICCInfo2 entry
 	bytes, err := json.MarshalIndent(ChipInfo.EUICCInfo2, "", "  ")
@@ -144,7 +145,7 @@ func Refresh() {
 	RefreshNeeded = false
 }
 
-func UpdateStatusBar() {
+func UpdateStatusBarListener() {
 	for {
 		status := <-StatusChan
 		switch status {
@@ -162,42 +163,39 @@ func UpdateStatusBar() {
 	}
 }
 
-func LockButton() {
+func LockButtonListener() {
+	buttons := []*widget.Button{
+		RefreshButton, DownloadButton, DiscoveryButton,
+		SetNicknameButton, SwitchStateButton, DeleteProfileButton,
+		ProcessNotificationButton, RemoveNotificationButton,
+		SetDefaultSmdpButton, ApduDriverRefreshButton,
+	}
+	checks := []*widget.Check{
+		ProfileMaskCheck, NotificationMaskCheck,
+	}
 	for {
 		lock := <-LockButtonChan
 		if lock {
-			DownloadButton.Disable()
-			DiscoveryButton.Disable()
-			SetNicknameButton.Disable()
-			RefreshButton.Disable()
-			SwitchStateButton.Disable()
-			DeleteProfileButton.Disable()
-			ProcessNotificationButton.Disable()
-			RemoveNotificationButton.Disable()
-			SetDefaultSmdpButton.Disable()
-			ProfileMaskCheck.Disable()
-			NotificationMaskCheck.Disable()
+			for _, button := range buttons {
+				button.Disable()
+			}
+			for _, check := range checks {
+				check.Disable()
+			}
 			ApduDriverSelect.Disable()
-			ApduDriverRefreshButton.Disable()
 		} else {
-			DownloadButton.Enable()
-			DiscoveryButton.Enable()
-			SetNicknameButton.Enable()
-			RefreshButton.Enable()
-			SwitchStateButton.Enable()
-			DeleteProfileButton.Enable()
-			ProcessNotificationButton.Enable()
-			RemoveNotificationButton.Enable()
-			SetDefaultSmdpButton.Enable()
-			ProfileMaskCheck.Enable()
-			NotificationMaskCheck.Enable()
+			for _, button := range buttons {
+				button.Enable()
+			}
+			for _, check := range checks {
+				check.Enable()
+			}
 			ApduDriverSelect.Enable()
-			ApduDriverRefreshButton.Enable()
 		}
 	}
 }
 
-func SetDriverIfid(name string) {
+func SetDriverIFID(name string) {
 	for _, d := range ApduDrivers {
 		if name == d.Name {
 			// 未选择过读卡器

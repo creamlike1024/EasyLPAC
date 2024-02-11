@@ -59,7 +59,6 @@ func LoadConfig() error {
 		ConfigInstance.LogDir = filepath.Join("/tmp", "EasyLPAC-log")
 	}
 
-	now := time.Now()
-	ConfigInstance.LogFilename = fmt.Sprintf("lpac-%s.txt", now.Format("20060102-150405"))
+	ConfigInstance.LogFilename = fmt.Sprintf("lpac-%s.txt", time.Now().Format("20060102-150405"))
 	return nil
 }

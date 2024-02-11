@@ -160,7 +160,7 @@ func InitWidgets() {
 	ViewCertInfoButton.Hide()
 	EUICCManufacturerLabel = widget.NewRichText()
 	EUICCManufacturerLabel.Hide()
-	ApduDriverSelect = widget.NewSelect([]string{}, func(s string) { SetDriverIfid(s) })
+	ApduDriverSelect = widget.NewSelect([]string{}, func(s string) { SetDriverIFID(s) })
 	ApduDriverRefreshButton = &widget.Button{OnTapped: func() { go RefreshApduDriver() }, Icon: theme.SearchReplaceIcon()}
 }
 
