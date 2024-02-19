@@ -157,6 +157,12 @@ func InitDownloadDialog() dialog.Dialog {
 
 	form := widget.NewForm(formItems...)
 	var d dialog.Dialog
+	showConfirmCodeNeededDialog := func() {
+		dConfirmCodeNeeded := dialog.NewInformation("Confirm Code Required",
+			"This profile needs confirm code to download.\n"+
+				"Please fill the confirm code manually.", WMain)
+		dConfirmCodeNeeded.Show()
+	}
 	cancelButton := &widget.Button{
 		Text: "Cancel",
 		Icon: theme.CancelIcon(),
@@ -228,13 +234,16 @@ func InitDownloadDialog() dialog.Dialog {
 						dError := dialog.NewError(err, WMain)
 						dError.Show()
 					} else {
-						pullInfo, err := DecodeLpaActivationCode(result.String())
+						pullInfo, confirmCodeNeeded, err := DecodeLpaActivationCode(result.String())
 						if err != nil {
 							dError := dialog.NewError(err, WMain)
 							dError.Show()
 						} else {
 							smdpEntry.SetText(pullInfo.SMDP)
 							matchIDEntry.SetText(pullInfo.MatchID)
+							if confirmCodeNeeded {
+								go showConfirmCodeNeededDialog()
+							}
 						}
 					}
 				}
@@ -250,6 +259,7 @@ func InitDownloadDialog() dialog.Dialog {
 				defer enableButtons()
 				var err error
 				var pullInfo PullInfo
+				var confirmCodeNeeded bool
 				var qrResult *gozxing.Result
 
 				format, result, err := PasteFromClipboard()
@@ -266,7 +276,7 @@ func InitDownloadDialog() dialog.Dialog {
 						dError.Show()
 						return
 					}
-					pullInfo, err = DecodeLpaActivationCode(qrResult.String())
+					pullInfo, confirmCodeNeeded, err = DecodeLpaActivationCode(qrResult.String())
 				case clipboard.FmtText:
 					completeLpaActivationCode := func(input string) string {
 						// 如果输入已经以 LPA:1$ 开始，则认为它是完整的
@@ -284,7 +294,7 @@ func InitDownloadDialog() dialog.Dialog {
 						// rspAddr$matchID
 						return "LPA:1$" + input
 					}
-					pullInfo, err = DecodeLpaActivationCode(completeLpaActivationCode(string(result)))
+					pullInfo, confirmCodeNeeded, err = DecodeLpaActivationCode(completeLpaActivationCode(string(result)))
 				default:
 					// Unreachable, should not be here.
 					panic(nil)
@@ -296,6 +306,9 @@ func InitDownloadDialog() dialog.Dialog {
 				}
 				smdpEntry.SetText(pullInfo.SMDP)
 				matchIDEntry.SetText(pullInfo.MatchID)
+				if confirmCodeNeeded {
+					go showConfirmCodeNeededDialog()
+				}
 			}()
 		},
 	}

@@ -22,20 +22,27 @@ func CountryCodeToEmoji(countryCode string) string {
 	return string([]rune{rune1, rune2})
 }
 
-func DecodeLpaActivationCode(s string) (PullInfo, error) {
+func DecodeLpaActivationCode(s string) (PullInfo, bool, error) {
+	// ref: https://www.gsma.com/esim/wp-content/uploads/2020/06/SGP.22-v2.2.2.pdf#page=111
+	var confirmCodeNeeded bool
 	strs := strings.Split(s, "$")
-	if len(strs) != 3 {
-		return PullInfo{}, errors.New("QR code or LPA Activation Code format error")
+	if len(strs) < 3 || len(strs) > 5 {
+		return PullInfo{}, confirmCodeNeeded, errors.New("QR Code or LPA Activation Code format error")
 	}
 	if strings.TrimSpace(strs[0]) != "LPA:1" {
-		return PullInfo{}, errors.New("QR Code or LPA Activation Code format error")
+		return PullInfo{}, confirmCodeNeeded, errors.New("QR Code or LPA Activation Code format error")
+	}
+	if len(strs) == 5 {
+		if strings.TrimSpace(strs[4]) == "1" {
+			confirmCodeNeeded = true
+		}
 	}
 	return PullInfo{
 		SMDP:        strs[1],
 		MatchID:     strs[2],
 		ConfirmCode: "",
 		IMEI:        "",
-	}, nil
+	}, confirmCodeNeeded, nil
 }
 
 func scanQRCodeFromImage(img image.Image) (*gozxing.Result, error) {
