@@ -12,26 +12,32 @@
         "country": "FR"
     },
     {
+        "prefix": "89043051",
+        "manufacturer": "NXP",
+        "link": "https://nxp.com",
+        "country": "AT"
+    },
+    {
         "prefix": "89044047",
-        "manufacturer": "Truphone Ltd",
+        "manufacturer": "Truphone",
         "link": "https://truphone.com",
         "country": "GB"
     },
     {
         "prefix": "89049032",
-        "manufacturer": "Giesecke+Devrient GmbH",
+        "manufacturer": "G+D",
         "link": "https://gi-de.com",
         "country": "DE"
     },
     {
         "prefix": "89086029",
-        "manufacturer": "Wuhan Tianyu Information Industry Co., Ltd",
+        "manufacturer": "Wuhan Tianyu",
         "link": "https://www.whty.com",
         "country": "CN"
     },
     {
         "prefix": "89086030",
-        "manufacturer": "Eastcompeace Technology Co., Ltd",
+        "manufacturer": "Eastcompeace",
         "link": "https://www.eastcompeace.com",
         "country": "CN"
     }
