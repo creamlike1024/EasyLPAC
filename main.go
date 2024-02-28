@@ -24,9 +24,6 @@ func init() {
 	SelectedProfile = Unselected
 	SelectedNotification = Unselected
 	RefreshNeeded = true
-	if err := json.Unmarshal(CIRegistryByte, &CIRegistry); err != nil {
-		panic(err)
-	}
 	if err := json.Unmarshal(EUMRegistryByte, &EUMRegistry); err != nil {
 		panic(err)
 	}

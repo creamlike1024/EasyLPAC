@@ -12,6 +12,7 @@ import (
 	"github.com/mattn/go-runewidth"
 	"golang.org/x/net/publicsuffix"
 	"image/color"
+	"slices"
 	"strings"
 	"time"
 )
@@ -467,45 +468,24 @@ func setDefaultSmdpButtonFunc() {
 func viewCertInfoButtonFunc() {
 	selectedCI := Unselected
 	type ciWidgetEl struct {
-		C     string
-		CN    string
-		KeyID string
+		Country    string
+		CommonName string
+		KeyID      string
 	}
 	var ciWidgetEls []ciWidgetEl
 	// chipinfo 中 signing 和 verification 同时存在则有效
-	for _, idForVerification := range ChipInfo.EUICCInfo2.EuiccCiPKIDListForVerification {
-		for _, idForSigning := range ChipInfo.EUICCInfo2.EuiccCiPKIDListForSigning {
-			if idForSigning == idForVerification {
-				// 有效 keyid，查找 CIRegistry
-				var foundCI bool
-				for _, v := range CIRegistry {
-					if v.KeyID == idForSigning {
-						var c, cn string
-						if v.C != nil {
-							c = v.C.(string)
-						}
-						if v.CN != nil {
-							cn = v.CN.(string)
-						}
-						ciWidgetEls = append(ciWidgetEls, ciWidgetEl{
-							C:     c,
-							CN:    cn,
-							KeyID: v.KeyID,
-						})
-						foundCI = true
-						break
-					}
-				}
-				// 有效 keyid 但是不在 CIRegistry
-				if !foundCI {
-					ciWidgetEls = append(ciWidgetEls, ciWidgetEl{
-						C:     "",
-						CN:    "Unknown",
-						KeyID: idForSigning,
-					})
-				}
-			}
+	for _, keyId := range ChipInfo.EUICCInfo2.EuiccCiPKIDListForSigning {
+		if !slices.Contains(ChipInfo.EUICCInfo2.EuiccCiPKIDListForVerification, keyId) {
+			continue
 		}
+		var element ciWidgetEl
+		element.CommonName = "Unknown"
+		element.KeyID = keyId
+		if issuer, found := issuerRegistry[keyId]; found {
+			element.Country = issuer.Country
+			element.CommonName = issuer.CommonName
+		}
+		ciWidgetEls = append(ciWidgetEls, element)
 	}
 	list := &widget.List{
 		Length: func() int {
@@ -516,8 +496,8 @@ func viewCertInfoButtonFunc() {
 				&widget.Label{TextStyle: fyne.TextStyle{Monospace: true}})
 		},
 		UpdateItem: func(i widget.ListItemID, o fyne.CanvasObject) {
-			o.(*fyne.Container).Objects[0].(*fyne.Container).Objects[0].(*widget.Label).SetText(fmt.Sprintf("CN: %s", ciWidgetEls[i].CN))
-			o.(*fyne.Container).Objects[0].(*fyne.Container).Objects[1].(*widget.Label).SetText(CountryCodeToEmoji(ciWidgetEls[i].C))
+			o.(*fyne.Container).Objects[0].(*fyne.Container).Objects[0].(*widget.Label).SetText(fmt.Sprintf("CN: %s", ciWidgetEls[i].CommonName))
+			o.(*fyne.Container).Objects[0].(*fyne.Container).Objects[1].(*widget.Label).SetText(CountryCodeToEmoji(ciWidgetEls[i].Country))
 			o.(*fyne.Container).Objects[1].(*widget.Label).SetText(fmt.Sprintf("KeyID: %s", ciWidgetEls[i].KeyID))
 		},
 		OnSelected: func(id widget.ListItemID) {
@@ -531,10 +511,10 @@ func viewCertInfoButtonFunc() {
 		if selectedCI == Unselected {
 			ShowSelectItemDialog()
 		} else {
-			for _, v := range CIRegistry {
-				if v.KeyID == ciWidgetEls[selectedCI].KeyID && v.CertData != nil {
+			for _, v := range issuerRegistry {
+				if v.KeyID == ciWidgetEls[selectedCI].KeyID {
 					entry := NewReadOnlyEntry()
-					entry.SetText(v.CertData.(string))
+					entry.SetText(v.Text)
 					w := App.NewWindow(v.KeyID)
 					w.Resize(fyne.Size{
 						Width:  550,
