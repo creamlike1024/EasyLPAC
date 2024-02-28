@@ -29,14 +29,10 @@ func DecodeLpaActivationCode(code string) (info PullInfo, confirmCodeNeeded bool
 	if code, ok = strings.CutPrefix(code, "LPA:"); !ok {
 		return
 	}
-	parts := strings.FieldsFunc(code, func(r rune) bool { return r == '$' })
-	if len(parts) == 0 {
-		return
-	}
-	switch parts[0] {
+	switch parts := strings.Split(code, "$"); parts[0] {
 	case "1": // Activation Code Format
-		var objectId, codeNeeded string
-		bindings := []*string{&info.SMDP, &info.MatchID, &objectId, &codeNeeded}
+		var codeNeeded string
+		bindings := []*string{&info.SMDP, &info.MatchID, &info.ObjectID, &codeNeeded}
 		for index, value := range parts[1:] {
 			*bindings[index] = value
 		}

@@ -8,6 +8,7 @@ import (
 type PullInfo struct {
 	SMDP        string
 	MatchID     string
+	ObjectID    string
 	ConfirmCode string
 	IMEI        string
 }
