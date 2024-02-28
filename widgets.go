@@ -48,6 +48,7 @@ var CopyEidButton *widget.Button
 var SetDefaultSmdpButton *widget.Button
 var ViewCertInfoButton *widget.Button
 var EUICCManufacturerLabel *widget.RichText
+var CopyEuiccInfo2Button *widget.Button
 
 var ApduDriverSelect *widget.Select
 var ApduDriverRefreshButton *widget.Button
@@ -160,6 +161,8 @@ func InitWidgets() {
 	ViewCertInfoButton.Hide()
 	EUICCManufacturerLabel = widget.NewRichText()
 	EUICCManufacturerLabel.Hide()
+	CopyEuiccInfo2Button = &widget.Button{Text: "Copy eUICCInfo2", OnTapped: func() { go copyEuiccInfo2ButtonFunc() }, Icon: theme.ContentCopyIcon()}
+	CopyEuiccInfo2Button.Hide()
 	ApduDriverSelect = widget.NewSelect([]string{}, func(s string) { SetDriverIFID(s) })
 	ApduDriverRefreshButton = &widget.Button{OnTapped: func() { go RefreshApduDriver() }, Icon: theme.SearchReplaceIcon()}
 }
@@ -439,6 +442,13 @@ func copyEidButtonFunc() {
 	CopyEidButton.SetText("Copied!")
 	time.Sleep(2 * time.Second)
 	CopyEidButton.SetText("Copy")
+}
+
+func copyEuiccInfo2ButtonFunc() {
+	WMain.Clipboard().SetContent(EuiccInfo2Entry.Text)
+	CopyEuiccInfo2Button.SetText("Copied eUICCInfo2!")
+	time.Sleep(2 * time.Second)
+	CopyEuiccInfo2Button.SetText("Copy eUICCInfo2")
 }
 
 func setDefaultSmdpButtonFunc() {

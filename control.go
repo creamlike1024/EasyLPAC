@@ -96,6 +96,7 @@ func RefreshChipInfo() {
 	EuiccInfo2Entry.Show()
 	ViewCertInfoButton.Show()
 	EUICCManufacturerLabel.Show()
+	CopyEuiccInfo2Button.Show()
 }
 
 func RefreshApduDriver() {

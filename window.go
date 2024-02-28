@@ -100,8 +100,8 @@ func InitMainWindow() fyne.Window {
 		nil,
 		container.NewBorder(
 			container.NewVBox(container.NewBorder(nil, nil, container.NewHBox(EidLabel, CopyEidButton), EUICCManufacturerLabel),
-				container.NewHBox(DefaultDpAddressLabel, SetDefaultSmdpButton),
-				container.NewBorder(nil, nil, RootDsAddressLabel, ViewCertInfoButton)),
+				container.NewBorder(nil, nil, container.NewHBox(DefaultDpAddressLabel, SetDefaultSmdpButton), ViewCertInfoButton),
+				container.NewBorder(nil, nil, RootDsAddressLabel, CopyEuiccInfo2Button)),
 			nil,
 			nil,
 			nil,
