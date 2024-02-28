@@ -22,27 +22,27 @@ func CountryCodeToEmoji(countryCode string) string {
 	return string([]rune{rune1, rune2})
 }
 
-func DecodeLpaActivationCode(s string) (PullInfo, bool, error) {
+func DecodeLpaActivationCode(code string) (info PullInfo, confirmCodeNeeded bool, err error) {
 	// ref: https://www.gsma.com/esim/wp-content/uploads/2020/06/SGP.22-v2.2.2.pdf#page=111
-	var confirmCodeNeeded bool
-	strs := strings.Split(s, "$")
-	if len(strs) < 3 || len(strs) > 5 {
-		return PullInfo{}, confirmCodeNeeded, errors.New("QR Code or LPA Activation Code format error")
+	err = errors.New("QR Code or LPA Activation Code format error")
+	code = strings.TrimSpace(code)
+	var ok bool
+	if code, ok = strings.CutPrefix(code, "LPA:"); !ok {
+		return
 	}
-	if strings.TrimSpace(strs[0]) != "LPA:1" {
-		return PullInfo{}, confirmCodeNeeded, errors.New("QR Code or LPA Activation Code format error")
-	}
-	if len(strs) == 5 {
-		if strings.TrimSpace(strs[4]) == "1" {
-			confirmCodeNeeded = true
+	switch parts := strings.Split(code, "$"); parts[0] {
+	case "1": // Activation Code Format
+		var codeNeeded string
+		bindings := []*string{&info.SMDP, &info.MatchID, &info.ObjectID, &codeNeeded}
+		for index, value := range parts[1:] {
+			*bindings[index] = strings.TrimSpace(value)
+		}
+		confirmCodeNeeded = codeNeeded == "1"
+		if info.SMDP != "" {
+			err = nil
 		}
 	}
-	return PullInfo{
-		SMDP:        strs[1],
-		MatchID:     strs[2],
-		ConfirmCode: "",
-		IMEI:        "",
-	}, confirmCodeNeeded, nil
+	return
 }
 
 func scanQRCodeFromImage(img image.Image) (*gozxing.Result, error) {
