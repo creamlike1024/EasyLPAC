@@ -25,6 +25,7 @@ func CountryCodeToEmoji(countryCode string) string {
 func DecodeLpaActivationCode(code string) (info PullInfo, confirmCodeNeeded bool, err error) {
 	// ref: https://www.gsma.com/esim/wp-content/uploads/2020/06/SGP.22-v2.2.2.pdf#page=111
 	err = errors.New("QR Code or LPA Activation Code format error")
+	code = strings.TrimSpace(code)
 	var ok bool
 	if code, ok = strings.CutPrefix(code, "LPA:"); !ok {
 		return
@@ -34,7 +35,7 @@ func DecodeLpaActivationCode(code string) (info PullInfo, confirmCodeNeeded bool
 		var codeNeeded string
 		bindings := []*string{&info.SMDP, &info.MatchID, &info.ObjectID, &codeNeeded}
 		for index, value := range parts[1:] {
-			*bindings[index] = value
+			*bindings[index] = strings.TrimSpace(value)
 		}
 		confirmCodeNeeded = codeNeeded == "1"
 		if info.SMDP != "" {
