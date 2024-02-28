@@ -89,16 +89,13 @@ var ChipInfo EuiccInfo
 var ApduDrivers []ApduDriver
 
 type CertificateIssuer struct {
-	C        interface{} `json:"C"`
-	CN       interface{} `json:"CN"`
-	KeyID    string      `json:"keyID"`
-	CertData interface{} `json:"certData"`
+	Country    string
+	CommonName string
+	KeyID      string
+	Text       string
 }
 
-var CIRegistry []CertificateIssuer
-
-//go:embed ci-registry.json
-var CIRegistryByte []byte
+var issuerRegistry map[string]CertificateIssuer
 
 type EUMIdentifier struct {
 	Prefix       string `json:"prefix"`
