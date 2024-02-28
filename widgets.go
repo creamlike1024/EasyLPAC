@@ -510,28 +510,21 @@ func viewCertInfoButtonFunc() {
 	certDataButtonFunc := func() {
 		if selectedCI == Unselected {
 			ShowSelectItemDialog()
-		} else {
-			for _, v := range issuerRegistry {
-				if v.KeyID == ciWidgetEls[selectedCI].KeyID {
-					entry := NewReadOnlyEntry()
-					entry.SetText(v.Text)
-					w := App.NewWindow(v.KeyID)
-					w.Resize(fyne.Size{
-						Width:  550,
-						Height: 600,
-					})
-					w.SetContent(entry)
-					w.Show()
-					return
-				}
-			}
+		} else if issuer, found := issuerRegistry[ciWidgetEls[selectedCI].KeyID]; !found || issuer.Text == "" {
 			d := dialog.NewInformation("No Data",
 				"The information of this certificate is not included.\n"+
 					"If you have any information about this certificate,\n"+
-					"you can report it to euicc-dev-manual@septs.pw\n"+
+					"you can report it to <euicc-dev-manual@septs.pw>\n"+
 					"Thank you",
 				WMain)
 			d.Show()
+		} else {
+			entry := NewReadOnlyEntry()
+			entry.SetText(issuer.Text)
+			w := App.NewWindow(issuer.KeyID)
+			w.Resize(fyne.Size{Width: 550, Height: 600})
+			w.SetContent(entry)
+			w.Show()
 		}
 	}
 	certDataButton := &widget.Button{
