@@ -35,8 +35,7 @@ func DecodeLpaActivationCode(code string) (info PullInfo, confirmCodeNeeded bool
 	}
 	switch parts[0] {
 	case "1": // Activation Code Format
-		var codeNeeded string
-		var objectId string
+		var objectId, codeNeeded string
 		bindings := []*string{&info.SMDP, &info.MatchID, &objectId, &codeNeeded}
 		for index, value := range parts[1:] {
 			*bindings[index] = value
