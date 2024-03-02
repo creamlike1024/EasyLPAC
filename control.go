@@ -69,12 +69,13 @@ func RefreshChipInfo() {
 	// eUICC Manufacturer Label
 	var EUICCManufacturerLabelContent string
 	// 仅在获取到 EidValue 时进行切片
-	if len(ChipInfo.EidValue) >= 8 {
-		for _, v := range EUMRegistry {
-			if ChipInfo.EidValue[:8] == v.Prefix {
-				EUICCManufacturerLabelContent = fmt.Sprintf("Manufacturer: [%s](%s) %s", v.Manufacturer, v.Link, CountryCodeToEmoji(v.Country))
-			}
-		}
+	if eum := GetEUM(ChipInfo.EidValue); eum != nil {
+		EUICCManufacturerLabelContent = fmt.Sprint(
+			"Manufacturer: ",
+			eum.Manufacturer,
+			" ",
+			CountryCodeToEmoji(eum.Country),
+		)
 	}
 	if EUICCManufacturerLabelContent == "" {
 		EUICCManufacturerLabel.ParseMarkdown("Manufacturer: Unknown")
@@ -116,23 +117,25 @@ func RefreshApduDriver() {
 }
 
 func OpenLog() {
-	var err error
+	if err := OpenProgram(ConfigInstance.LogDir); err != nil {
+		ShowLpacErrDialog(err)
+	}
+}
 
+func OpenProgram(name string) error {
+	var launcher string
 	switch runtime.GOOS {
 	case "windows":
-		err = exec.Command("explorer", ConfigInstance.LogDir).Start()
+		launcher = "explorer"
 	case "darwin":
-		err = exec.Command("open", ConfigInstance.LogDir).Start()
+		launcher = "open"
 	case "linux":
-		err = exec.Command("xdg-open", ConfigInstance.LogDir).Start()
-	default:
-		err = fmt.Errorf("unsupported platform, please open log file manually")
-		ShowLpacErrDialog(err)
+		launcher = "xdg-open"
 	}
-
-	if err != nil {
-		ShowLpacErrDialog(err)
+	if launcher == "" {
+		return fmt.Errorf("unsupported platform, please open log file manually")
 	}
+	return exec.Command(launcher, name).Start()
 }
 
 func Refresh() {

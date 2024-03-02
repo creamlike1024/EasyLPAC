@@ -1,7 +1,6 @@
 package main
 
 import (
-	"encoding/json"
 	"fmt"
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/app"
@@ -24,9 +23,6 @@ func init() {
 	SelectedProfile = Unselected
 	SelectedNotification = Unselected
 	RefreshNeeded = true
-	if err := json.Unmarshal(EUMRegistryByte, &EUMRegistry); err != nil {
-		panic(err)
-	}
 	if err := LoadConfig(); err != nil {
 		panic(err)
 	}

@@ -1,44 +1,11 @@
 [
-    {
-        "prefix": "89033023",
-        "manufacturer": "Thales",
-        "link": "https://thalesgroup.com",
-        "country": "FR"
-    },
-    {
-        "prefix": "89033024",
-        "manufacturer": "IDEMIA",
-        "link": "https://idemia.com",
-        "country": "FR"
-    },
-    {
-        "prefix": "89043051",
-        "manufacturer": "NXP",
-        "link": "https://nxp.com",
-        "country": "AT"
-    },
-    {
-        "prefix": "89044047",
-        "manufacturer": "Truphone",
-        "link": "https://truphone.com",
-        "country": "GB"
-    },
-    {
-        "prefix": "89049032",
-        "manufacturer": "G+D",
-        "link": "https://gi-de.com",
-        "country": "DE"
-    },
-    {
-        "prefix": "89086029",
-        "manufacturer": "Wuhan Tianyu",
-        "link": "https://www.whty.com",
-        "country": "CN"
-    },
-    {
-        "prefix": "89086030",
-        "manufacturer": "Eastcompeace",
-        "link": "https://www.eastcompeace.com",
-        "country": "CN"
-    }
+  { "eum": "89033023", "country": "FR", "manufacturer": "Thales" },
+  { "eum": "89033024", "country": "FR", "manufacturer": "IDEMIA" },
+  { "eum": "89034011", "country": "ES", "manufacturer": "Valid" },
+  { "eum": "89043051", "country": "AT", "manufacturer": "NXP" },
+  { "eum": "89044047", "country": "GB", "manufacturer": "Truphone" },
+  { "eum": "89049032", "country": "DE", "manufacturer": "G+D" },
+  { "eum": "89086001", "country": "CN", "manufacturer": "Hengbao" },
+  { "eum": "89086029", "country": "CN", "manufacturer": "Wuhan Tianyu" },
+  { "eum": "89086030", "country": "CN", "manufacturer": "Eastcompeace" }
 ]
