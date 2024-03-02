@@ -107,3 +107,20 @@ func PasteFromClipboard() (clipboard.Format, []byte, error) {
 	}
 	return clipboard.FmtText, nil, errors.New("failed to read clipboard: not text or image")
 }
+
+func CompleteActivationCode(input string) string {
+	// 如果输入已经以 LPA:1$ 开始，则认为它是完整的
+	if strings.HasPrefix(input, "LPA:1$") {
+		return input
+	}
+	// 1$rspAddr$matchID
+	if strings.HasPrefix(input, "1$") {
+		return "LPA:" + input
+	}
+	// $rspAddr$matchID
+	if strings.HasPrefix(input, "$") {
+		return "LPA:1" + input
+	}
+	// rspAddr$matchID
+	return "LPA:1$" + input
+}

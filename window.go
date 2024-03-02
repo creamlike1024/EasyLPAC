@@ -13,7 +13,6 @@ import (
 	nativeDialog "github.com/sqweek/dialog"
 	"golang.design/x/clipboard"
 	"image/color"
-	"strings"
 )
 
 var WMain fyne.Window
@@ -284,23 +283,7 @@ func InitDownloadDialog() dialog.Dialog {
 					}
 					pullInfo, confirmCodeNeeded, err = DecodeLpaActivationCode(qrResult.String())
 				case clipboard.FmtText:
-					completeLpaActivationCode := func(input string) string {
-						// 如果输入已经以 LPA:1$ 开始，则认为它是完整的
-						if strings.HasPrefix(input, "LPA:1$") {
-							return input
-						}
-						// 1$rspAddr$matchID
-						if strings.HasPrefix(input, "1$") {
-							return "LPA:" + input
-						}
-						// $rspAddr$matchID
-						if strings.HasPrefix(input, "$") {
-							return "LPA:1" + input
-						}
-						// rspAddr$matchID
-						return "LPA:1$" + input
-					}
-					pullInfo, confirmCodeNeeded, err = DecodeLpaActivationCode(completeLpaActivationCode(string(result)))
+					pullInfo, confirmCodeNeeded, err = DecodeLpaActivationCode(CompleteActivationCode(string(result)))
 				default:
 					// Unreachable, should not be here.
 					panic(nil)
