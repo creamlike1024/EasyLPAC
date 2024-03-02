@@ -74,8 +74,8 @@ type Notification struct {
 }
 
 type DiscoveryResult struct {
-	EventID         string `json:"eventId"`
-	RspServerAddres string `json:"rspServerAddres"`
+	EventID          string `json:"eventId"`
+	RspServerAddress string `json:"rspServerAddress"`
 }
 
 type ApduDriver struct {

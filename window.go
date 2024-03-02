@@ -58,7 +58,11 @@ func InitMainWindow() fyne.Window {
 			nil,
 			nil,
 			nil,
-			container.NewHBox(ProfileMaskCheck, DownloadButton, spacer, DiscoveryButton, spacer, SetNicknameButton, spacer, SwitchStateButton, spacer, DeleteProfileButton),
+			container.NewHBox(ProfileMaskCheck, DownloadButton,
+				spacer, DiscoveryButton,
+				spacer, SetNicknameButton,
+				spacer, SwitchStateButton,
+				spacer, DeleteProfileButton),
 			statusBar),
 		nil,
 		nil,
@@ -76,7 +80,10 @@ func InitMainWindow() fyne.Window {
 			nil,
 			nil,
 			nil,
-			container.NewHBox(NotificationMaskCheck, spacer, ProcessNotificationButton, spacer, RemoveAllNotificationButton, spacer, RemoveNotificationButton),
+			container.NewHBox(NotificationMaskCheck,
+				spacer, ProcessNotificationButton,
+				spacer, RemoveAllNotificationButton,
+				spacer, RemoveNotificationButton),
 			statusBar),
 		nil,
 		nil,
@@ -94,9 +101,13 @@ func InitMainWindow() fyne.Window {
 		nil,
 		nil,
 		container.NewBorder(
-			container.NewVBox(container.NewBorder(nil, nil, container.NewHBox(EidLabel, CopyEidButton), EUICCManufacturerLabel),
-				container.NewBorder(nil, nil, container.NewHBox(DefaultDpAddressLabel, SetDefaultSmdpButton), ViewCertInfoButton),
-				container.NewBorder(nil, nil, RootDsAddressLabel, CopyEuiccInfo2Button)),
+			container.NewVBox(
+				container.NewBorder(nil, nil,
+					container.NewHBox(EidLabel, CopyEidButton), EUICCManufacturerLabel),
+				container.NewBorder(nil, nil,
+					container.NewHBox(DefaultDpAddressLabel, SetDefaultSmdpButton), ViewCertInfoButton),
+				container.NewBorder(nil, nil,
+					RootDsAddressLabel, CopyEuiccInfo2Button)),
 			nil,
 			nil,
 			nil,
@@ -323,7 +334,8 @@ func InitDownloadDialog() dialog.Dialog {
 }
 
 func InitSetNicknameDialog() dialog.Dialog {
-	entry := &widget.Entry{PlaceHolder: "Leave it empty to remove nickname", TextStyle: fyne.TextStyle{Monospace: true}}
+	entry := &widget.Entry{PlaceHolder: "Leave it empty to remove nickname",
+		TextStyle: fyne.TextStyle{Monospace: true}}
 	form := []*widget.FormItem{
 		{Text: "Nickname", Widget: entry},
 	}
@@ -365,7 +377,10 @@ func InitSetDefaultSmdpDialog() dialog.Dialog {
 func ShowLpacErrDialog(err error) {
 	go func() {
 		l := &widget.Label{Text: fmt.Sprintf("%v", err), TextStyle: fyne.TextStyle{Monospace: true}}
-		content := container.NewVBox(container.NewCenter(container.NewHBox(widget.NewIcon(theme.ErrorIcon()), widget.NewLabel("lpac error"))),
+		content := container.NewVBox(
+			container.NewCenter(container.NewHBox(
+				widget.NewIcon(theme.ErrorIcon()),
+				widget.NewLabel("lpac error"))),
 			container.NewCenter(l),
 			container.NewCenter(widget.NewLabel("Please check the log for details")))
 		d := dialog.NewCustom("Error", "OK", content, WMain)

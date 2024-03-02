@@ -97,36 +97,56 @@ func InitWidgets() {
 
 	StatusLabel = widget.NewLabel("Ready.")
 
-	DownloadButton = &widget.Button{Text: "Download", OnTapped: func() { go downloadButtonFunc() }, Icon: theme.DownloadIcon()}
+	DownloadButton = &widget.Button{Text: "Download",
+		OnTapped: func() { go downloadButtonFunc() },
+		Icon:     theme.DownloadIcon()}
 
-	DiscoveryButton = &widget.Button{Text: "Discovery", OnTapped: func() { go discoveryButtonFunc() }, Icon: theme.SearchIcon()}
+	DiscoveryButton = &widget.Button{Text: "Discovery",
+		OnTapped: func() { go discoveryButtonFunc() },
+		Icon:     theme.SearchIcon()}
 
-	SetNicknameButton = &widget.Button{Text: "Nickname", OnTapped: func() { go setNicknameButtonFunc() }, Icon: theme.DocumentCreateIcon()}
+	SetNicknameButton = &widget.Button{Text: "Nickname",
+		OnTapped: func() { go setNicknameButtonFunc() },
+		Icon:     theme.DocumentCreateIcon()}
 
-	DeleteProfileButton = &widget.Button{Text: "Delete", OnTapped: func() { go deleteProfileButtonFunc() }, Icon: theme.DeleteIcon()}
+	DeleteProfileButton = &widget.Button{Text: "Delete",
+		OnTapped: func() { go deleteProfileButtonFunc() },
+		Icon:     theme.DeleteIcon()}
 
-	SwitchStateButton = &widget.Button{Text: "Enable", OnTapped: func() { go switchStateButtonFunc() }, Icon: theme.ConfirmIcon()}
+	SwitchStateButton = &widget.Button{Text: "Enable", OnTapped: func() { go switchStateButtonFunc() },
+		Icon: theme.ConfirmIcon()}
 
 	ProfileList = initProfileList()
 
-	ProfileListTitle = container.NewHBox(&widget.Label{Text: "ICCID\t\t\t\t\t", TextStyle: fyne.TextStyle{Bold: true}},
+	ProfileListTitle = container.NewHBox(&widget.Label{Text: "ICCID\t\t\t\t\t",
+		TextStyle: fyne.TextStyle{Bold: true}},
 		&widget.Label{Text: "Profile State\t\t", TextStyle: fyne.TextStyle{Bold: true}},
 		&widget.Label{Text: "Provider\t\t\t\t\t", TextStyle: fyne.TextStyle{Bold: true}},
 		&widget.Label{Text: "Nickname", TextStyle: fyne.TextStyle{Bold: true}})
 
 	NotificationList = initNotificationList()
 
-	ProcessNotificationButton = &widget.Button{Text: "Process", OnTapped: func() { go processNotificationButtonFunc() }, Icon: theme.MediaPlayIcon()}
+	ProcessNotificationButton = &widget.Button{Text: "Process",
+		OnTapped: func() { go processNotificationButtonFunc() },
+		Icon:     theme.MediaPlayIcon()}
 
-	RemoveNotificationButton = &widget.Button{Text: "Remove", OnTapped: func() { go removeNotificationButtonFunc() }, Icon: theme.ContentRemoveIcon()}
+	RemoveNotificationButton = &widget.Button{Text: "Remove",
+		OnTapped: func() { go removeNotificationButtonFunc() },
+		Icon:     theme.ContentRemoveIcon()}
 
-	RemoveAllNotificationButton = &widget.Button{Text: "Remove All", OnTapped: func() { go removeAllNotificationButtonFunc() }, Icon: theme.DeleteIcon()}
+	RemoveAllNotificationButton = &widget.Button{Text: "Remove All",
+		OnTapped: func() { go removeAllNotificationButtonFunc() },
+		Icon:     theme.DeleteIcon()}
 
 	FreeSpaceLabel = widget.NewLabel("")
 
-	OpenLogButton = &widget.Button{Text: "Open Log", OnTapped: func() { go OpenLog() }, Icon: theme.FolderOpenIcon()}
+	OpenLogButton = &widget.Button{Text: "Open Log",
+		OnTapped: func() { go OpenLog() },
+		Icon:     theme.FolderOpenIcon()}
 
-	RefreshButton = &widget.Button{Text: "Refresh", OnTapped: func() { go Refresh() }, Icon: theme.ViewRefreshIcon()}
+	RefreshButton = &widget.Button{Text: "Refresh",
+		OnTapped: func() { go Refresh() },
+		Icon:     theme.ViewRefreshIcon()}
 
 	ProfileMaskCheck = widget.NewCheck("Mask", func(b bool) {
 		if b {
@@ -152,18 +172,26 @@ func InitWidgets() {
 	RootDsAddressLabel = widget.NewLabel("")
 	EuiccInfo2Entry = NewReadOnlyEntry()
 	EuiccInfo2Entry.Hide()
-	CopyEidButton = &widget.Button{Text: "Copy", OnTapped: func() { go copyEidButtonFunc() }, Icon: theme.ContentCopyIcon()}
+	CopyEidButton = &widget.Button{Text: "Copy",
+		OnTapped: func() { go copyEidButtonFunc() },
+		Icon:     theme.ContentCopyIcon()}
 	CopyEidButton.Hide()
-	SetDefaultSmdpButton = &widget.Button{OnTapped: func() { go setDefaultSmdpButtonFunc() }, Icon: theme.DocumentCreateIcon()}
+	SetDefaultSmdpButton = &widget.Button{OnTapped: func() { go setDefaultSmdpButtonFunc() },
+		Icon: theme.DocumentCreateIcon()}
 	SetDefaultSmdpButton.Hide()
-	ViewCertInfoButton = &widget.Button{Text: "Certificate Issuer", OnTapped: func() { go viewCertInfoButtonFunc() }, Icon: theme.InfoIcon()}
+	ViewCertInfoButton = &widget.Button{Text: "Certificate Issuer",
+		OnTapped: func() { go viewCertInfoButtonFunc() },
+		Icon:     theme.InfoIcon()}
 	ViewCertInfoButton.Hide()
 	EUICCManufacturerLabel = widget.NewRichText()
 	EUICCManufacturerLabel.Hide()
-	CopyEuiccInfo2Button = &widget.Button{Text: "Copy eUICCInfo2", OnTapped: func() { go copyEuiccInfo2ButtonFunc() }, Icon: theme.ContentCopyIcon()}
+	CopyEuiccInfo2Button = &widget.Button{Text: "Copy eUICCInfo2",
+		OnTapped: func() { go copyEuiccInfo2ButtonFunc() },
+		Icon:     theme.ContentCopyIcon()}
 	CopyEuiccInfo2Button.Hide()
 	ApduDriverSelect = widget.NewSelect([]string{}, func(s string) { SetDriverIFID(s) })
-	ApduDriverRefreshButton = &widget.Button{OnTapped: func() { go RefreshApduDriver() }, Icon: theme.SearchReplaceIcon()}
+	ApduDriverRefreshButton = &widget.Button{OnTapped: func() { go RefreshApduDriver() },
+		Icon: theme.SearchReplaceIcon()}
 }
 
 func downloadButtonFunc() {
@@ -217,7 +245,7 @@ func discoveryButtonFunc() {
 			}, func() fyne.CanvasObject {
 				return &widget.Label{TextStyle: fyne.TextStyle{Monospace: true}}
 			}, func(i widget.ListItemID, o fyne.CanvasObject) {
-				o.(*widget.Label).SetText(fmt.Sprintf("%-6s\t\t%s", data[i].EventID, data[i].RspServerAddres))
+				o.(*widget.Label).SetText(fmt.Sprintf("%-6s\t\t%s", data[i].EventID, data[i].RspServerAddress))
 			})
 			discoveredEsimList.OnSelected = func(id widget.ListItemID) {
 				selectedProfile = id
@@ -228,7 +256,7 @@ func discoveryButtonFunc() {
 				} else {
 					d.Hide()
 					go LpacProfileDownload(PullInfo{
-						SMDP:        data[selectedProfile].RspServerAddres,
+						SMDP:        data[selectedProfile].RspServerAddress,
 						MatchID:     "",
 						ConfirmCode: "",
 						IMEI:        "",
@@ -527,13 +555,17 @@ func viewCertInfoButtonFunc() {
 			return len(ciWidgetEls)
 		},
 		CreateItem: func() fyne.CanvasObject {
-			return container.NewVBox(container.NewBorder(nil, nil, &widget.Label{TextStyle: fyne.TextStyle{Monospace: true}}, &widget.Label{}),
+			return container.NewVBox(container.NewBorder(nil, nil,
+				&widget.Label{TextStyle: fyne.TextStyle{Monospace: true}}, &widget.Label{}),
 				&widget.Label{TextStyle: fyne.TextStyle{Monospace: true}})
 		},
 		UpdateItem: func(i widget.ListItemID, o fyne.CanvasObject) {
-			o.(*fyne.Container).Objects[0].(*fyne.Container).Objects[0].(*widget.Label).SetText(fmt.Sprintf("CN: %s", ciWidgetEls[i].CommonName))
-			o.(*fyne.Container).Objects[0].(*fyne.Container).Objects[1].(*widget.Label).SetText(CountryCodeToEmoji(ciWidgetEls[i].Country))
-			o.(*fyne.Container).Objects[1].(*widget.Label).SetText(fmt.Sprintf("KeyID: %s", ciWidgetEls[i].KeyID))
+			o.(*fyne.Container).Objects[0].(*fyne.Container).Objects[0].(*widget.Label).SetText(
+				fmt.Sprintf("CN: %s", ciWidgetEls[i].CommonName))
+			o.(*fyne.Container).Objects[0].(*fyne.Container).Objects[1].(*widget.Label).SetText(
+				CountryCodeToEmoji(ciWidgetEls[i].Country))
+			o.(*fyne.Container).Objects[1].(*widget.Label).SetText(
+				fmt.Sprintf("KeyID: %s", ciWidgetEls[i].KeyID))
 		},
 		OnSelected: func(id widget.ListItemID) {
 			selectedCI = id
@@ -567,7 +599,8 @@ func viewCertInfoButtonFunc() {
 		OnTapped: certDataButtonFunc,
 		Icon:     theme.InfoIcon(),
 	}
-	d := dialog.NewCustom("Certificate Issuer", "OK", container.NewBorder(nil, container.NewCenter(certDataButton), nil, nil, list), WMain)
+	d := dialog.NewCustom("Certificate Issuer", "OK",
+		container.NewBorder(nil, container.NewCenter(certDataButton), nil, nil, list), WMain)
 	d.Resize(fyne.Size{
 		Width:  600,
 		Height: 500,
@@ -610,7 +643,8 @@ func initProfileList() *widget.List {
 			} else {
 				c.Objects[0].(*widget.Label).SetText(fmt.Sprintf("%s\t\t", Profiles[i].Iccid))
 			}
-			c.Objects[1].(*fyne.Container).Objects[0].(*widget.Label).SetText(fmt.Sprintf("%s", Profiles[i].ProfileState))
+			c.Objects[1].(*fyne.Container).Objects[0].(*widget.Label).SetText(
+				fmt.Sprintf("%s", Profiles[i].ProfileState))
 			if Profiles[i].ProfileState == "enabled" {
 				c.Objects[1].(*fyne.Container).Objects[1].(*widget.Icon).Show()
 				c.Objects[1].(*fyne.Container).Objects[2].(*canvas.Rectangle).SetMinSize(fyne.Size{Width: 24, Height: 1})
@@ -724,12 +758,15 @@ func initNotificationList() *widget.List {
 				notificationAddress = Notifications[i].NotificationAddress
 			}
 			// Notification Address
-			o.(*fyne.Container).Objects[0].(*fyne.Container).Objects[0].(*widget.Label).SetText(fmt.Sprintf("%s", notificationAddress))
+			o.(*fyne.Container).Objects[0].(*fyne.Container).Objects[0].(*widget.Label).SetText(
+				fmt.Sprintf("%s", notificationAddress))
 			// Seq number
-			o.(*fyne.Container).Objects[0].(*fyne.Container).Objects[1].(*widget.Label).SetText(fmt.Sprintf("Seq: %d", Notifications[i].SeqNumber))
+			o.(*fyne.Container).Objects[0].(*fyne.Container).Objects[1].(*widget.Label).SetText(
+				fmt.Sprintf("Seq: %d", Notifications[i].SeqNumber))
 			// Operation
-			o.(*fyne.Container).Objects[1].(*fyne.Container).Objects[0].(*widget.Label).SetText(fmt.Sprintf("%s",
-				strings.ToUpper(Notifications[i].ProfileManagementOperation[0:1])+Notifications[i].ProfileManagementOperation[1:]))
+			o.(*fyne.Container).Objects[1].(*fyne.Container).Objects[0].(*widget.Label).SetText(
+				fmt.Sprintf("%s",
+					strings.ToUpper(Notifications[i].ProfileManagementOperation[0:1])+Notifications[i].ProfileManagementOperation[1:]))
 			// Provider
 			profile, err := findProfileByIccid(Notifications[i].Iccid)
 			if err != nil {
@@ -745,9 +782,11 @@ func initNotificationList() *widget.List {
 			}
 			// ICCID
 			if iccid == "" {
-				o.(*fyne.Container).Objects[1].(*fyne.Container).Objects[2].(*widget.Label).SetText(fmt.Sprintf("(No ICCID!)"))
+				o.(*fyne.Container).Objects[1].(*fyne.Container).Objects[2].(*widget.Label).SetText(
+					fmt.Sprintf("(No ICCID!)"))
 			} else {
-				o.(*fyne.Container).Objects[1].(*fyne.Container).Objects[2].(*widget.Label).SetText(fmt.Sprintf("(%s)", iccid))
+				o.(*fyne.Container).Objects[1].(*fyne.Container).Objects[2].(*widget.Label).SetText(
+					fmt.Sprintf("(%s)", iccid))
 			}
 		},
 		OnSelected: func(id widget.ListItemID) {
@@ -801,7 +840,8 @@ func processNotification(seq int) {
 					&widget.Label{Text: "Successfully processed notification.\nDo you want to remove this notification now?",
 						Alignment: fyne.TextAlignCenter},
 					&widget.Label{Text: fmt.Sprintf("Seq: %d\nICCID: %s\nOperation: %s\nAddress: %s\n",
-						notification.SeqNumber, notification.Iccid, notification.ProfileManagementOperation, notification.NotificationAddress),
+						notification.SeqNumber, notification.Iccid,
+						notification.ProfileManagementOperation, notification.NotificationAddress),
 						TextStyle: fyne.TextStyle{Monospace: true}})),
 			WMain)
 		d.Show()
