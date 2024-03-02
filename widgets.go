@@ -35,7 +35,6 @@ var ProfileList *widget.List
 var NotificationList *widget.List
 
 var ProfileListTitle *fyne.Container
-var NotificationListTitle *fyne.Container
 
 var FreeSpaceLabel *widget.Label
 var OpenLogButton *widget.Button
@@ -116,11 +115,6 @@ func InitWidgets() {
 		&widget.Label{Text: "Nickname", TextStyle: fyne.TextStyle{Bold: true}})
 
 	NotificationList = initNotificationList()
-
-	NotificationListTitle = container.NewHBox(&widget.Label{Text: "Seq\t\t", TextStyle: fyne.TextStyle{Bold: true}},
-		&widget.Label{Text: "ICCID\t\t\t\t\t", TextStyle: fyne.TextStyle{Bold: true}},
-		&widget.Label{Text: "Operation\t\t\t", TextStyle: fyne.TextStyle{Bold: true}},
-		&widget.Label{Text: "Server", TextStyle: fyne.TextStyle{Bold: true}})
 
 	ProcessNotificationButton = &widget.Button{Text: "Process", OnTapped: func() { go processNotificationButtonFunc() }, Icon: theme.MediaPlayIcon()}
 
@@ -321,18 +315,17 @@ func deleteProfileButtonFunc() {
 		d.Show()
 		return
 	}
-	profileText := fmt.Sprintf("%s\t\t%s",
+	profileText := fmt.Sprintf("ICCID: %s\nProvider: %s\n",
 		Profiles[SelectedProfile].Iccid,
 		Profiles[SelectedProfile].ServiceProviderName)
 	if Profiles[SelectedProfile].ProfileNickname != nil {
-		profileText += fmt.Sprintf("\t\t%s\n\n", Profiles[SelectedProfile].ProfileNickname)
-	} else {
-		profileText += "\n\n"
+		profileText += fmt.Sprintf("Nickname: %s\n", Profiles[SelectedProfile].ProfileNickname)
 	}
 	d := dialog.NewCustomConfirm("Confirm",
 		"Confirm",
 		"Cancel",
-		container.NewVBox(container.NewCenter(widget.NewLabel("Are you sure you want to delete this profile?")), &widget.Label{Text: profileText, TextStyle: fyne.TextStyle{Monospace: true}}),
+		container.NewVBox(container.NewCenter(widget.NewLabel("Are you sure you want to delete this profile?")),
+			&widget.Label{Text: profileText, TextStyle: fyne.TextStyle{Monospace: true}}),
 		func(b bool) {
 			if b {
 				go func() {
@@ -418,16 +411,11 @@ func removeNotificationButtonFunc() {
 		ShowSelectItemDialog()
 		return
 	}
-	notificationText := fmt.Sprintf("%d\t\t%s\t\t%s\t\t%s\n\n",
-		Notifications[SelectedNotification].SeqNumber,
-		Notifications[SelectedNotification].Iccid,
-		Notifications[SelectedNotification].ProfileManagementOperation,
-		Notifications[SelectedNotification].NotificationAddress)
 	d := dialog.NewCustomConfirm("Confirm",
 		"Confirm",
 		"Cancel",
-		container.NewVBox(container.NewCenter(widget.NewLabel("Are you sure you want to remove this notification?")),
-			&widget.Label{Text: notificationText, TextStyle: fyne.TextStyle{Monospace: true}}),
+		&widget.Label{Text: "Are you sure you want to remove this notification?\n",
+			Alignment: fyne.TextAlignCenter},
 		func(b bool) {
 			if b {
 				if err := LpacNotificationRemove(Notifications[SelectedNotification].SeqNumber); err != nil {
@@ -694,11 +682,15 @@ func initNotificationList() *widget.List {
 			return len(Notifications)
 		},
 		CreateItem: func() fyne.CanvasObject {
-			seqLabel := &widget.Label{TextStyle: fyne.TextStyle{Monospace: true, TabWidth: FontTabWidth}}
+			notificationAddressLabel := &widget.Label{TextStyle: fyne.TextStyle{Monospace: true, TabWidth: FontTabWidth}}
+			seqLabel := &widget.Label{}
+			operationLabel := &widget.Label{TextStyle: fyne.TextStyle{Bold: true}}
+			providerLaber := &widget.Label{TextStyle: fyne.TextStyle{Monospace: true}}
 			iccidLabel := &widget.Label{TextStyle: fyne.TextStyle{Monospace: true, TabWidth: FontTabWidth}}
-			operationLabel := &widget.Label{TextStyle: fyne.TextStyle{Monospace: true, TabWidth: FontTabWidth}}
-			notificationAddress := &widget.Label{TextStyle: fyne.TextStyle{Monospace: true, TabWidth: FontTabWidth}}
-			return container.NewHBox(seqLabel, iccidLabel, operationLabel, notificationAddress)
+			return container.NewVBox(
+				container.NewBorder(nil, nil, notificationAddressLabel, seqLabel),
+				container.NewHBox(operationLabel, providerLaber, iccidLabel),
+			)
 		},
 		UpdateItem: func(i widget.ListItemID, o fyne.CanvasObject) {
 			var iccid, notificationAddress string
@@ -731,14 +723,32 @@ func initNotificationList() *widget.List {
 				iccid = Notifications[i].Iccid
 				notificationAddress = Notifications[i].NotificationAddress
 			}
-			o.(*fyne.Container).Objects[0].(*widget.Label).SetText(fmt.Sprintf("%-6d\t", Notifications[i].SeqNumber))
-			if iccid == "" {
-				o.(*fyne.Container).Objects[1].(*widget.Label).SetText(fmt.Sprintf("No ICCID!\t\t\t\t"))
+			// Notification Address
+			o.(*fyne.Container).Objects[0].(*fyne.Container).Objects[0].(*widget.Label).SetText(fmt.Sprintf("%s", notificationAddress))
+			// Seq number
+			o.(*fyne.Container).Objects[0].(*fyne.Container).Objects[1].(*widget.Label).SetText(fmt.Sprintf("Seq: %d", Notifications[i].SeqNumber))
+			// Operation
+			o.(*fyne.Container).Objects[1].(*fyne.Container).Objects[0].(*widget.Label).SetText(fmt.Sprintf("%s",
+				strings.ToUpper(Notifications[i].ProfileManagementOperation[0:1])+Notifications[i].ProfileManagementOperation[1:]))
+			// Provider
+			profile, err := findProfileByIccid(Notifications[i].Iccid)
+			if err != nil {
+				o.(*fyne.Container).Objects[1].(*fyne.Container).Objects[1].(*widget.Label).SetText("?deleted profile")
 			} else {
-				o.(*fyne.Container).Objects[1].(*widget.Label).SetText(fmt.Sprintf("%s\t\t", iccid))
+				var name string
+				if profile.ProfileNickname != nil {
+					name = profile.ProfileNickname.(string)
+				} else {
+					name = profile.ServiceProviderName
+				}
+				o.(*fyne.Container).Objects[1].(*fyne.Container).Objects[1].(*widget.Label).SetText(name)
 			}
-			o.(*fyne.Container).Objects[2].(*widget.Label).SetText(fmt.Sprintf("%s\t\t\t", Notifications[i].ProfileManagementOperation))
-			o.(*fyne.Container).Objects[3].(*widget.Label).SetText(fmt.Sprintf("%s", notificationAddress))
+			// ICCID
+			if iccid == "" {
+				o.(*fyne.Container).Objects[1].(*fyne.Container).Objects[2].(*widget.Label).SetText(fmt.Sprintf("(No ICCID!)"))
+			} else {
+				o.(*fyne.Container).Objects[1].(*fyne.Container).Objects[2].(*widget.Label).SetText(fmt.Sprintf("(%s)", iccid))
+			}
 		},
 		OnSelected: func(id widget.ListItemID) {
 			SelectedNotification = id
@@ -759,11 +769,6 @@ func processNotification(seq int) {
 				notification = n
 			}
 		}
-		notificationText := fmt.Sprintf("%d\t\t%s\t\t%s\t\t%s\n",
-			notification.SeqNumber,
-			notification.Iccid,
-			notification.ProfileManagementOperation,
-			notification.NotificationAddress)
 		var d *dialog.CustomDialog
 		notNowButton := &widget.Button{
 			Text: "Not Now",
@@ -793,9 +798,11 @@ func processNotification(seq int) {
 				nil,
 				nil,
 				container.NewVBox(
-					&widget.Label{Text: "Successfully processed notification.", Alignment: fyne.TextAlignCenter},
-					&widget.Label{Text: "Do you want to remove this notification now?", Alignment: fyne.TextAlignCenter},
-					&widget.Label{Text: notificationText, TextStyle: fyne.TextStyle{Monospace: true, TabWidth: FontTabWidth}})),
+					&widget.Label{Text: "Successfully processed notification.\nDo you want to remove this notification now?",
+						Alignment: fyne.TextAlignCenter},
+					&widget.Label{Text: fmt.Sprintf("Seq: %d\nICCID: %s\nOperation: %s\nAddress: %s\n",
+						notification.SeqNumber, notification.Iccid, notification.ProfileManagementOperation, notification.NotificationAddress),
+						TextStyle: fyne.TextStyle{Monospace: true}})),
 			WMain)
 		d.Show()
 	}
@@ -812,4 +819,13 @@ func findNewNotification(first, second []Notification) Notification {
 		}
 	}
 	return Notification{}
+}
+
+func findProfileByIccid(iccid string) (Profile, error) {
+	for _, profile := range Profiles {
+		if iccid == profile.Iccid {
+			return profile, nil
+		}
+	}
+	return Profile{}, errors.New("profile not found")
 }

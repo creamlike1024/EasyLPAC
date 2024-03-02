@@ -80,12 +80,7 @@ func InitMainWindow() fyne.Window {
 			statusBar),
 		nil,
 		nil,
-		container.NewBorder(
-			NotificationListTitle,
-			nil,
-			nil,
-			nil,
-			NotificationList))
+		NotificationList)
 	NotificationTab = container.NewTabItem("Notification", notificationTabContent)
 
 	chipInfoTabContent := container.NewBorder(
@@ -342,7 +337,7 @@ func InitSetNicknameDialog() dialog.Dialog {
 	}, WMain)
 	d.Resize(fyne.Size{
 		Width:  400,
-		Height: 200,
+		Height: 180,
 	})
 	return d
 }
