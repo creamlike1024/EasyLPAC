@@ -1,57 +1,34 @@
+//go:generate curl -o ci-registry.json https://euicc-manual.septs.app/docs/pki/ci/manifest.json
 package main
 
 import (
-	"archive/zip"
-	"bytes"
-	"crypto/x509"
 	_ "embed"
-	"encoding/hex"
-	"encoding/pem"
-	"io"
+	"encoding/json"
+	"strings"
 )
 
-//go:embed ci-registry.zip
+//go:embed ci-registry.json
 var ciRegistryBundle []byte
 
+type CertificateIssuer struct {
+	KeyID   string `json:"key-id"`
+	Country string `json:"country"`
+	Name    string `json:"name"`
+}
+
+var issuerRegistry []*CertificateIssuer
+
 func init() {
-	reader, err := zip.NewReader(
-		bytes.NewReader(ciRegistryBundle),
-		int64(len(ciRegistryBundle)),
-	)
-	if err != nil {
+	if err := json.Unmarshal(ciRegistryBundle, &issuerRegistry); err != nil {
 		panic(err)
 	}
-	issuerRegistry = make(map[string]CertificateIssuer)
-	for _, file := range reader.File {
-		fp, err := file.Open()
-		if err != nil {
-			panic(err)
-		}
-		pemCertificate, err := io.ReadAll(fp)
-		if err != nil {
-			panic(err)
-		}
-		block, _ := pem.Decode(pemCertificate)
-		certificate, err := x509.ParseCertificate(block.Bytes)
-		if err != nil {
-			continue
-		}
-		issuer := certificate.Issuer
-		keyId := certificate.AuthorityKeyId
-		if certificate.IsCA {
-			issuer = certificate.Subject
-			keyId = certificate.SubjectKeyId
-		}
-		pemCertificateText := string(pemCertificate)
-		var country string
-		if len(issuer.Country) > 0 {
-			country = issuer.Country[0]
-		}
-		issuerRegistry[hex.EncodeToString(keyId)] = CertificateIssuer{
-			Country:    country,
-			CommonName: issuer.CommonName,
-			KeyID:      hex.EncodeToString(keyId),
-			Text:       pemCertificateText,
+}
+
+func GetIssuer(keyId string) *CertificateIssuer {
+	for _, issuer := range issuerRegistry {
+		if strings.HasPrefix(keyId, issuer.KeyID) {
+			return issuer
 		}
 	}
+	return nil
 }

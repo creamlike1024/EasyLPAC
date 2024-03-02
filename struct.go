@@ -87,24 +87,3 @@ var Profiles []Profile
 var Notifications []Notification
 var ChipInfo EuiccInfo
 var ApduDrivers []ApduDriver
-
-type CertificateIssuer struct {
-	Country    string
-	CommonName string
-	KeyID      string
-	Text       string
-}
-
-var issuerRegistry map[string]CertificateIssuer
-
-type EUMIdentifier struct {
-	Prefix       string `json:"prefix"`
-	Manufacturer string `json:"manufacturer"`
-	Link         string `json:"link"`
-	Country      string `json:"country"`
-}
-
-var EUMRegistry []EUMIdentifier
-
-//go:embed eum-registry.json
-var EUMRegistryByte []byte

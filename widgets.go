@@ -532,22 +532,22 @@ func setDefaultSmdpButtonFunc() {
 func viewCertInfoButtonFunc() {
 	selectedCI := Unselected
 	type ciWidgetEl struct {
-		Country    string
-		CommonName string
-		KeyID      string
+		Country string
+		Name    string
+		KeyID   string
 	}
 	var ciWidgetEls []ciWidgetEl
-	// chipinfo 中 signing 和 verification 同时存在则有效
+	// ChipInfo 中 signing 和 verification 同时存在则有效
 	for _, keyId := range ChipInfo.EUICCInfo2.EuiccCiPKIDListForSigning {
 		if !slices.Contains(ChipInfo.EUICCInfo2.EuiccCiPKIDListForVerification, keyId) {
 			continue
 		}
 		var element ciWidgetEl
-		element.CommonName = "Unknown"
 		element.KeyID = keyId
-		if issuer, found := issuerRegistry[keyId]; found {
+		element.Name = "Unknown"
+		if issuer := GetIssuer(keyId); issuer != nil {
 			element.Country = issuer.Country
-			element.CommonName = issuer.CommonName
+			element.Name = issuer.Name
 		}
 		ciWidgetEls = append(ciWidgetEls, element)
 	}
@@ -561,12 +561,9 @@ func viewCertInfoButtonFunc() {
 				&widget.Label{TextStyle: fyne.TextStyle{Monospace: true}})
 		},
 		UpdateItem: func(i widget.ListItemID, o fyne.CanvasObject) {
-			o.(*fyne.Container).Objects[0].(*fyne.Container).Objects[0].(*widget.Label).SetText(
-				fmt.Sprintf("CN: %s", ciWidgetEls[i].CommonName))
-			o.(*fyne.Container).Objects[0].(*fyne.Container).Objects[1].(*widget.Label).SetText(
-				CountryCodeToEmoji(ciWidgetEls[i].Country))
-			o.(*fyne.Container).Objects[1].(*widget.Label).SetText(
-				fmt.Sprintf("KeyID: %s", ciWidgetEls[i].KeyID))
+			o.(*fyne.Container).Objects[0].(*fyne.Container).Objects[0].(*widget.Label).SetText(ciWidgetEls[i].Name)
+			o.(*fyne.Container).Objects[0].(*fyne.Container).Objects[1].(*widget.Label).SetText(CountryCodeToEmoji(ciWidgetEls[i].Country))
+			o.(*fyne.Container).Objects[1].(*widget.Label).SetText(fmt.Sprintf("KeyID: %s", ciWidgetEls[i].KeyID))
 		},
 		OnSelected: func(id widget.ListItemID) {
 			selectedCI = id
@@ -578,7 +575,7 @@ func viewCertInfoButtonFunc() {
 	certDataButtonFunc := func() {
 		if selectedCI == Unselected {
 			ShowSelectItemDialog()
-		} else if issuer, found := issuerRegistry[ciWidgetEls[selectedCI].KeyID]; !found || issuer.Text == "" {
+		} else if issuer := GetIssuer(ciWidgetEls[selectedCI].KeyID); issuer == nil {
 			d := dialog.NewInformation("No Data",
 				"The information of this certificate is not included.\n"+
 					"If you have any information about this certificate,\n"+
@@ -587,12 +584,11 @@ func viewCertInfoButtonFunc() {
 				WMain)
 			d.Show()
 		} else {
-			entry := NewReadOnlyEntry()
-			entry.SetText(issuer.Text)
-			w := App.NewWindow(issuer.KeyID)
-			w.Resize(fyne.Size{Width: 550, Height: 600})
-			w.SetContent(entry)
-			w.Show()
+			const CiUrl = "https://euicc-manual.septs.app/docs/pki/ci/files/"
+			certificateURL := fmt.Sprint(CiUrl, issuer.KeyID, ".txt")
+			if err := OpenProgram(certificateURL); err != nil {
+				ShowLpacErrDialog(err)
+			}
 		}
 	}
 	certDataButton := &widget.Button{
