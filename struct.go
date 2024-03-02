@@ -73,10 +73,10 @@ type Notification struct {
 	Iccid                      string `json:"iccid"`
 }
 
-type DiscoveryResult struct {
-	EventID          string `json:"eventId"`
-	RspServerAddress string `json:"rspServerAddress"`
-}
+// type DiscoveryResult struct {
+// 	EventID          string `json:"eventId"`
+// 	RspServerAddress string `json:"rspServerAddress"`
+// }
 
 type ApduDriver struct {
 	Env  string `json:"env"`

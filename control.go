@@ -166,7 +166,7 @@ func UpdateStatusBarListener() {
 
 func LockButtonListener() {
 	buttons := []*widget.Button{
-		RefreshButton, DownloadButton, DiscoveryButton,
+		RefreshButton, DownloadButton, // DiscoveryButton,
 		SetNicknameButton, SwitchStateButton, DeleteProfileButton,
 		ProcessNotificationButton, RemoveNotificationButton, RemoveAllNotificationButton,
 		SetDefaultSmdpButton, ApduDriverRefreshButton,

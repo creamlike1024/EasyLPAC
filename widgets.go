@@ -24,7 +24,8 @@ var StatusProcessBar *widget.ProgressBarInfinite
 var StatusLabel *widget.Label
 var SetNicknameButton *widget.Button
 var DownloadButton *widget.Button
-var DiscoveryButton *widget.Button
+
+// var DiscoveryButton *widget.Button
 var DeleteProfileButton *widget.Button
 var SwitchStateButton *widget.Button
 var ProcessNotificationButton *widget.Button
@@ -101,9 +102,9 @@ func InitWidgets() {
 		OnTapped: func() { go downloadButtonFunc() },
 		Icon:     theme.DownloadIcon()}
 
-	DiscoveryButton = &widget.Button{Text: "Discovery",
-		OnTapped: func() { go discoveryButtonFunc() },
-		Icon:     theme.SearchIcon()}
+	// DiscoveryButton = &widget.Button{Text: "Discovery",
+	// 	OnTapped: func() { go discoveryButtonFunc() },
+	// 	Icon:     theme.SearchIcon()}
 
 	SetNicknameButton = &widget.Button{Text: "Nickname",
 		OnTapped: func() { go setNicknameButtonFunc() },
@@ -207,102 +208,102 @@ func downloadButtonFunc() {
 	d.Show()
 }
 
-func discoveryButtonFunc() {
-	if ConfigInstance.DriverIFID == "" {
-		ShowSelectCardReaderDialog()
-		return
-	}
-	if RefreshNeeded == true {
-		ShowRefreshNeededDialog()
-		return
-	}
-	discoveryFunc := func() {
-		ch := make(chan bool)
-		var data []DiscoveryResult
-		var err error
-		go func() {
-			data, err = LpacProfileDiscovery()
-			ch <- true
-		}()
-		<-ch
-		if err != nil {
-			ShowLpacErrDialog(err)
-			return
-		}
-		if len(data) != 0 {
-			var d *dialog.CustomDialog
-			selectedProfile := Unselected
-			foundLabel := widget.NewLabel("")
-			if len(data) == 1 {
-				foundLabel.SetText(fmt.Sprintf("%d profile found.", len(data)))
-			} else {
-				foundLabel.SetText(fmt.Sprintf("%d profiles found.", len(data)))
-			}
-			discoveredEsimListTitle := widget.NewLabel("EventID\t\tRSP Server Address")
-			discoveredEsimListTitle.TextStyle = fyne.TextStyle{Bold: true}
-			discoveredEsimList := widget.NewList(func() int {
-				return len(data)
-			}, func() fyne.CanvasObject {
-				return &widget.Label{TextStyle: fyne.TextStyle{Monospace: true}}
-			}, func(i widget.ListItemID, o fyne.CanvasObject) {
-				o.(*widget.Label).SetText(fmt.Sprintf("%-6s\t\t%s", data[i].EventID, data[i].RspServerAddress))
-			})
-			discoveredEsimList.OnSelected = func(id widget.ListItemID) {
-				selectedProfile = id
-			}
-			downloadButton := widget.NewButton("Download", func() {
-				if selectedProfile == Unselected {
-					ShowSelectItemDialog()
-				} else {
-					d.Hide()
-					go LpacProfileDownload(PullInfo{
-						SMDP:        data[selectedProfile].RspServerAddress,
-						MatchID:     "",
-						ConfirmCode: "",
-						IMEI:        "",
-					})
-				}
-			})
-			downloadButton.Importance = widget.HighImportance
-			downloadButton.SetIcon(theme.DownloadIcon())
-			dismissButton := widget.NewButton("Dismiss", func() {
-				d.Hide()
-			})
-			dismissButton.SetIcon(theme.CancelIcon())
-			content := container.NewBorder(
-				foundLabel,
-				nil,
-				nil,
-				nil,
-				container.NewBorder(
-					discoveredEsimListTitle,
-					nil,
-					nil,
-					nil,
-					discoveredEsimList))
-			d = dialog.NewCustomWithoutButtons("Result", content, WMain)
-			d.Resize(fyne.Size{
-				Width:  550,
-				Height: 400,
-			})
-			d.SetButtons([]fyne.CanvasObject{dismissButton, downloadButton})
-			d.Show()
-
-		} else {
-			d := dialog.NewInformation("Result", "No eSIM profile found.\n", WMain)
-			d.Show()
-		}
-	}
-	d := dialog.NewInformation("Info", "Discovery has not been actually tested yet.\n"+
-		"If you have any discoverable profiles and try to use the discovery function,\n"+
-		"regardless of whether it is successful,\n"+
-		"please open an issue to report logs and program behavior.\n"+
-		"Thank you very much\n", WMain)
-	d.SetOnClosed(func() {
-		go discoveryFunc()
-	})
-	d.Show()
-}
+// func discoveryButtonFunc() {
+// 	if ConfigInstance.DriverIFID == "" {
+// 		ShowSelectCardReaderDialog()
+// 		return
+// 	}
+// 	if RefreshNeeded == true {
+// 		ShowRefreshNeededDialog()
+// 		return
+// 	}
+// 	discoveryFunc := func() {
+// 		ch := make(chan bool)
+// 		var data []DiscoveryResult
+// 		var err error
+// 		go func() {
+// 			data, err = LpacProfileDiscovery()
+// 			ch <- true
+// 		}()
+// 		<-ch
+// 		if err != nil {
+// 			ShowLpacErrDialog(err)
+// 			return
+// 		}
+// 		if len(data) != 0 {
+// 			var d *dialog.CustomDialog
+// 			selectedProfile := Unselected
+// 			foundLabel := widget.NewLabel("")
+// 			if len(data) == 1 {
+// 				foundLabel.SetText(fmt.Sprintf("%d profile found.", len(data)))
+// 			} else {
+// 				foundLabel.SetText(fmt.Sprintf("%d profiles found.", len(data)))
+// 			}
+// 			discoveredEsimListTitle := widget.NewLabel("EventID\t\tRSP Server Address")
+// 			discoveredEsimListTitle.TextStyle = fyne.TextStyle{Bold: true}
+// 			discoveredEsimList := widget.NewList(func() int {
+// 				return len(data)
+// 			}, func() fyne.CanvasObject {
+// 				return &widget.Label{TextStyle: fyne.TextStyle{Monospace: true}}
+// 			}, func(i widget.ListItemID, o fyne.CanvasObject) {
+// 				o.(*widget.Label).SetText(fmt.Sprintf("%-6s\t\t%s", data[i].EventID, data[i].RspServerAddress))
+// 			})
+// 			discoveredEsimList.OnSelected = func(id widget.ListItemID) {
+// 				selectedProfile = id
+// 			}
+// 			downloadButton := widget.NewButton("Download", func() {
+// 				if selectedProfile == Unselected {
+// 					ShowSelectItemDialog()
+// 				} else {
+// 					d.Hide()
+// 					go LpacProfileDownload(PullInfo{
+// 						SMDP:        data[selectedProfile].RspServerAddress,
+// 						MatchID:     "",
+// 						ConfirmCode: "",
+// 						IMEI:        "",
+// 					})
+// 				}
+// 			})
+// 			downloadButton.Importance = widget.HighImportance
+// 			downloadButton.SetIcon(theme.DownloadIcon())
+// 			dismissButton := widget.NewButton("Dismiss", func() {
+// 				d.Hide()
+// 			})
+// 			dismissButton.SetIcon(theme.CancelIcon())
+// 			content := container.NewBorder(
+// 				foundLabel,
+// 				nil,
+// 				nil,
+// 				nil,
+// 				container.NewBorder(
+// 					discoveredEsimListTitle,
+// 					nil,
+// 					nil,
+// 					nil,
+// 					discoveredEsimList))
+// 			d = dialog.NewCustomWithoutButtons("Result", content, WMain)
+// 			d.Resize(fyne.Size{
+// 				Width:  550,
+// 				Height: 400,
+// 			})
+// 			d.SetButtons([]fyne.CanvasObject{dismissButton, downloadButton})
+// 			d.Show()
+//
+// 		} else {
+// 			d := dialog.NewInformation("Result", "No eSIM profile found.\n", WMain)
+// 			d.Show()
+// 		}
+// 	}
+// 	d := dialog.NewInformation("Info", "Discovery has not been actually tested yet.\n"+
+// 		"If you have any discoverable profiles and try to use the discovery function,\n"+
+// 		"regardless of whether it is successful,\n"+
+// 		"please open an issue to report logs and program behavior.\n"+
+// 		"Thank you very much\n", WMain)
+// 	d.SetOnClosed(func() {
+// 		go discoveryFunc()
+// 	})
+// 	d.Show()
+// }
 
 func setNicknameButtonFunc() {
 	if ConfigInstance.DriverIFID == "" {

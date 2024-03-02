@@ -59,7 +59,7 @@ func InitMainWindow() fyne.Window {
 			nil,
 			nil,
 			container.NewHBox(ProfileMaskCheck, DownloadButton,
-				spacer, DiscoveryButton,
+				// spacer, DiscoveryButton,
 				spacer, SetNicknameButton,
 				spacer, SwitchStateButton,
 				spacer, DeleteProfileButton),
