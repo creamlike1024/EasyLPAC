@@ -2,6 +2,7 @@ package main
 
 import (
 	"encoding/base64"
+	"errors"
 	"fmt"
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/canvas"
@@ -28,6 +29,7 @@ var DeleteProfileButton *widget.Button
 var SwitchStateButton *widget.Button
 var ProcessNotificationButton *widget.Button
 var RemoveNotificationButton *widget.Button
+var RemoveAllNotificationButton *widget.Button
 
 var ProfileList *widget.List
 var NotificationList *widget.List
@@ -122,7 +124,9 @@ func InitWidgets() {
 
 	ProcessNotificationButton = &widget.Button{Text: "Process", OnTapped: func() { go processNotificationButtonFunc() }, Icon: theme.MediaPlayIcon()}
 
-	RemoveNotificationButton = &widget.Button{Text: "Remove", OnTapped: func() { go removeNotificationButtonFunc() }, Icon: theme.DeleteIcon()}
+	RemoveNotificationButton = &widget.Button{Text: "Remove", OnTapped: func() { go removeNotificationButtonFunc() }, Icon: theme.ContentRemoveIcon()}
+
+	RemoveAllNotificationButton = &widget.Button{Text: "Remove All", OnTapped: func() { go removeAllNotificationButtonFunc() }, Icon: theme.DeleteIcon()}
 
 	FreeSpaceLabel = widget.NewLabel("")
 
@@ -435,6 +439,49 @@ func removeNotificationButtonFunc() {
 				return
 			}
 		}, WMain)
+	d.Show()
+}
+
+func removeAllNotificationButtonFunc() {
+	if ConfigInstance.DriverIFID == "" {
+		ShowSelectCardReaderDialog()
+		return
+	}
+	if RefreshNeeded {
+		ShowRefreshNeededDialog()
+		return
+	}
+	var d dialog.Dialog
+	entry := &widget.Entry{TextStyle: fyne.TextStyle{Monospace: true}, PlaceHolder: "Confirm"}
+	content := container.NewBorder(container.NewVBox(
+		&widget.Label{Alignment: fyne.TextAlignCenter, Text: "Are you sure you want to delete all notifications?\n" +
+			"This operation is not recoverable"},
+		container.NewCenter(widget.NewRichTextFromMarkdown("Enter **Confirm** to proceed")),
+	),
+		container.NewCenter(container.NewHBox(
+			&widget.Button{Text: "Cancel", Icon: theme.CancelIcon(), OnTapped: func() { d.Hide() }},
+			spacer,
+			&widget.Button{Text: "OK", Icon: theme.ConfirmIcon(), OnTapped: func() {
+				d.Hide()
+				if strings.TrimSpace(entry.Text) != "Confirm" {
+					dError := dialog.NewError(errors.New("input mismatch, cancel operation"), WMain)
+					dError.Show()
+				} else {
+					for _, notification := range Notifications {
+						err := LpacNotificationRemove(notification.SeqNumber)
+						if err != nil {
+							ShowLpacErrDialog(err)
+						}
+						RefreshNotification()
+					}
+					dInfo := dialog.NewInformation("Info", "Operation finished", WMain)
+					dInfo.Show()
+				}
+			}})),
+		nil,
+		nil,
+		entry)
+	d = dialog.NewCustomWithoutButtons("Remove All Notification?", content, WMain)
 	d.Show()
 }
 

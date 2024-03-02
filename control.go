@@ -168,7 +168,7 @@ func LockButtonListener() {
 	buttons := []*widget.Button{
 		RefreshButton, DownloadButton, DiscoveryButton,
 		SetNicknameButton, SwitchStateButton, DeleteProfileButton,
-		ProcessNotificationButton, RemoveNotificationButton,
+		ProcessNotificationButton, RemoveNotificationButton, RemoveAllNotificationButton,
 		SetDefaultSmdpButton, ApduDriverRefreshButton,
 	}
 	checks := []*widget.Check{
