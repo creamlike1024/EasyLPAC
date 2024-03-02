@@ -14,10 +14,10 @@ anchors = ['#ein-verified']
 
 # 遍历 anchors
 for anchor in anchors:
-    h3_tag = soup.find('h3', id=anchor.strip('#'))
-    if h3_tag:
-        # 获取 h3 标签后的所有 li 标签
-        for li in h3_tag.find_next_sibling('ul').find_all('li', recursive=False):
+    h2_tag = soup.find('h2', id=anchor.strip('#'))
+    if h2_tag:
+        # 获取 h2 标签后的所有 li 标签
+        for li in h2_tag.find_next_sibling('ul').find_all('li', recursive=False):
             results.append({
                 'prefix': li.code.text.strip(),
                 'manufacturer': li.find('a').text.split(' (')[0].strip(),

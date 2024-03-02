@@ -12,6 +12,12 @@
         "country": "FR"
     },
     {
+        "prefix": "89034011",
+        "manufacturer": "Valid",
+        "link": "https://valid.com",
+        "country": "ES"
+    },
+    {
         "prefix": "89043051",
         "manufacturer": "NXP",
         "link": "https://nxp.com",
@@ -28,6 +34,12 @@
         "manufacturer": "G+D",
         "link": "https://gi-de.com",
         "country": "DE"
+    },
+    {
+        "prefix": "89086001",
+        "manufacturer": "Hengbao",
+        "link": "https://www.hengbao.com",
+        "country": "CN"
     },
     {
         "prefix": "89086029",
