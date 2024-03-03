@@ -9,8 +9,8 @@ import (
 	"path/filepath"
 )
 
-const Version = "0.6.9"
-const EUICCDataVersion = "2024-03-01"
+const Version = "development"
+const EUICCDataVersion = "unknown"
 
 var App fyne.App
 
