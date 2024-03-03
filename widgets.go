@@ -25,7 +25,7 @@ var StatusLabel *widget.Label
 var SetNicknameButton *widget.Button
 var DownloadButton *widget.Button
 
-// var DiscoveryButton *widget.Button
+// DeleteProfileButton var DiscoveryButton *widget.Button
 var DeleteProfileButton *widget.Button
 var SwitchStateButton *widget.Button
 var ProcessNotificationButton *widget.Button
@@ -50,7 +50,7 @@ var EuiccInfo2Entry *ReadOnlyEntry
 var CopyEidButton *widget.Button
 var SetDefaultSmdpButton *widget.Button
 var ViewCertInfoButton *widget.Button
-var EUICCManufacturerLabel *widget.RichText
+var EUICCManufacturerLabel *widget.Label
 var CopyEuiccInfo2Button *widget.Button
 
 var ApduDriverSelect *widget.Select
@@ -184,7 +184,7 @@ func InitWidgets() {
 		OnTapped: func() { go viewCertInfoButtonFunc() },
 		Icon:     theme.InfoIcon()}
 	ViewCertInfoButton.Hide()
-	EUICCManufacturerLabel = widget.NewRichText()
+	EUICCManufacturerLabel = &widget.Label{}
 	EUICCManufacturerLabel.Hide()
 	CopyEuiccInfo2Button = &widget.Button{Text: "Copy eUICCInfo2",
 		OnTapped: func() { go copyEuiccInfo2ButtonFunc() },

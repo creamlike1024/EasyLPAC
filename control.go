@@ -3,6 +3,7 @@ package main
 import (
 	"encoding/json"
 	"fmt"
+	"fyne.io/fyne/v2/dialog"
 	"fyne.io/fyne/v2/widget"
 	"math"
 	"os/exec"
@@ -78,9 +79,9 @@ func RefreshChipInfo() {
 		)
 	}
 	if EUICCManufacturerLabelContent == "" {
-		EUICCManufacturerLabel.ParseMarkdown("Manufacturer: Unknown")
+		EUICCManufacturerLabel.SetText("Manufacturer: Unknown")
 	} else {
-		EUICCManufacturerLabel.ParseMarkdown(EUICCManufacturerLabelContent)
+		EUICCManufacturerLabel.SetText(EUICCManufacturerLabelContent)
 	}
 	// EUICCInfo2 entry
 	bytes, err := json.MarshalIndent(ChipInfo.EUICCInfo2, "", "  ")
@@ -118,7 +119,8 @@ func RefreshApduDriver() {
 
 func OpenLog() {
 	if err := OpenProgram(ConfigInstance.LogDir); err != nil {
-		ShowLpacErrDialog(err)
+		d := dialog.NewError(err, WMain)
+		d.Show()
 	}
 }
 
@@ -133,7 +135,7 @@ func OpenProgram(name string) error {
 		launcher = "xdg-open"
 	}
 	if launcher == "" {
-		return fmt.Errorf("unsupported platform, please open log file manually")
+		return fmt.Errorf("unsupported platform, failed to open")
 	}
 	return exec.Command(launcher, name).Start()
 }
