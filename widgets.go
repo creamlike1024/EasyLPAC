@@ -655,7 +655,7 @@ func initProfileList() *widget.List {
 				iconData, err := base64.StdEncoding.DecodeString(Profiles[i].Icon.(string))
 				if err == nil {
 					// 创建一个 fyne.Resource 对象
-					iconResource := fyne.NewStaticResource(Profiles[i].ProfileName, iconData)
+					iconResource := fyne.NewStaticResource(Profiles[i].Iccid, iconData)
 					c.Objects[1].(*fyne.Container).Objects[4].(*widget.Icon).SetResource(iconResource)
 					// 刷新状态
 					c.Objects[1].(*fyne.Container).Objects[4].(*widget.Icon).Show()
@@ -718,9 +718,11 @@ func initNotificationList() *widget.List {
 			operationLabel := &widget.Label{TextStyle: fyne.TextStyle{Bold: true}}
 			providerLaber := &widget.Label{TextStyle: fyne.TextStyle{Monospace: true}}
 			iccidLabel := &widget.Label{TextStyle: fyne.TextStyle{Monospace: true, TabWidth: FontTabWidth}}
+			providerIcon := widget.NewIcon(theme.FileImageIcon())
+			// providerIcon.Hide()
 			return container.NewVBox(
 				container.NewBorder(nil, nil, notificationAddressLabel, seqLabel),
-				container.NewHBox(operationLabel, providerLaber, iccidLabel),
+				container.NewHBox(operationLabel, providerIcon, providerLaber, iccidLabel),
 			)
 		},
 		UpdateItem: func(i widget.ListItemID, o fyne.CanvasObject) {
@@ -767,7 +769,8 @@ func initNotificationList() *widget.List {
 			// Provider
 			profile, err := findProfileByIccid(Notifications[i].Iccid)
 			if err != nil {
-				o.(*fyne.Container).Objects[1].(*fyne.Container).Objects[1].(*widget.Label).SetText("?deleted profile")
+				o.(*fyne.Container).Objects[1].(*fyne.Container).Objects[2].(*widget.Label).SetText("?deleted profile")
+				o.(*fyne.Container).Objects[1].(*fyne.Container).Objects[1].(*widget.Icon).Hide()
 			} else {
 				var name string
 				if profile.ProfileNickname != nil {
@@ -775,14 +778,25 @@ func initNotificationList() *widget.List {
 				} else {
 					name = profile.ServiceProviderName
 				}
-				o.(*fyne.Container).Objects[1].(*fyne.Container).Objects[1].(*widget.Label).SetText(name)
+				o.(*fyne.Container).Objects[1].(*fyne.Container).Objects[2].(*widget.Label).SetText(name)
+				if profile.Icon != nil {
+					iconData, err := base64.StdEncoding.DecodeString(profile.Icon.(string))
+					if err == nil {
+						iconResource := fyne.NewStaticResource(profile.Iccid, iconData)
+						o.(*fyne.Container).Objects[1].(*fyne.Container).Objects[1].(*widget.Icon).SetResource(iconResource)
+						o.(*fyne.Container).Objects[1].(*fyne.Container).Objects[1].(*widget.Icon).Show()
+					}
+				} else {
+					o.(*fyne.Container).Objects[1].(*fyne.Container).Objects[1].(*widget.Icon).Hide()
+				}
+
 			}
 			// ICCID
 			if iccid == "" {
-				o.(*fyne.Container).Objects[1].(*fyne.Container).Objects[2].(*widget.Label).SetText(
+				o.(*fyne.Container).Objects[1].(*fyne.Container).Objects[3].(*widget.Label).SetText(
 					fmt.Sprintf("(No ICCID!)"))
 			} else {
-				o.(*fyne.Container).Objects[1].(*fyne.Container).Objects[2].(*widget.Label).SetText(
+				o.(*fyne.Container).Objects[1].(*fyne.Container).Objects[3].(*widget.Label).SetText(
 					fmt.Sprintf("(%s)", iccid))
 			}
 		},
