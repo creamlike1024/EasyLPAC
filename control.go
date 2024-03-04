@@ -8,6 +8,7 @@ import (
 	"math"
 	"os/exec"
 	"runtime"
+	"strings"
 )
 
 const StatusProcess = 1
@@ -109,6 +110,10 @@ func RefreshApduDriver() {
 	}
 	var options []string
 	for _, d := range ApduDrivers {
+		// exclude YubiKey and CanoKey
+		if strings.Contains(d.Name, "canokeys.org") || strings.Contains(d.Name, "YubiKey") {
+			continue
+		}
 		options = append(options, d.Name)
 	}
 	ApduDriverSelect.SetOptions(options)
