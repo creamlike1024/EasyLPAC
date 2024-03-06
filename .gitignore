@@ -2,5 +2,8 @@
 lpac/
 log/
 
+/ci-registry.json
+/eum-registry.json
+
 EasyLPAC
 EasyLPAC.exe
