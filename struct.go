@@ -3,6 +3,7 @@ package main
 import (
 	_ "embed"
 	"encoding/json"
+	"strings"
 )
 
 type PullInfo struct {
@@ -55,15 +56,19 @@ type EuiccInfo struct {
 }
 
 type Profile struct {
-	Iccid               string `json:"iccid"`
-	IsdpAid             string `json:"isdpAid"`
-	ProfileState        string `json:"profileState"`
-	ProfileNickname     any    `json:"profileNickname"`
-	ServiceProviderName string `json:"serviceProviderName"`
-	ProfileName         string `json:"profileName"`
-	IconType            string `json:"iconType"`
-	Icon                any    `json:"icon"`
-	ProfileClass        string `json:"profileClass"`
+	Iccid               string  `json:"iccid"`
+	IsdpAid             string  `json:"isdpAid"`
+	ProfileState        string  `json:"profileState"`
+	ProfileNickname     *string `json:"profileNickname"`
+	ServiceProviderName string  `json:"serviceProviderName"`
+	ProfileName         string  `json:"profileName"`
+	IconType            string  `json:"iconType"`
+	Icon                []byte  `json:"icon"`
+	ProfileClass        string  `json:"profileClass"`
+}
+
+func (p *Profile) MaskedICCID() string {
+	return p.Iccid[0:7] + strings.Repeat("*", len(p.Iccid)-7)
 }
 
 type Notification struct {

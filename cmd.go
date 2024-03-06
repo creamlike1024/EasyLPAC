@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"bytes"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"fyne.io/fyne/v2/dialog"
 	"github.com/mattn/go-runewidth"
@@ -51,10 +52,8 @@ func runLpac(args []string) (json.RawMessage, error) {
 	cmd.Stderr = errWriter
 
 	err := cmd.Run()
-	if err != nil {
-		if len(bytes.TrimSpace(stderr.Bytes())) != 0 {
-			return nil, fmt.Errorf("%s", stderr.String())
-		}
+	if err != nil && len(bytes.TrimSpace(stderr.Bytes())) != 0 {
+		return nil, errors.New(stderr.String())
 	}
 
 	var resp LpacReturnValue
