@@ -1,7 +1,6 @@
 package main
 
 import (
-	"encoding/base64"
 	"errors"
 	"fmt"
 	"fyne.io/fyne/v2"
@@ -651,26 +650,19 @@ func initProfileList() *widget.List {
 				c.Objects[1].(*fyne.Container).Objects[2].(*canvas.Rectangle).SetMinSize(fyne.Size{Width: 0, Height: 1})
 				c.Objects[1].(*fyne.Container).Objects[3].(*widget.Label).SetText("\t\t")
 			}
+			icon := c.Objects[1].(*fyne.Container).Objects[4].(*widget.Icon)
 			if Profiles[i].Icon != nil {
-				iconData, err := base64.StdEncoding.DecodeString(Profiles[i].Icon.(string))
-				if err == nil {
-					// 创建一个 fyne.Resource 对象
-					iconResource := fyne.NewStaticResource(Profiles[i].Iccid, iconData)
-					c.Objects[1].(*fyne.Container).Objects[4].(*widget.Icon).SetResource(iconResource)
-					// 刷新状态
-					c.Objects[1].(*fyne.Container).Objects[4].(*widget.Icon).Show()
-					// 重设控件间距
-					if Profiles[i].ProfileState == "enabled" {
-						c.Objects[1].(*fyne.Container).Objects[2].(*canvas.Rectangle).SetMinSize(fyne.Size{Width: 0, Height: 1})
-					} else {
-						c.Objects[1].(*fyne.Container).Objects[2].(*canvas.Rectangle).SetMinSize(fyne.Size{Width: 16, Height: 1})
-						c.Objects[1].(*fyne.Container).Objects[3].(*widget.Label).SetText("\t")
-					}
+				icon.SetResource(fyne.NewStaticResource(Profiles[i].Iccid, Profiles[i].Icon))
+				icon.Show()
+				if Profiles[i].ProfileState == "enabled" {
+					c.Objects[1].(*fyne.Container).Objects[2].(*canvas.Rectangle).SetMinSize(fyne.Size{Width: 0, Height: 1})
+				} else {
+					c.Objects[1].(*fyne.Container).Objects[2].(*canvas.Rectangle).SetMinSize(fyne.Size{Width: 16, Height: 1})
+					c.Objects[1].(*fyne.Container).Objects[3].(*widget.Label).SetText("\t")
 				}
 			} else {
-				// 恢复默认图标
-				c.Objects[1].(*fyne.Container).Objects[4].(*widget.Icon).SetResource(theme.FileImageIcon())
-				c.Objects[1].(*fyne.Container).Objects[4].(*widget.Icon).Hide()
+				icon.SetResource(theme.FileImageIcon())
+				icon.Hide()
 			}
 			providerName := Profiles[i].ServiceProviderName
 			if Profiles[i].ProfileNickname != nil {
@@ -779,15 +771,12 @@ func initNotificationList() *widget.List {
 					name = profile.ServiceProviderName
 				}
 				o.(*fyne.Container).Objects[1].(*fyne.Container).Objects[2].(*widget.Label).SetText(name)
+				icon := o.(*fyne.Container).Objects[1].(*fyne.Container).Objects[1].(*widget.Icon)
 				if profile.Icon != nil {
-					iconData, err := base64.StdEncoding.DecodeString(profile.Icon.(string))
-					if err == nil {
-						iconResource := fyne.NewStaticResource(profile.Iccid, iconData)
-						o.(*fyne.Container).Objects[1].(*fyne.Container).Objects[1].(*widget.Icon).SetResource(iconResource)
-						o.(*fyne.Container).Objects[1].(*fyne.Container).Objects[1].(*widget.Icon).Show()
-					}
+					icon.SetResource(fyne.NewStaticResource(profile.Iccid, profile.Icon))
+					icon.Show()
 				} else {
-					o.(*fyne.Container).Objects[1].(*fyne.Container).Objects[1].(*widget.Icon).Hide()
+					icon.Hide()
 				}
 
 			}
