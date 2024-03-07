@@ -109,6 +109,16 @@ func InitMainWindow() fyne.Window {
 		))
 	ChipInfoTab = container.NewTabItem("Chip Info", chipInfoTabContent)
 
+	settingsTabContent := container.NewVBox(
+		&widget.Label{Text: "lpac debug output", TextStyle: fyne.TextStyle{Bold: true}},
+		widget.NewCheck("Enable env LIBEUICC_DEBUG_HTTP", func(b bool) {
+			ConfigInstance.DebugHTTP = b
+		}),
+		widget.NewCheck("Enable env LIBEUICC_DEBUG_APDU", func(b bool) {
+			ConfigInstance.DebugAPDU = b
+		}))
+	SettingsTab = container.NewTabItem("Settings", settingsTabContent)
+
 	thankstoText := widget.NewRichTextFromMarkdown(`
 # Thanks to
 
@@ -135,7 +145,7 @@ lpac GUI Frontend
 		container.NewCenter(container.NewVBox(thankstoText, aboutText)))
 	AboutTab = container.NewTabItem("About", aboutTabContent)
 
-	Tabs = container.NewAppTabs(ProfileTab, NotificationTab, ChipInfoTab, AboutTab)
+	Tabs = container.NewAppTabs(ProfileTab, NotificationTab, ChipInfoTab, SettingsTab, AboutTab)
 
 	w.SetContent(Tabs)
 

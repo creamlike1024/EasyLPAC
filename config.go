@@ -14,6 +14,8 @@ type Config struct {
 	APDUInterface string
 	HTTPInterface string
 	DriverIFID    string
+	DebugHTTP     bool
+	DebugAPDU     bool
 	LogDir        string
 	LogFilename   string
 	LogFile       *os.File

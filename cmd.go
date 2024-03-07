@@ -43,7 +43,12 @@ func runLpac(args []string) (json.RawMessage, error) {
 		fmt.Sprintf("HTTP_INTERFACE=%s", ConfigInstance.HTTPInterface),
 		fmt.Sprintf("DRIVER_IFID=%s", ConfigInstance.DriverIFID),
 	}
-
+	if ConfigInstance.DebugHTTP {
+		cmd.Env = append(cmd.Env, "LIBEUICC_DEBUG_HTTP=1")
+	}
+	if ConfigInstance.DebugAPDU {
+		cmd.Env = append(cmd.Env, "LIBEUICC_DEBUG_APDU=1")
+	}
 	var stdout bytes.Buffer
 	var stderr bytes.Buffer
 	writer := io.MultiWriter(&stdout, ConfigInstance.LogFile)

@@ -54,6 +54,7 @@ var Tabs *container.AppTabs
 var ProfileTab *container.TabItem
 var NotificationTab *container.TabItem
 var ChipInfoTab *container.TabItem
+var SettingsTab *container.TabItem
 var AboutTab *container.TabItem
 
 type ReadOnlyEntry struct{ widget.Entry }
