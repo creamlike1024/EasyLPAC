@@ -29,7 +29,7 @@ func InitMainWindow() fyne.Window {
 
 	statusBar := container.NewGridWrap(fyne.Size{
 		Width:  100,
-		Height: 36,
+		Height: DownloadButton.MinSize().Height,
 	}, StatusLabel, StatusProcessBar)
 
 	spacer = canvas.NewRectangle(color.Transparent)
@@ -46,8 +46,8 @@ func InitMainWindow() fyne.Window {
 			widget.NewLabel("Card Reader:"),
 			nil,
 			container.NewHBox(container.NewGridWrap(fyne.Size{
-				Width:  260,
-				Height: 36,
+				Width:  280,
+				Height: ApduDriverSelect.MinSize().Height,
 			}, ApduDriverSelect), ApduDriverRefreshButton)),
 	)
 
@@ -96,12 +96,12 @@ func InitMainWindow() fyne.Window {
 		nil,
 		container.NewBorder(
 			container.NewVBox(
-				container.NewBorder(nil, nil,
-					container.NewHBox(EidLabel, CopyEidButton), EUICCManufacturerLabel),
-				container.NewBorder(nil, nil,
-					container.NewHBox(DefaultDpAddressLabel, SetDefaultSmdpButton), ViewCertInfoButton),
-				container.NewBorder(nil, nil,
-					RootDsAddressLabel, CopyEuiccInfo2Button)),
+				container.NewHBox(
+					EidLabel, CopyEidButton, layout.NewSpacer(), EUICCManufacturerLabel),
+				container.NewHBox(
+					DefaultDpAddressLabel, SetDefaultSmdpButton, layout.NewSpacer(), ViewCertInfoButton),
+				container.NewHBox(
+					RootDsAddressLabel, layout.NewSpacer(), CopyEuiccInfo2Button)),
 			nil,
 			nil,
 			nil,

@@ -607,20 +607,20 @@ func initProfileList() *widget.List {
 			providerLabel := &widget.Label{}
 			nicknameLabel := &widget.Label{}
 			return container.NewVBox(
-				container.NewBorder(nil, nil, iccidLabel, profileNameLabel),
-				container.NewBorder(nil, nil, container.NewHBox(
-					container.NewVBox(layout.NewSpacer(), stateLabel), enabledIcon, providerLabel, profileIcon), nicknameLabel))
+				container.NewHBox(iccidLabel, layout.NewSpacer(), profileNameLabel),
+				container.NewHBox(container.NewVBox(layout.NewSpacer(), stateLabel),
+					enabledIcon, providerLabel, profileIcon, layout.NewSpacer(), nicknameLabel))
 		},
 		UpdateItem: func(i widget.ListItemID, o fyne.CanvasObject) {
 			r1 := o.(*fyne.Container).Objects[0].(*fyne.Container)
 			r2 := o.(*fyne.Container).Objects[1].(*fyne.Container)
 			iccidLabel := r1.Objects[0].(*widget.Label)
-			profileNameLabel := r1.Objects[1].(*widget.Label)
-			stateLabel := r2.Objects[0].(*fyne.Container).Objects[0].(*fyne.Container).Objects[1].(*widget.Label)
-			enabledIcon := r2.Objects[0].(*fyne.Container).Objects[1].(*widget.Icon)
-			providerLabel := r2.Objects[0].(*fyne.Container).Objects[2].(*widget.Label)
-			profileIcon := r2.Objects[0].(*fyne.Container).Objects[3].(*widget.Icon)
-			nicknameLabel := r2.Objects[1].(*widget.Label)
+			profileNameLabel := r1.Objects[2].(*widget.Label)
+			stateLabel := r2.Objects[0].(*fyne.Container).Objects[1].(*widget.Label)
+			enabledIcon := r2.Objects[1].(*widget.Icon)
+			providerLabel := r2.Objects[2].(*widget.Label)
+			profileIcon := r2.Objects[3].(*widget.Icon)
+			nicknameLabel := r2.Objects[5].(*widget.Label)
 
 			iccid := Profiles[i].Iccid
 			if ProfileMaskNeeded {
@@ -667,6 +667,21 @@ func initProfileList() *widget.List {
 }
 
 func initNotificationList() *widget.List {
+	maskFQDNExceptPublicSuffix := func(fqdn string) string {
+		suffix, _ := publicsuffix.PublicSuffix(fqdn)
+		parts := strings.Split(fqdn, ".")
+		suffixParts := strings.Split(suffix, ".")
+		// 如果域名部分少于后缀部分，说明域名不合法或者是一个裸域名，直接返回掩码后的顶级域名
+		if len(parts) <= len(suffixParts) {
+			return strings.Repeat("x", len(parts[0])) + "." + suffix
+		}
+		// 掩盖除了后缀之外的所有部分
+		for x := 0; x < len(parts)-len(suffixParts); x++ {
+			parts[x] = strings.Repeat("x", len(parts[x]))
+		}
+		return strings.Join(parts, ".")
+	}
+
 	return &widget.List{
 		Length: func() int {
 			return len(Notifications)
@@ -675,31 +690,24 @@ func initNotificationList() *widget.List {
 			notificationAddressLabel := &widget.Label{}
 			seqLabel := &widget.Label{}
 			operationLabel := &widget.Label{TextStyle: fyne.TextStyle{Bold: true}}
-			providerLaber := &widget.Label{}
+			providerLabel := &widget.Label{}
 			iccidLabel := &widget.Label{}
 			providerIcon := widget.NewIcon(theme.FileImageIcon())
 			return container.NewVBox(
-				container.NewBorder(nil, nil, notificationAddressLabel, seqLabel),
-				container.NewHBox(container.NewVBox(layout.NewSpacer(), operationLabel), providerIcon, providerLaber, iccidLabel),
+				container.NewHBox(notificationAddressLabel, layout.NewSpacer(), seqLabel),
+				container.NewHBox(container.NewVBox(layout.NewSpacer(), operationLabel), providerLabel, providerIcon, iccidLabel),
 			)
 		},
 		UpdateItem: func(i widget.ListItemID, o fyne.CanvasObject) {
+			notificationAddressLabel := o.(*fyne.Container).Objects[0].(*fyne.Container).Objects[0].(*widget.Label)
+			seqLabel := o.(*fyne.Container).Objects[0].(*fyne.Container).Objects[2].(*widget.Label)
+			iccidLabel := o.(*fyne.Container).Objects[1].(*fyne.Container).Objects[3].(*widget.Label)
+			operationLabel := o.(*fyne.Container).Objects[1].(*fyne.Container).Objects[0].(*fyne.Container).Objects[1].(*widget.Label)
+			providerLabel := o.(*fyne.Container).Objects[1].(*fyne.Container).Objects[1].(*widget.Label)
+			providerIcon := o.(*fyne.Container).Objects[1].(*fyne.Container).Objects[2].(*widget.Icon)
+
 			iccid := Notifications[i].Iccid
 			notificationAddress := Notifications[i].NotificationAddress
-			maskFQDNExceptPublicSuffix := func(fqdn string) string {
-				suffix, _ := publicsuffix.PublicSuffix(fqdn)
-				parts := strings.Split(fqdn, ".")
-				suffixParts := strings.Split(suffix, ".")
-				// 如果域名部分少于后缀部分，说明域名不合法或者是一个裸域名，直接返回掩码后的顶级域名
-				if len(parts) <= len(suffixParts) {
-					return strings.Repeat("x", len(parts[0])) + "." + suffix
-				}
-				// 掩盖除了后缀之外的所有部分
-				for x := 0; x < len(parts)-len(suffixParts); x++ {
-					parts[x] = strings.Repeat("x", len(parts[x]))
-				}
-				return strings.Join(parts, ".")
-			}
 			if NotificationMaskNeeded {
 				if iccid != "" {
 					iccid = Notifications[i].MaskedICCID()
@@ -710,34 +718,30 @@ func initNotificationList() *widget.List {
 			if iccid == "" {
 				iccid = "No ICCID!"
 			}
-			o.(*fyne.Container).Objects[1].(*fyne.Container).Objects[3].(*widget.Label).
-				SetText(fmt.Sprint("(", iccid, ")"))
+			iccidLabel.SetText(fmt.Sprint("(", iccid, ")"))
 			// Notification Address
-			o.(*fyne.Container).Objects[0].(*fyne.Container).Objects[0].(*widget.Label).
-				SetText(notificationAddress)
+			notificationAddressLabel.SetText(notificationAddress)
 			// Seq number
-			o.(*fyne.Container).Objects[0].(*fyne.Container).Objects[1].(*widget.Label).
-				SetText(fmt.Sprint("Seq: ", Notifications[i].SeqNumber))
+			seqLabel.SetText(fmt.Sprint("Seq: ", Notifications[i].SeqNumber))
 			// Operation
-			o.(*fyne.Container).Objects[1].(*fyne.Container).Objects[0].(*fyne.Container).Objects[1].(*widget.Label).
+			operationLabel.
 				SetText(strings.ToTitle(Notifications[i].ProfileManagementOperation))
 			// Provider
 			profile, err := findProfileByIccid(Notifications[i].Iccid)
 			if err != nil {
-				o.(*fyne.Container).Objects[1].(*fyne.Container).Objects[2].(*widget.Label).SetText("?deleted profile")
-				o.(*fyne.Container).Objects[1].(*fyne.Container).Objects[1].(*widget.Icon).Hide()
+				providerLabel.SetText("?deleted profile")
+				providerIcon.Hide()
 			} else {
 				name := profile.ServiceProviderName
 				if profile.ProfileNickname != nil {
 					name = *profile.ProfileNickname
 				}
-				o.(*fyne.Container).Objects[1].(*fyne.Container).Objects[2].(*widget.Label).SetText(name)
-				icon := o.(*fyne.Container).Objects[1].(*fyne.Container).Objects[1].(*widget.Icon)
+				providerLabel.SetText(name)
 				if profile.Icon != nil {
-					icon.SetResource(fyne.NewStaticResource(profile.Iccid, profile.Icon))
-					icon.Show()
+					providerIcon.SetResource(fyne.NewStaticResource(profile.Iccid, profile.Icon))
+					providerIcon.Show()
 				} else {
-					icon.Hide()
+					providerIcon.Hide()
 				}
 			}
 		},
