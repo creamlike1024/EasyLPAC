@@ -78,6 +78,10 @@ type Notification struct {
 	Iccid                      string `json:"iccid"`
 }
 
+func (p *Notification) MaskedICCID() string {
+	return p.Iccid[0:7] + strings.Repeat("*", len(p.Iccid)-7)
+}
+
 // type DiscoveryResult struct {
 // 	EventID          string `json:"eventId"`
 // 	RspServerAddress string `json:"rspServerAddress"`

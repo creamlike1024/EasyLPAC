@@ -694,13 +694,13 @@ func initNotificationList() *widget.List {
 				}
 				// 掩盖除了后缀之外的所有部分
 				for x := 0; x < len(parts)-len(suffixParts); x++ {
-					parts[i] = strings.Repeat("x", len(parts[x]))
+					parts[x] = strings.Repeat("x", len(parts[x]))
 				}
 				return strings.Join(parts, ".")
 			}
 			if NotificationMaskNeeded {
 				if iccid != "" {
-					iccid = Profiles[i].MaskedICCID()
+					iccid = Notifications[i].MaskedICCID()
 				}
 				notificationAddress = maskFQDNExceptPublicSuffix(Notifications[i].NotificationAddress)
 			}
