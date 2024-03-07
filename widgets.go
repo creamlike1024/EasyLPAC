@@ -4,27 +4,23 @@ import (
 	"errors"
 	"fmt"
 	"fyne.io/fyne/v2"
-	"fyne.io/fyne/v2/canvas"
 	"fyne.io/fyne/v2/container"
 	"fyne.io/fyne/v2/dialog"
 	"fyne.io/fyne/v2/theme"
 	"fyne.io/fyne/v2/widget"
-	"github.com/mattn/go-runewidth"
 	"golang.org/x/net/publicsuffix"
-	"image/color"
 	"slices"
 	"strings"
 	"time"
 )
-
-const FontTabWidth = 4
 
 var StatusProcessBar *widget.ProgressBarInfinite
 var StatusLabel *widget.Label
 var SetNicknameButton *widget.Button
 var DownloadButton *widget.Button
 
-// DeleteProfileButton var DiscoveryButton *widget.Button
+// var DiscoveryButton *widget.Button
+
 var DeleteProfileButton *widget.Button
 var SwitchStateButton *widget.Button
 var ProcessNotificationButton *widget.Button
@@ -33,8 +29,6 @@ var RemoveAllNotificationButton *widget.Button
 
 var ProfileList *widget.List
 var NotificationList *widget.List
-
-var ProfileListTitle *fyne.Container
 
 var FreeSpaceLabel *widget.Label
 var OpenLogButton *widget.Button
@@ -117,13 +111,6 @@ func InitWidgets() {
 		Icon: theme.ConfirmIcon()}
 
 	ProfileList = initProfileList()
-
-	ProfileListTitle = container.NewHBox(&widget.Label{Text: "ICCID\t\t\t\t\t",
-		TextStyle: fyne.TextStyle{Bold: true}},
-		&widget.Label{Text: "Profile State\t\t", TextStyle: fyne.TextStyle{Bold: true}},
-		&widget.Label{Text: "Provider\t\t\t\t\t", TextStyle: fyne.TextStyle{Bold: true}},
-		&widget.Label{Text: "Nickname", TextStyle: fyne.TextStyle{Bold: true}})
-
 	NotificationList = initNotificationList()
 
 	ProcessNotificationButton = &widget.Button{Text: "Process",
@@ -354,7 +341,7 @@ func deleteProfileButtonFunc() {
 		"Confirm",
 		"Cancel",
 		container.NewVBox(container.NewCenter(widget.NewLabel("Are you sure you want to delete this profile?")),
-			&widget.Label{Text: profileText, TextStyle: fyne.TextStyle{Monospace: true}}),
+			&widget.Label{Text: profileText}),
 		func(b bool) {
 			if b {
 				go func() {
@@ -469,7 +456,7 @@ func removeAllNotificationButtonFunc() {
 		return
 	}
 	var d dialog.Dialog
-	entry := &widget.Entry{TextStyle: fyne.TextStyle{Monospace: true}, PlaceHolder: "Confirm"}
+	entry := &widget.Entry{PlaceHolder: "Confirm"}
 	content := container.NewBorder(container.NewVBox(
 		&widget.Label{Alignment: fyne.TextAlignCenter, Text: "Are you sure you want to delete all notifications?\n" +
 			"This operation is not recoverable"},
@@ -557,8 +544,8 @@ func viewCertInfoButtonFunc() {
 		},
 		CreateItem: func() fyne.CanvasObject {
 			return container.NewVBox(container.NewBorder(nil, nil,
-				&widget.Label{TextStyle: fyne.TextStyle{Monospace: true}}, &widget.Label{}),
-				&widget.Label{TextStyle: fyne.TextStyle{Monospace: true}})
+				&widget.Label{}, &widget.Label{}),
+				&widget.Label{})
 		},
 		UpdateItem: func(i widget.ListItemID, o fyne.CanvasObject) {
 			o.(*fyne.Container).Objects[0].(*fyne.Container).Objects[0].(*widget.Label).SetText(ciWidgetEls[i].Name)
@@ -611,65 +598,53 @@ func initProfileList() *widget.List {
 			return len(Profiles)
 		},
 		CreateItem: func() fyne.CanvasObject {
-			spacer := canvas.NewRectangle(color.Transparent)
-			spacer.SetMinSize(fyne.NewSize(1, 1))
-			iccidLabel := &widget.Label{TextStyle: fyne.TextStyle{Monospace: true, TabWidth: FontTabWidth}}
-			stateLabel := &widget.Label{TextStyle: fyne.TextStyle{Monospace: true, TabWidth: FontTabWidth}}
+			iccidLabel := &widget.Label{}
+			profileNameLabel := &widget.Label{}
+			stateLabel := &widget.Label{TextStyle: fyne.TextStyle{Bold: true}}
 			enabledIcon := widget.NewIcon(theme.ConfirmIcon())
-			enabledIcon.Hide()
-			stateFillLabel := widget.NewLabel("")
 			profileIcon := widget.NewIcon(theme.FileImageIcon())
-			stateContainer := container.NewHBox(stateLabel, enabledIcon, spacer, stateFillLabel, profileIcon)
-			providerLabel := &widget.Label{TextStyle: fyne.TextStyle{Monospace: true, TabWidth: FontTabWidth}}
-			nicknameLabel := &widget.Label{TextStyle: fyne.TextStyle{Monospace: true, TabWidth: FontTabWidth}}
-			return container.NewHBox(iccidLabel, stateContainer, providerLabel, nicknameLabel)
+			providerLabel := &widget.Label{}
+			nicknameLabel := &widget.Label{}
+			return container.NewVBox(
+				container.NewBorder(nil, nil, iccidLabel, profileNameLabel),
+				container.NewBorder(nil, nil, container.NewHBox(stateLabel, enabledIcon, providerLabel, profileIcon), nicknameLabel))
 		},
 		UpdateItem: func(i widget.ListItemID, o fyne.CanvasObject) {
-			c := o.(*fyne.Container)
+			r1 := o.(*fyne.Container).Objects[0].(*fyne.Container)
+			r2 := o.(*fyne.Container).Objects[1].(*fyne.Container)
+			iccidLabel := r1.Objects[0].(*widget.Label)
+			profileNameLabel := r1.Objects[1].(*widget.Label)
+			stateLabel := r2.Objects[0].(*fyne.Container).Objects[0].(*widget.Label)
+			enabledIcon := r2.Objects[0].(*fyne.Container).Objects[1].(*widget.Icon)
+			providerLabel := r2.Objects[0].(*fyne.Container).Objects[2].(*widget.Label)
+			profileIcon := r2.Objects[0].(*fyne.Container).Objects[3].(*widget.Icon)
+			nicknameLabel := r2.Objects[1].(*widget.Label)
+
 			iccid := Profiles[i].Iccid
 			if ProfileMaskNeeded {
 				iccid = Profiles[i].MaskedICCID()
 			}
-			c.Objects[0].(*widget.Label).SetText(fmt.Sprint(iccid, "\t\t"))
-			c.Objects[1].(*fyne.Container).Objects[0].(*widget.Label).
-				SetText(strings.ToTitle(Profiles[i].ProfileState))
+			iccidLabel.SetText(fmt.Sprintf("ICCID: %s", iccid))
+			profileNameLabel.SetText(Profiles[i].ProfileName)
+			stateLabel.SetText(strings.ToUpper(Profiles[i].ProfileState))
 			if Profiles[i].ProfileState == "enabled" {
-				c.Objects[1].(*fyne.Container).Objects[1].(*widget.Icon).Show()
-				c.Objects[1].(*fyne.Container).Objects[2].(*canvas.Rectangle).SetMinSize(fyne.Size{Width: 24, Height: 1})
-				c.Objects[1].(*fyne.Container).Objects[3].(*widget.Label).SetText("\t")
+				enabledIcon.Show()
 			} else {
-				c.Objects[1].(*fyne.Container).Objects[1].(*widget.Icon).Hide()
-				c.Objects[1].(*fyne.Container).Objects[2].(*canvas.Rectangle).SetMinSize(fyne.Size{Width: 0, Height: 1})
-				c.Objects[1].(*fyne.Container).Objects[3].(*widget.Label).SetText("\t\t")
+				enabledIcon.Hide()
 			}
-			icon := c.Objects[1].(*fyne.Container).Objects[4].(*widget.Icon)
+
 			if Profiles[i].Icon != nil {
-				icon.SetResource(fyne.NewStaticResource(Profiles[i].Iccid, Profiles[i].Icon))
-				icon.Show()
-				if Profiles[i].ProfileState == "enabled" {
-					c.Objects[1].(*fyne.Container).Objects[2].(*canvas.Rectangle).SetMinSize(fyne.Size{Width: 0, Height: 1})
-				} else {
-					c.Objects[1].(*fyne.Container).Objects[2].(*canvas.Rectangle).SetMinSize(fyne.Size{Width: 16, Height: 1})
-					c.Objects[1].(*fyne.Container).Objects[3].(*widget.Label).SetText("\t")
-				}
+				profileIcon.SetResource(fyne.NewStaticResource(Profiles[i].Iccid, Profiles[i].Icon))
+				profileIcon.Show()
 			} else {
-				icon.SetResource(theme.FileImageIcon())
-				icon.Hide()
+				profileIcon.Hide()
 			}
-			providerName := Profiles[i].ServiceProviderName
+
+			providerLabel.SetText("Provider: " + Profiles[i].ServiceProviderName)
 			if Profiles[i].ProfileNickname != nil {
-				width := runewidth.StringWidth(Profiles[i].ServiceProviderName)
-				tabNum := 6 - width/6
-				// Fixme: 使用 Grid Layout 排版
-				if width == 23 || width == 29 {
-					tabNum -= 1
-				}
-				providerName += strings.Repeat("\t", tabNum-1)
-				c.Objects[2].(*widget.Label).SetText(providerName)
-				c.Objects[3].(*widget.Label).SetText(*Profiles[i].ProfileNickname)
+				nicknameLabel.SetText(*Profiles[i].ProfileNickname)
 			} else {
-				c.Objects[2].(*widget.Label).SetText(providerName)
-				c.Objects[3].(*widget.Label).SetText("") // 必须刷新
+				nicknameLabel.SetText("")
 			}
 		},
 		OnSelected: func(id widget.ListItemID) {
@@ -695,13 +670,12 @@ func initNotificationList() *widget.List {
 			return len(Notifications)
 		},
 		CreateItem: func() fyne.CanvasObject {
-			notificationAddressLabel := &widget.Label{TextStyle: fyne.TextStyle{Monospace: true, TabWidth: FontTabWidth}}
+			notificationAddressLabel := &widget.Label{}
 			seqLabel := &widget.Label{}
 			operationLabel := &widget.Label{TextStyle: fyne.TextStyle{Bold: true}}
-			providerLaber := &widget.Label{TextStyle: fyne.TextStyle{Monospace: true}}
-			iccidLabel := &widget.Label{TextStyle: fyne.TextStyle{Monospace: true, TabWidth: FontTabWidth}}
+			providerLaber := &widget.Label{}
+			iccidLabel := &widget.Label{}
 			providerIcon := widget.NewIcon(theme.FileImageIcon())
-			// providerIcon.Hide()
 			return container.NewVBox(
 				container.NewBorder(nil, nil, notificationAddressLabel, seqLabel),
 				container.NewHBox(operationLabel, providerIcon, providerLaber, iccidLabel),
@@ -719,15 +693,23 @@ func initNotificationList() *widget.List {
 					return strings.Repeat("x", len(parts[0])) + "." + suffix
 				}
 				// 掩盖除了后缀之外的所有部分
-				for i := 0; i < len(parts)-len(suffixParts); i++ {
-					parts[i] = strings.Repeat("x", len(parts[i]))
+				for x := 0; x < len(parts)-len(suffixParts); x++ {
+					parts[i] = strings.Repeat("x", len(parts[x]))
 				}
 				return strings.Join(parts, ".")
 			}
 			if NotificationMaskNeeded {
-				iccid = Profiles[i].MaskedICCID()
+				if iccid != "" {
+					iccid = Profiles[i].MaskedICCID()
+				}
 				notificationAddress = maskFQDNExceptPublicSuffix(Notifications[i].NotificationAddress)
 			}
+			// ICCID
+			if iccid == "" {
+				iccid = "No ICCID!"
+			}
+			o.(*fyne.Container).Objects[1].(*fyne.Container).Objects[3].(*widget.Label).
+				SetText(fmt.Sprint("(", iccid, ")"))
 			// Notification Address
 			o.(*fyne.Container).Objects[0].(*fyne.Container).Objects[0].(*widget.Label).
 				SetText(notificationAddress)
@@ -755,14 +737,7 @@ func initNotificationList() *widget.List {
 				} else {
 					icon.Hide()
 				}
-
 			}
-			// ICCID
-			if iccid == "" {
-				iccid = "No ICCID!"
-			}
-			o.(*fyne.Container).Objects[1].(*fyne.Container).Objects[3].(*widget.Label).
-				SetText(fmt.Sprint("(", iccid, ")"))
 		},
 		OnSelected: func(id widget.ListItemID) {
 			SelectedNotification = id
@@ -816,8 +791,7 @@ func processNotification(seq int) {
 						Alignment: fyne.TextAlignCenter},
 					&widget.Label{Text: fmt.Sprintf("Seq: %d\nICCID: %s\nOperation: %s\nAddress: %s\n",
 						notification.SeqNumber, notification.Iccid,
-						notification.ProfileManagementOperation, notification.NotificationAddress),
-						TextStyle: fyne.TextStyle{Monospace: true}})),
+						notification.ProfileManagementOperation, notification.NotificationAddress)})),
 			WMain)
 		d.Show()
 	}

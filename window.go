@@ -65,12 +65,7 @@ func InitMainWindow() fyne.Window {
 			statusBar),
 		nil,
 		nil,
-		container.NewBorder(
-			ProfileListTitle,
-			nil,
-			nil,
-			nil,
-			ProfileList))
+		ProfileList)
 	ProfileTab = container.NewTabItem("Profile", profileTabContent)
 
 	notificationTabContent := container.NewBorder(
@@ -317,8 +312,7 @@ func InitDownloadDialog() dialog.Dialog {
 }
 
 func InitSetNicknameDialog() dialog.Dialog {
-	entry := &widget.Entry{PlaceHolder: "Leave it empty to remove nickname",
-		TextStyle: fyne.TextStyle{Monospace: true}}
+	entry := &widget.Entry{PlaceHolder: "Leave it empty to remove nickname"}
 	form := []*widget.FormItem{
 		{Text: "Nickname", Widget: entry},
 	}

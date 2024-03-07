@@ -25,10 +25,16 @@ func (MyTheme) Color(n fyne.ThemeColorName, v fyne.ThemeVariant) color.Color {
 }
 
 func (MyTheme) Font(s fyne.TextStyle) fyne.Resource {
-	if s.Monospace {
-		return resourceNotoSansMonoCJKscRegular
+	if s.Italic || s.Symbol {
+		return theme.DefaultTheme().Font(s)
 	}
-	return theme.DefaultTheme().Font(s)
+	if s.Monospace {
+		return resourceDroidSansMono
+	}
+	if s.Bold {
+		return resourceDroidSansBold
+	}
+	return resourceDroidSansFallback
 }
 
 func (MyTheme) Icon(n fyne.ThemeIconName) fyne.Resource {
