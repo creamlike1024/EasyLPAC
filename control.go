@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"fyne.io/fyne/v2/dialog"
+	"fyne.io/fyne/v2/theme"
 	"fyne.io/fyne/v2/widget"
 	"math"
 	"os/exec"
@@ -35,6 +36,8 @@ func RefreshProfile() {
 	// 刷新 List
 	ProfileList.Refresh()
 	ProfileList.UnselectAll()
+	SwitchStateButton.SetText("Enable")
+	SwitchStateButton.SetIcon(theme.ConfirmIcon())
 }
 
 func RefreshNotification() {
