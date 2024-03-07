@@ -6,6 +6,7 @@ import (
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/container"
 	"fyne.io/fyne/v2/dialog"
+	"fyne.io/fyne/v2/layout"
 	"fyne.io/fyne/v2/theme"
 	"fyne.io/fyne/v2/widget"
 	"golang.org/x/net/publicsuffix"
@@ -607,14 +608,15 @@ func initProfileList() *widget.List {
 			nicknameLabel := &widget.Label{}
 			return container.NewVBox(
 				container.NewBorder(nil, nil, iccidLabel, profileNameLabel),
-				container.NewBorder(nil, nil, container.NewHBox(stateLabel, enabledIcon, providerLabel, profileIcon), nicknameLabel))
+				container.NewBorder(nil, nil, container.NewHBox(
+					container.NewVBox(layout.NewSpacer(), stateLabel), enabledIcon, providerLabel, profileIcon), nicknameLabel))
 		},
 		UpdateItem: func(i widget.ListItemID, o fyne.CanvasObject) {
 			r1 := o.(*fyne.Container).Objects[0].(*fyne.Container)
 			r2 := o.(*fyne.Container).Objects[1].(*fyne.Container)
 			iccidLabel := r1.Objects[0].(*widget.Label)
 			profileNameLabel := r1.Objects[1].(*widget.Label)
-			stateLabel := r2.Objects[0].(*fyne.Container).Objects[0].(*widget.Label)
+			stateLabel := r2.Objects[0].(*fyne.Container).Objects[0].(*fyne.Container).Objects[1].(*widget.Label)
 			enabledIcon := r2.Objects[0].(*fyne.Container).Objects[1].(*widget.Icon)
 			providerLabel := r2.Objects[0].(*fyne.Container).Objects[2].(*widget.Label)
 			profileIcon := r2.Objects[0].(*fyne.Container).Objects[3].(*widget.Icon)
@@ -678,7 +680,7 @@ func initNotificationList() *widget.List {
 			providerIcon := widget.NewIcon(theme.FileImageIcon())
 			return container.NewVBox(
 				container.NewBorder(nil, nil, notificationAddressLabel, seqLabel),
-				container.NewHBox(operationLabel, providerIcon, providerLaber, iccidLabel),
+				container.NewHBox(container.NewVBox(layout.NewSpacer(), operationLabel), providerIcon, providerLaber, iccidLabel),
 			)
 		},
 		UpdateItem: func(i widget.ListItemID, o fyne.CanvasObject) {
@@ -717,7 +719,7 @@ func initNotificationList() *widget.List {
 			o.(*fyne.Container).Objects[0].(*fyne.Container).Objects[1].(*widget.Label).
 				SetText(fmt.Sprint("Seq: ", Notifications[i].SeqNumber))
 			// Operation
-			o.(*fyne.Container).Objects[1].(*fyne.Container).Objects[0].(*widget.Label).
+			o.(*fyne.Container).Objects[1].(*fyne.Container).Objects[0].(*fyne.Container).Objects[1].(*widget.Label).
 				SetText(strings.ToTitle(Notifications[i].ProfileManagementOperation))
 			// Provider
 			profile, err := findProfileByIccid(Notifications[i].Iccid)
