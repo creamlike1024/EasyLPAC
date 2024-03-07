@@ -353,7 +353,7 @@ func InitSetDefaultSmdpDialog() dialog.Dialog {
 
 func ShowLpacErrDialog(err error) {
 	go func() {
-		l := &widget.Label{Text: fmt.Sprintf("%v", err), TextStyle: fyne.TextStyle{Monospace: true}}
+		l := &widget.Label{Text: fmt.Sprintf("%v", err)}
 		content := container.NewVBox(
 			container.NewCenter(container.NewHBox(
 				widget.NewIcon(theme.ErrorIcon()),
