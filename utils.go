@@ -121,6 +121,5 @@ func CompleteActivationCode(input string) string {
 	if strings.HasPrefix(input, "$") {
 		return "LPA:1" + input
 	}
-	// rspAddr$matchID
-	return "LPA:1$" + input
+	return input
 }

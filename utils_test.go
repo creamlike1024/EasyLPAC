@@ -32,5 +32,4 @@ func TestCompleteActivationCode(t *testing.T) {
 	assert.Equal(t, lpaString, CompleteActivationCode("LPA:1$example.com$matching-id"))
 	assert.Equal(t, lpaString, CompleteActivationCode("1$example.com$matching-id"))
 	assert.Equal(t, lpaString, CompleteActivationCode("$example.com$matching-id"))
-	assert.Equal(t, lpaString, CompleteActivationCode("example.com$matching-id"))
 }
