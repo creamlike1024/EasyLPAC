@@ -343,11 +343,12 @@ func deleteProfileButtonFunc() {
 		d.Show()
 		return
 	}
-	profileText := fmt.Sprintf("ICCID: %s\nProvider: %s\n",
-		Profiles[SelectedProfile].Iccid,
-		Profiles[SelectedProfile].ServiceProviderName)
-	if Profiles[SelectedProfile].ProfileNickname != nil {
-		profileText += fmt.Sprintf("Nickname: %s\n", Profiles[SelectedProfile].ProfileNickname)
+	profileText := fmt.Sprint(
+		"ICCID: ", Profiles[SelectedProfile].Iccid, "\n",
+		"Provider: ", Profiles[SelectedProfile].ServiceProviderName, "\n",
+	)
+	if name := Profiles[SelectedProfile].ProfileNickname; name != nil {
+		profileText += fmt.Sprint("Nickname: ", name, "\n")
 	}
 	d := dialog.NewCustomConfirm("Confirm",
 		"Confirm",
@@ -625,22 +626,13 @@ func initProfileList() *widget.List {
 		},
 		UpdateItem: func(i widget.ListItemID, o fyne.CanvasObject) {
 			c := o.(*fyne.Container)
+			iccid := Profiles[i].Iccid
 			if ProfileMaskNeeded {
-				var iccidMasked string
-				for x := 0; x < len(Profiles[i].Iccid); x++ {
-					if x < 7 {
-						iccidMasked += string(Profiles[i].Iccid[x])
-					} else {
-						iccidMasked += "*"
-					}
-				}
-				iccidMasked += "\t\t"
-				c.Objects[0].(*widget.Label).SetText(iccidMasked)
-			} else {
-				c.Objects[0].(*widget.Label).SetText(fmt.Sprintf("%s\t\t", Profiles[i].Iccid))
+				iccid = Profiles[i].MaskedICCID()
 			}
-			c.Objects[1].(*fyne.Container).Objects[0].(*widget.Label).SetText(
-				fmt.Sprintf("%s", Profiles[i].ProfileState))
+			c.Objects[0].(*widget.Label).SetText(fmt.Sprint(iccid, "\t\t"))
+			c.Objects[1].(*fyne.Container).Objects[0].(*widget.Label).
+				SetText(strings.ToTitle(Profiles[i].ProfileState))
 			if Profiles[i].ProfileState == "enabled" {
 				c.Objects[1].(*fyne.Container).Objects[1].(*widget.Icon).Show()
 				c.Objects[1].(*fyne.Container).Objects[2].(*canvas.Rectangle).SetMinSize(fyne.Size{Width: 24, Height: 1})
@@ -672,11 +664,9 @@ func initProfileList() *widget.List {
 				if width == 23 || width == 29 {
 					tabNum -= 1
 				}
-				for x := 1; x <= tabNum; x++ {
-					providerName += "\t"
-				}
+				providerName += strings.Repeat("\t", tabNum-1)
 				c.Objects[2].(*widget.Label).SetText(providerName)
-				c.Objects[3].(*widget.Label).SetText(fmt.Sprintf("%s", Profiles[i].ProfileNickname))
+				c.Objects[3].(*widget.Label).SetText(*Profiles[i].ProfileNickname)
 			} else {
 				c.Objects[2].(*widget.Label).SetText(providerName)
 				c.Objects[3].(*widget.Label).SetText("") // 必须刷新
@@ -718,7 +708,8 @@ func initNotificationList() *widget.List {
 			)
 		},
 		UpdateItem: func(i widget.ListItemID, o fyne.CanvasObject) {
-			var iccid, notificationAddress string
+			iccid := Notifications[i].Iccid
+			notificationAddress := Notifications[i].NotificationAddress
 			maskFQDNExceptPublicSuffix := func(fqdn string) string {
 				suffix, _ := publicsuffix.PublicSuffix(fqdn)
 				parts := strings.Split(fqdn, ".")
@@ -734,41 +725,27 @@ func initNotificationList() *widget.List {
 				return strings.Join(parts, ".")
 			}
 			if NotificationMaskNeeded {
-				for x := 0; x < len(Notifications[i].Iccid); x++ {
-					if x < 7 {
-						iccid += string(Notifications[i].Iccid[x])
-					} else {
-						{
-							iccid += "*"
-						}
-					}
-				}
+				iccid = Profiles[i].MaskedICCID()
 				notificationAddress = maskFQDNExceptPublicSuffix(Notifications[i].NotificationAddress)
-			} else {
-				iccid = Notifications[i].Iccid
-				notificationAddress = Notifications[i].NotificationAddress
 			}
 			// Notification Address
-			o.(*fyne.Container).Objects[0].(*fyne.Container).Objects[0].(*widget.Label).SetText(
-				fmt.Sprintf("%s", notificationAddress))
+			o.(*fyne.Container).Objects[0].(*fyne.Container).Objects[0].(*widget.Label).
+				SetText(notificationAddress)
 			// Seq number
-			o.(*fyne.Container).Objects[0].(*fyne.Container).Objects[1].(*widget.Label).SetText(
-				fmt.Sprintf("Seq: %d", Notifications[i].SeqNumber))
+			o.(*fyne.Container).Objects[0].(*fyne.Container).Objects[1].(*widget.Label).
+				SetText(fmt.Sprint("Seq: ", Notifications[i].SeqNumber))
 			// Operation
-			o.(*fyne.Container).Objects[1].(*fyne.Container).Objects[0].(*widget.Label).SetText(
-				fmt.Sprintf("%s",
-					strings.ToUpper(Notifications[i].ProfileManagementOperation[0:1])+Notifications[i].ProfileManagementOperation[1:]))
+			o.(*fyne.Container).Objects[1].(*fyne.Container).Objects[0].(*widget.Label).
+				SetText(strings.ToTitle(Notifications[i].ProfileManagementOperation))
 			// Provider
 			profile, err := findProfileByIccid(Notifications[i].Iccid)
 			if err != nil {
 				o.(*fyne.Container).Objects[1].(*fyne.Container).Objects[2].(*widget.Label).SetText("?deleted profile")
 				o.(*fyne.Container).Objects[1].(*fyne.Container).Objects[1].(*widget.Icon).Hide()
 			} else {
-				var name string
+				name := profile.ServiceProviderName
 				if profile.ProfileNickname != nil {
-					name = profile.ProfileNickname.(string)
-				} else {
-					name = profile.ServiceProviderName
+					name = *profile.ProfileNickname
 				}
 				o.(*fyne.Container).Objects[1].(*fyne.Container).Objects[2].(*widget.Label).SetText(name)
 				icon := o.(*fyne.Container).Objects[1].(*fyne.Container).Objects[1].(*widget.Icon)
@@ -782,12 +759,10 @@ func initNotificationList() *widget.List {
 			}
 			// ICCID
 			if iccid == "" {
-				o.(*fyne.Container).Objects[1].(*fyne.Container).Objects[3].(*widget.Label).SetText(
-					fmt.Sprintf("(No ICCID!)"))
-			} else {
-				o.(*fyne.Container).Objects[1].(*fyne.Container).Objects[3].(*widget.Label).SetText(
-					fmt.Sprintf("(%s)", iccid))
+				iccid = "No ICCID!"
 			}
+			o.(*fyne.Container).Objects[1].(*fyne.Container).Objects[3].(*widget.Label).
+				SetText(fmt.Sprint("(", iccid, ")"))
 		},
 		OnSelected: func(id widget.ListItemID) {
 			SelectedNotification = id
