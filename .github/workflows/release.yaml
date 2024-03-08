@@ -63,7 +63,7 @@ jobs:
           fyne-cross windows --arch=amd64,arm64 --icon assets/icon64.png
           cd fyne-cross/bin/windows-amd64
           mkdir lpac
-          wget https://github.com/creamlike1024/lpac/releases/download/v20240303/lpac-windows-x86_64-mingw.zip -O lpac.zip
+          wget https://github.com/creamlike1024/lpac/releases/download/v20240201-asn1c/lpac-windows-x86_64-cygwin.zip -O lpac.zip
           unzip lpac.zip -d lpac
           rm lpac.zip
           zip -r $GITHUB_WORKSPACE/EasyLPAC-windows-x86_64-with-lpac.zip ./*
@@ -82,7 +82,7 @@ jobs:
           fyne package --icon assets/icon128.png --release
           cd EasyLPAC.app/Contents/MacOS
           mkdir lpac
-          wget https://github.com/creamlike1024/lpac/releases/download/v20240303/lpac-macos-universal.zip -O lpac.zip
+          wget https://github.com/creamlike1024/lpac/releases/download/v20240201-asn1c/lpac-macos-universal.zip -O lpac.zip
           unzip lpac.zip -d lpac && rm lpac.zip
           chmod +x lpac/*
           cd $GITHUB_WORKSPACE
