@@ -629,8 +629,7 @@ func initProfileList() *widget.List {
 			}
 			iccidLabel.SetText(fmt.Sprintf("ICCID: %s", iccid))
 			profileNameLabel.SetText(Profiles[i].ProfileName)
-			stateLabel.SetText(strings.ToUpper(
-				Profiles[i].ProfileState[0:1]) + Profiles[i].ProfileState[1:])
+			stateLabel.SetText(Profiles[i].CapitalizedState())
 			if Profiles[i].ProfileState == "enabled" {
 				enabledIcon.Show()
 			} else {
@@ -727,8 +726,7 @@ func initNotificationList() *widget.List {
 			seqLabel.SetText(fmt.Sprint("Seq: ", Notifications[i].SeqNumber))
 			// Operation
 			operationLabel.
-				SetText(strings.ToUpper(Notifications[i].ProfileManagementOperation[0:1]) +
-					Notifications[i].ProfileManagementOperation[1:])
+				SetText(Notifications[i].CapitalizedOperation())
 			// Provider
 			profile, err := findProfileByIccid(Notifications[i].Iccid)
 			if err != nil {
