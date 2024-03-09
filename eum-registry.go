@@ -4,6 +4,7 @@ package main
 import (
 	_ "embed"
 	"encoding/json"
+	"path/filepath"
 	"strings"
 )
 
@@ -11,9 +12,25 @@ import (
 var eumRegistryBundle []byte
 
 type EUMIdentifier struct {
-	EUM          string `json:"eum"`
-	Country      string `json:"country"`
-	Manufacturer string `json:"manufacturer"`
+	EUM          string        `json:"eum"`
+	Country      string        `json:"country"`
+	Manufacturer string        `json:"manufacturer"`
+	Products     []*EUMProduct `json:"products"`
+}
+
+func (e EUMIdentifier) ProductName(eid string) string {
+	for _, product := range e.Products {
+		if match, err := filepath.Match(product.Pattern, eid); err != nil || !match {
+			continue
+		}
+		return product.Name
+	}
+	return ""
+}
+
+type EUMProduct struct {
+	Pattern string `json:"pattern"`
+	Name    string `json:"name"`
 }
 
 var EUMRegistry []*EUMIdentifier
