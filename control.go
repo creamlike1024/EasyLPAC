@@ -72,20 +72,18 @@ func RefreshChipInfo() {
 	DefaultDpAddressLabel.SetText(fmt.Sprintf("Default SM-DP+ Address:  %s", convertToString(ChipInfo.EuiccConfiguredAddresses.DefaultDpAddress)))
 	RootDsAddressLabel.SetText(fmt.Sprintf("Root SM-DS Address:  %s", convertToString(ChipInfo.EuiccConfiguredAddresses.RootDsAddress)))
 	// eUICC Manufacturer Label
-	var EUICCManufacturerLabelContent string
-	// 仅在获取到 EidValue 时进行切片
 	if eum := GetEUM(ChipInfo.EidValue); eum != nil {
-		EUICCManufacturerLabelContent = fmt.Sprint(
-			"Manufacturer: ",
-			eum.Manufacturer,
-			" ",
+		manufacturer := eum.Manufacturer
+		if productName := eum.ProductName(ChipInfo.EidValue); productName != "" {
+			manufacturer = fmt.Sprint(productName, " (", manufacturer, ")")
+		}
+		EUICCManufacturerLabel.SetText(fmt.Sprintf(
+			"Manufacturer: %s %s",
+			manufacturer,
 			CountryCodeToEmoji(eum.Country),
-		)
-	}
-	if EUICCManufacturerLabelContent == "" {
-		EUICCManufacturerLabel.SetText("Manufacturer: Unknown")
+		))
 	} else {
-		EUICCManufacturerLabel.SetText(EUICCManufacturerLabelContent)
+		EUICCManufacturerLabel.SetText("Manufacturer: Unknown")
 	}
 	// EUICCInfo2 entry
 	bytes, err := json.MarshalIndent(ChipInfo.EUICCInfo2, "", "  ")
