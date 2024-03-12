@@ -576,7 +576,8 @@ func viewCertInfoButtonFunc() {
 			const CiUrl = "https://euicc-manual.septs.app/docs/pki/ci/files/"
 			certificateURL := fmt.Sprint(CiUrl, issuer.KeyID, ".txt")
 			if err := OpenProgram(certificateURL); err != nil {
-				ShowLpacErrDialog(err)
+				d := dialog.NewError(err, WMain)
+				d.Show()
 			}
 		}
 	}

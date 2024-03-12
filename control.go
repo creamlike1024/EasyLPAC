@@ -73,15 +73,11 @@ func RefreshChipInfo() {
 	RootDsAddressLabel.SetText(fmt.Sprintf("Root SM-DS Address:  %s", convertToString(ChipInfo.EuiccConfiguredAddresses.RootDsAddress)))
 	// eUICC Manufacturer Label
 	if eum := GetEUM(ChipInfo.EidValue); eum != nil {
-		manufacturer := eum.Manufacturer
+		manufacturer := fmt.Sprintf("%s %s", eum.Manufacturer, CountryCodeToEmoji(eum.Country))
 		if productName := eum.ProductName(ChipInfo.EidValue); productName != "" {
 			manufacturer = fmt.Sprint(productName, " (", manufacturer, ")")
 		}
-		EUICCManufacturerLabel.SetText(fmt.Sprintf(
-			"Manufacturer: %s %s",
-			manufacturer,
-			CountryCodeToEmoji(eum.Country),
-		))
+		EUICCManufacturerLabel.SetText("Manufacturer: " + manufacturer)
 	} else {
 		EUICCManufacturerLabel.SetText("Manufacturer: Unknown")
 	}
