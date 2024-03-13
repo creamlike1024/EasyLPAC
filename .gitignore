@@ -1,6 +1,6 @@
-.idea/
-lpac/
-log/
+/.idea/
+/lpac/
+/log/
 
 /ci-registry.json
 /eum-registry.json
