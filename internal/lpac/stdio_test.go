@@ -23,7 +23,7 @@ func (s *Stdio) APDU(request *StdioAPDURequest) (response *StdioAPDUResponse) {
 	}
 	switch request.Name {
 	case "transmit":
-		if hmac.Equal(s.APDUSteps[s.apduOffset][5:], request.Param[5:]) {
+		if hmac.Equal(s.APDUSteps[s.apduOffset], request.Param[5:]) {
 			response.Data = s.APDUSteps[s.apduOffset+1]
 			s.apduOffset += 2
 		} else {
