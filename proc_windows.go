@@ -15,4 +15,4 @@ func HideCmdWindow(cmd *exec.Cmd) {
 	}
 }
 
-func SetFixedWindowSize(w *fyne.Window) {}
+func SetFixedWindowSize(_ *fyne.Window) {}

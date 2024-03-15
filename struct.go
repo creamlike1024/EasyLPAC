@@ -90,17 +90,12 @@ func (n *Notification) CapitalizedOperation() string {
 	return strings.ToUpper(n.ProfileManagementOperation[0:1]) + n.ProfileManagementOperation[1:]
 }
 
-// type DiscoveryResult struct {
-// 	EventID          string `json:"eventId"`
-// 	RspServerAddress string `json:"rspServerAddress"`
-// }
-
 type ApduDriver struct {
 	Env  string `json:"env"`
 	Name string `json:"name"`
 }
 
-var Profiles []Profile
-var Notifications []Notification
-var ChipInfo EuiccInfo
-var ApduDrivers []ApduDriver
+var Profiles []*Profile
+var Notifications []*Notification
+var ChipInfo *EuiccInfo
+var ApduDrivers []*ApduDriver

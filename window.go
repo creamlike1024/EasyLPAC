@@ -13,6 +13,7 @@ import (
 	nativeDialog "github.com/sqweek/dialog"
 	"golang.design/x/clipboard"
 	"image/color"
+	"strings"
 )
 
 var WMain fyne.Window
@@ -111,12 +112,28 @@ func InitMainWindow() fyne.Window {
 
 	settingsTabContent := container.NewVBox(
 		&widget.Label{Text: "lpac debug output", TextStyle: fyne.TextStyle{Bold: true}},
-		widget.NewCheck("Enable env LIBEUICC_DEBUG_HTTP", func(b bool) {
-			ConfigInstance.DebugHTTP = b
-		}),
-		widget.NewCheck("Enable env LIBEUICC_DEBUG_APDU", func(b bool) {
-			ConfigInstance.DebugAPDU = b
-		}))
+		&widget.Check{
+			Text:    "Enable env LIBEUICC_DEBUG_HTTP",
+			Checked: true,
+			OnChanged: func(b bool) {
+				ConfigInstance.DebugHTTP = b
+			},
+		},
+		&widget.Check{
+			Text:    "Enable env LIBEUICC_DEBUG_APDU",
+			Checked: true,
+			OnChanged: func(b bool) {
+				ConfigInstance.DebugAPDU = b
+			},
+		},
+		&widget.Label{Text: "lpac download settings", TextStyle: fyne.TextStyle{Bold: true}},
+		container.NewGridWrap(fyne.Size{
+			Width:  400,
+			Height: FakeIMEIEntry.MinSize().Height,
+		}, widget.NewForm(&widget.FormItem{
+			Text:   "Fake IMEI",
+			Widget: FakeIMEIEntry,
+		})))
 	SettingsTab = container.NewTabItem("Settings", settingsTabContent)
 
 	thankstoText := widget.NewRichTextFromMarkdown(`
@@ -156,13 +173,11 @@ func InitDownloadDialog() dialog.Dialog {
 	smdpEntry := &widget.Entry{PlaceHolder: "Leave it empty to use default SM-DP+"}
 	matchIDEntry := &widget.Entry{PlaceHolder: "Activation code. Optional"}
 	confirmCodeEntry := &widget.Entry{PlaceHolder: "Optional"}
-	imeiEntry := &widget.Entry{PlaceHolder: "The IMEI sent to SM-DP+. Optional"}
 
 	formItems := []*widget.FormItem{
 		{Text: "SM-DP+", Widget: smdpEntry},
 		{Text: "Matching ID", Widget: matchIDEntry},
 		{Text: "Confirm Code", Widget: confirmCodeEntry},
-		{Text: "IMEI", Widget: imeiEntry},
 	}
 
 	form := widget.NewForm(formItems...)
@@ -187,13 +202,17 @@ func InitDownloadDialog() dialog.Dialog {
 		OnTapped: func() {
 			d.Hide()
 			pullConfig := PullInfo{
-				SMDP:        smdpEntry.Text,
-				MatchID:     matchIDEntry.Text,
-				ConfirmCode: confirmCodeEntry.Text,
-				IMEI:        imeiEntry.Text,
+				SMDP:        strings.TrimSpace(smdpEntry.Text),
+				MatchID:     strings.TrimSpace(matchIDEntry.Text),
+				ConfirmCode: strings.TrimSpace(confirmCodeEntry.Text),
+				IMEI:        strings.TrimSpace(FakeIMEIEntry.Text),
 			}
 			go func() {
-				RefreshNotification()
+				err := RefreshNotification()
+				if err != nil {
+					ShowLpacErrDialog(err)
+					return
+				}
 				LpacProfileDownload(pullConfig)
 			}()
 		},
@@ -244,9 +263,9 @@ func InitDownloadDialog() dialog.Dialog {
 						dError := dialog.NewError(err, WMain)
 						dError.Show()
 					} else {
-						pullInfo, confirmCodeNeeded, err := DecodeLpaActivationCode(result.String())
-						if err != nil {
-							dError := dialog.NewError(err, WMain)
+						pullInfo, confirmCodeNeeded, err2 := DecodeLpaActivationCode(result.String())
+						if err2 != nil {
+							dError := dialog.NewError(err2, WMain)
 							dError.Show()
 						} else {
 							smdpEntry.SetText(pullInfo.SMDP)
@@ -306,6 +325,10 @@ func InitDownloadDialog() dialog.Dialog {
 			}()
 		},
 	}
+	fakeIMEISetHintLabel := &widget.Label{Text: "", Alignment: fyne.TextAlignCenter}
+	if strings.TrimSpace(FakeIMEIEntry.Text) != "" {
+		fakeIMEISetHintLabel.SetText("Fake IMEI has been set.")
+	}
 	d = dialog.NewCustomWithoutButtons("Download", container.NewBorder(
 		nil,
 		container.NewVBox(spacer, container.NewCenter(selectQRCodeButton), spacer,
@@ -313,10 +336,10 @@ func InitDownloadDialog() dialog.Dialog {
 			container.NewCenter(container.NewHBox(cancelButton, spacer, downloadButton))),
 		nil,
 		nil,
-		form), WMain)
+		container.NewVBox(form, fakeIMEISetHintLabel)), WMain)
 	d.Resize(fyne.Size{
 		Width:  520,
-		Height: 380,
+		Height: 370,
 	})
 	return d
 }
@@ -331,7 +354,10 @@ func InitSetNicknameDialog() dialog.Dialog {
 			if err := LpacProfileNickname(Profiles[SelectedProfile].Iccid, entry.Text); err != nil {
 				ShowLpacErrDialog(err)
 			}
-			RefreshProfile()
+			err := RefreshProfile()
+			if err != nil {
+				ShowLpacErrDialog(err)
+			}
 		}
 	}, WMain)
 	d.Resize(fyne.Size{
@@ -351,7 +377,10 @@ func InitSetDefaultSmdpDialog() dialog.Dialog {
 			if err := LpacChipDefaultSmdp(entry.Text); err != nil {
 				ShowLpacErrDialog(err)
 			}
-			RefreshChipInfo()
+			err := RefreshChipInfo()
+			if err != nil {
+				ShowLpacErrDialog(err)
+			}
 		}
 	}, WMain)
 	d.Resize(fyne.Size{

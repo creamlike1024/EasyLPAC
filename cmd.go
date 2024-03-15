@@ -87,7 +87,7 @@ func runLpac(args []string) (json.RawMessage, error) {
 				}
 			}
 			wrapText := func(text string, maxWidth int) string {
-				var result strings.Builder
+				var wrappedText strings.Builder
 				lines := strings.Split(text, "\n")
 				for _, line := range lines {
 					var currentWidth int
@@ -96,7 +96,7 @@ func runLpac(args []string) (json.RawMessage, error) {
 						// 使用字符宽度而不是长度，让包含 CJK 字符的字符串也能正确限制显示长度
 						runeWidth := runewidth.RuneWidth(runeValue)
 						if currentWidth+runeWidth > maxWidth {
-							result.WriteString(currentLine.String() + "\n")
+							wrappedText.WriteString(currentLine.String() + "\n")
 							currentLine.Reset()
 							currentWidth = 0
 						}
@@ -104,12 +104,12 @@ func runLpac(args []string) (json.RawMessage, error) {
 						currentWidth += runeWidth
 					}
 					if currentLine.Len() > 0 {
-						result.WriteString(currentLine.String() + "\n")
+						wrappedText.WriteString(currentLine.String() + "\n")
 					}
 				}
-				return result.String()
+				return wrappedText.String()
 			}
-			return nil, fmt.Errorf("stage: %s\ndata: %s", resp.Payload.Message, wrapText(dataString, 90))
+			return nil, fmt.Errorf("Function: %s\nData: %s", resp.Payload.Message, wrapText(dataString, 90))
 		}
 	}
 	if err := scanner.Err(); err != nil {
@@ -118,26 +118,26 @@ func runLpac(args []string) (json.RawMessage, error) {
 	return resp.Payload.Data, nil
 }
 
-func LpacChipInfo() (EuiccInfo, error) {
+func LpacChipInfo() (*EuiccInfo, error) {
 	args := []string{"chip", "info"}
 	payload, err := runLpac(args)
 	if err != nil {
-		return EuiccInfo{}, err
+		return nil, err
 	}
-	var chipInfo EuiccInfo
+	var chipInfo *EuiccInfo
 	if err = json.Unmarshal(payload, &chipInfo); err != nil {
-		return EuiccInfo{}, err
+		return nil, err
 	}
 	return chipInfo, nil
 }
 
-func LpacProfileList() ([]Profile, error) {
+func LpacProfileList() ([]*Profile, error) {
 	args := []string{"profile", "list"}
 	payload, err := runLpac(args)
 	if err != nil {
 		return nil, err
 	}
-	var profiles []Profile
+	var profiles []*Profile
 	if err = json.Unmarshal(payload, &profiles); err != nil {
 		return nil, err
 	}
@@ -196,25 +196,17 @@ func LpacProfileDownload(info PullInfo) {
 			func(b bool) {
 				if b {
 					downloadNotification := findNewNotification(notificationOrigin, Notifications)
+					if downloadNotification == nil {
+						dError := dialog.NewError(errors.New("notification not found"), WMain)
+						dError.Show()
+						return
+					}
 					go processNotification(downloadNotification.SeqNumber)
 				}
 			}, WMain)
 		d.Show()
 	}
 }
-
-// func LpacProfileDiscovery() ([]DiscoveryResult, error) {
-// 	args := []string{"profile", "discovery"}
-// 	payload, err := runLpac(args)
-// 	if err != nil {
-// 		return nil, err
-// 	}
-// 	var data []DiscoveryResult
-// 	if err = json.Unmarshal(payload, &data); err != nil {
-// 		return nil, err
-// 	}
-// 	return data, nil
-// }
 
 func LpacProfileNickname(iccid, nickname string) error {
 	args := []string{"profile", "nickname", iccid, nickname}
@@ -225,13 +217,13 @@ func LpacProfileNickname(iccid, nickname string) error {
 	return nil
 }
 
-func LpacNotificationList() ([]Notification, error) {
+func LpacNotificationList() ([]*Notification, error) {
 	args := []string{"notification", "list"}
 	payload, err := runLpac(args)
 	if err != nil {
 		return nil, err
 	}
-	var notifications []Notification
+	var notifications []*Notification
 	if err = json.Unmarshal(payload, &notifications); err != nil {
 		return nil, err
 	}
@@ -256,13 +248,13 @@ func LpacNotificationRemove(seq int) error {
 	return nil
 }
 
-func LpacDriverApduList() ([]ApduDriver, error) {
+func LpacDriverApduList() ([]*ApduDriver, error) {
 	args := []string{"driver", "apdu", "list"}
 	payload, err := runLpac(args)
 	if err != nil {
 		return nil, err
 	}
-	var apduDrivers []ApduDriver
+	var apduDrivers []*ApduDriver
 	if err = json.Unmarshal(payload, &apduDrivers); err != nil {
 		return nil, err
 	}

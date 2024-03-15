@@ -7,8 +7,9 @@ require (
 	github.com/makiuchi-d/gozxing v0.1.1
 	github.com/mattn/go-runewidth v0.0.15
 	github.com/sqweek/dialog v0.0.0-20240226140203-065105509627
+	github.com/stretchr/testify v1.9.0
 	golang.design/x/clipboard v0.7.0
-	golang.org/x/net v0.21.0
+	golang.org/x/net v0.22.0
 )
 
 require (
@@ -21,7 +22,7 @@ require (
 	github.com/fyne-io/glfw-js v0.0.0-20240101223322-6e1efdc71b7a // indirect
 	github.com/fyne-io/image v0.0.0-20240121103648-c3c798e60e6b // indirect
 	github.com/go-gl/gl v0.0.0-20231021071112-07e5d0ea2e71 // indirect
-	github.com/go-gl/glfw/v3.3/glfw v0.0.0-20240118000515-a250818d05e3 // indirect
+	github.com/go-gl/glfw/v3.3/glfw v0.0.0-20240307211618-a69d953ea142 // indirect
 	github.com/go-text/render v0.0.0-20240129162809-b6410f7d78ad // indirect
 	github.com/go-text/typesetting v0.1.0 // indirect
 	github.com/godbus/dbus/v5 v5.1.0 // indirect
@@ -32,14 +33,13 @@ require (
 	github.com/rivo/uniseg v0.4.7 // indirect
 	github.com/srwiley/oksvg v0.0.0-20221011165216-be6e8873101c // indirect
 	github.com/srwiley/rasterx v0.0.0-20220730225603-2ab79fcdd4ef // indirect
-	github.com/stretchr/testify v1.8.4 // indirect
 	github.com/tevino/abool v1.2.0 // indirect
 	github.com/yuin/goldmark v1.7.0 // indirect
 	golang.org/x/exp v0.0.0-20200224162631-6cc2880d07d6 // indirect
-	golang.org/x/exp/shiny v0.0.0-20240222234643-814bf88cf225 // indirect
+	golang.org/x/exp/shiny v0.0.0-20240314144324-c7f7c6466f7f // indirect
 	golang.org/x/image v0.15.0 // indirect
 	golang.org/x/mobile v0.0.0-20240213143359-d1f7d3436075 // indirect
-	golang.org/x/sys v0.17.0 // indirect
+	golang.org/x/sys v0.18.0 // indirect
 	golang.org/x/text v0.14.0 // indirect
 	golang.org/x/xerrors v0.0.0-20231012003039-104605ab7028 // indirect
 	gopkg.in/check.v1 v1.0.0-20200227125254-8fa46927fb4f // indirect

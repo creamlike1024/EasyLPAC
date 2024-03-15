@@ -16,46 +16,51 @@ const StatusProcess = 1
 const StatusReady = 0
 const Unselected = -1
 
-var SelectedProfile int
-var SelectedNotification int
+var SelectedProfile = Unselected
+var SelectedNotification = Unselected
 
-var RefreshNeeded bool
+var RefreshNeeded = true
 var ProfileMaskNeeded bool
 var NotificationMaskNeeded bool
 var ProfileStateAllowDisable bool
 
-var StatusChan chan int
-var LockButtonChan chan bool
+var StatusChan = make(chan int)
+var LockButtonChan = make(chan bool)
 
-func RefreshProfile() {
+func RefreshProfile() error {
 	var err error
 	Profiles, err = LpacProfileList()
 	if err != nil {
-		ShowLpacErrDialog(err)
+		return err
 	}
 	// 刷新 List
 	ProfileList.Refresh()
 	ProfileList.UnselectAll()
 	SwitchStateButton.SetText("Enable")
 	SwitchStateButton.SetIcon(theme.ConfirmIcon())
+	return nil
 }
 
-func RefreshNotification() {
+func RefreshNotification() error {
 	var err error
 	Notifications, err = LpacNotificationList()
 	if err != nil {
-		ShowLpacErrDialog(err)
+		return err
 	}
 	// 刷新 List
 	NotificationList.Refresh()
 	NotificationList.UnselectAll()
+	return nil
 }
 
-func RefreshChipInfo() {
+func RefreshChipInfo() error {
 	var err error
 	ChipInfo, err = LpacChipInfo()
 	if err != nil {
-		ShowLpacErrDialog(err)
+		return err
+	}
+	if ChipInfo == nil {
+		return nil
 	}
 
 	convertToString := func(value interface{}) string {
@@ -73,7 +78,7 @@ func RefreshChipInfo() {
 	RootDsAddressLabel.SetText(fmt.Sprintf("Root SM-DS Address:  %s", convertToString(ChipInfo.EuiccConfiguredAddresses.RootDsAddress)))
 	// eUICC Manufacturer Label
 	if eum := GetEUM(ChipInfo.EidValue); eum != nil {
-		manufacturer := fmt.Sprintf("%s %s", eum.Manufacturer, CountryCodeToEmoji(eum.Country))
+		manufacturer := fmt.Sprint(eum.Manufacturer, " ", CountryCodeToEmoji(eum.Country))
 		if productName := eum.ProductName(ChipInfo.EidValue); productName != "" {
 			manufacturer = fmt.Sprint(productName, " (", manufacturer, ")")
 		}
@@ -97,6 +102,7 @@ func RefreshChipInfo() {
 	ViewCertInfoButton.Show()
 	EUICCManufacturerLabel.Show()
 	CopyEuiccInfo2Button.Show()
+	return nil
 }
 
 func RefreshApduDriver() {
@@ -147,9 +153,21 @@ func Refresh() {
 		ShowSelectCardReaderDialog()
 		return
 	}
-	RefreshProfile()
-	RefreshNotification()
-	RefreshChipInfo()
+	err := RefreshProfile()
+	if err != nil {
+		ShowLpacErrDialog(err)
+		return
+	}
+	err = RefreshNotification()
+	if err != nil {
+		ShowLpacErrDialog(err)
+		return
+	}
+	err = RefreshChipInfo()
+	if err != nil {
+		ShowLpacErrDialog(err)
+		return
+	}
 	RefreshNeeded = false
 }
 

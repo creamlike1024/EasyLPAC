@@ -19,9 +19,6 @@ var StatusProcessBar *widget.ProgressBarInfinite
 var StatusLabel *widget.Label
 var SetNicknameButton *widget.Button
 var DownloadButton *widget.Button
-
-// var DiscoveryButton *widget.Button
-
 var DeleteProfileButton *widget.Button
 var SwitchStateButton *widget.Button
 var ProcessNotificationButton *widget.Button
@@ -46,6 +43,7 @@ var SetDefaultSmdpButton *widget.Button
 var ViewCertInfoButton *widget.Button
 var EUICCManufacturerLabel *widget.Label
 var CopyEuiccInfo2Button *widget.Button
+var FakeIMEIEntry *widget.Entry
 
 var ApduDriverSelect *widget.Select
 var ApduDriverRefreshButton *widget.Button
@@ -59,8 +57,8 @@ var AboutTab *container.TabItem
 
 type ReadOnlyEntry struct{ widget.Entry }
 
-func (entry *ReadOnlyEntry) TypedRune(r rune)            {}
-func (entry *ReadOnlyEntry) TypedKey(key *fyne.KeyEvent) {}
+func (entry *ReadOnlyEntry) TypedRune(_ rune)          {}
+func (entry *ReadOnlyEntry) TypedKey(_ *fyne.KeyEvent) {}
 func (entry *ReadOnlyEntry) TypedShortcut(shortcut fyne.Shortcut) {
 	switch shortcut := shortcut.(type) {
 	case *fyne.ShortcutCopy:
@@ -96,10 +94,6 @@ func InitWidgets() {
 	DownloadButton = &widget.Button{Text: "Download",
 		OnTapped: func() { go downloadButtonFunc() },
 		Icon:     theme.DownloadIcon()}
-
-	// DiscoveryButton = &widget.Button{Text: "Discovery",
-	// 	OnTapped: func() { go discoveryButtonFunc() },
-	// 	Icon:     theme.SearchIcon()}
 
 	SetNicknameButton = &widget.Button{Text: "Nickname",
 		OnTapped: func() { go setNicknameButtonFunc() },
@@ -178,6 +172,7 @@ func InitWidgets() {
 		OnTapped: func() { go copyEuiccInfo2ButtonFunc() },
 		Icon:     theme.ContentCopyIcon()}
 	CopyEuiccInfo2Button.Hide()
+	FakeIMEIEntry = &widget.Entry{PlaceHolder: "The IMEI sent to SM-DP+. Optional"}
 	ApduDriverSelect = widget.NewSelect([]string{}, func(s string) { SetDriverIFID(s) })
 	ApduDriverRefreshButton = &widget.Button{OnTapped: func() { go RefreshApduDriver() },
 		Icon: theme.SearchReplaceIcon()}
@@ -195,103 +190,6 @@ func downloadButtonFunc() {
 	d := InitDownloadDialog()
 	d.Show()
 }
-
-// func discoveryButtonFunc() {
-// 	if ConfigInstance.DriverIFID == "" {
-// 		ShowSelectCardReaderDialog()
-// 		return
-// 	}
-// 	if RefreshNeeded == true {
-// 		ShowRefreshNeededDialog()
-// 		return
-// 	}
-// 	discoveryFunc := func() {
-// 		ch := make(chan bool)
-// 		var data []DiscoveryResult
-// 		var err error
-// 		go func() {
-// 			data, err = LpacProfileDiscovery()
-// 			ch <- true
-// 		}()
-// 		<-ch
-// 		if err != nil {
-// 			ShowLpacErrDialog(err)
-// 			return
-// 		}
-// 		if len(data) != 0 {
-// 			var d *dialog.CustomDialog
-// 			selectedProfile := Unselected
-// 			foundLabel := widget.NewLabel("")
-// 			if len(data) == 1 {
-// 				foundLabel.SetText(fmt.Sprintf("%d profile found.", len(data)))
-// 			} else {
-// 				foundLabel.SetText(fmt.Sprintf("%d profiles found.", len(data)))
-// 			}
-// 			discoveredEsimListTitle := widget.NewLabel("EventID\t\tRSP Server Address")
-// 			discoveredEsimListTitle.TextStyle = fyne.TextStyle{Bold: true}
-// 			discoveredEsimList := widget.NewList(func() int {
-// 				return len(data)
-// 			}, func() fyne.CanvasObject {
-// 				return &widget.Label{TextStyle: fyne.TextStyle{Monospace: true}}
-// 			}, func(i widget.ListItemID, o fyne.CanvasObject) {
-// 				o.(*widget.Label).SetText(fmt.Sprintf("%-6s\t\t%s", data[i].EventID, data[i].RspServerAddress))
-// 			})
-// 			discoveredEsimList.OnSelected = func(id widget.ListItemID) {
-// 				selectedProfile = id
-// 			}
-// 			downloadButton := widget.NewButton("Download", func() {
-// 				if selectedProfile == Unselected {
-// 					ShowSelectItemDialog()
-// 				} else {
-// 					d.Hide()
-// 					go LpacProfileDownload(PullInfo{
-// 						SMDP:        data[selectedProfile].RspServerAddress,
-// 						MatchID:     "",
-// 						ConfirmCode: "",
-// 						IMEI:        "",
-// 					})
-// 				}
-// 			})
-// 			downloadButton.Importance = widget.HighImportance
-// 			downloadButton.SetIcon(theme.DownloadIcon())
-// 			dismissButton := widget.NewButton("Dismiss", func() {
-// 				d.Hide()
-// 			})
-// 			dismissButton.SetIcon(theme.CancelIcon())
-// 			content := container.NewBorder(
-// 				foundLabel,
-// 				nil,
-// 				nil,
-// 				nil,
-// 				container.NewBorder(
-// 					discoveredEsimListTitle,
-// 					nil,
-// 					nil,
-// 					nil,
-// 					discoveredEsimList))
-// 			d = dialog.NewCustomWithoutButtons("Result", content, WMain)
-// 			d.Resize(fyne.Size{
-// 				Width:  550,
-// 				Height: 400,
-// 			})
-// 			d.SetButtons([]fyne.CanvasObject{dismissButton, downloadButton})
-// 			d.Show()
-//
-// 		} else {
-// 			d := dialog.NewInformation("Result", "No eSIM profile found.\n", WMain)
-// 			d.Show()
-// 		}
-// 	}
-// 	d := dialog.NewInformation("Info", "Discovery has not been actually tested yet.\n"+
-// 		"If you have any discoverable profiles and try to use the discovery function,\n"+
-// 		"regardless of whether it is successful,\n"+
-// 		"please open an issue to report logs and program behavior.\n"+
-// 		"Thank you very much\n", WMain)
-// 	d.SetOnClosed(func() {
-// 		go discoveryFunc()
-// 	})
-// 	d.Show()
-// }
 
 func setNicknameButtonFunc() {
 	if ConfigInstance.DriverIFID == "" {
@@ -358,6 +256,11 @@ func deleteProfileButtonFunc() {
 							func(b bool) {
 								if b {
 									deleteNotification := findNewNotification(notificationOrigin, Notifications)
+									if deleteNotification == nil {
+										dError := dialog.NewError(errors.New("notification not found"), WMain)
+										dError.Show()
+										return
+									}
 									go processNotification(deleteNotification.SeqNumber)
 								}
 							},
@@ -439,10 +342,16 @@ func removeNotificationButtonFunc() {
 				if err := LpacNotificationRemove(Notifications[SelectedNotification].SeqNumber); err != nil {
 					ShowLpacErrDialog(err)
 				}
-				RefreshNotification()
-				RefreshChipInfo()
-			} else {
-				return
+
+				if err := RefreshNotification(); err != nil {
+					ShowLpacErrDialog(err)
+					return
+				}
+
+				if err := RefreshChipInfo(); err != nil {
+					ShowLpacErrDialog(err)
+					return
+				}
 			}
 		}, WMain)
 	d.Show()
@@ -474,11 +383,13 @@ func removeAllNotificationButtonFunc() {
 					dError.Show()
 				} else {
 					for _, notification := range Notifications {
-						err := LpacNotificationRemove(notification.SeqNumber)
-						if err != nil {
+						if err := LpacNotificationRemove(notification.SeqNumber); err != nil {
 							ShowLpacErrDialog(err)
 						}
-						RefreshNotification()
+
+						if err := RefreshNotification(); err != nil {
+							ShowLpacErrDialog(err)
+						}
 					}
 					dInfo := dialog.NewInformation("Info", "Operation finished", WMain)
 					dInfo.Show()
@@ -758,9 +669,12 @@ func initNotificationList() *widget.List {
 func processNotification(seq int) {
 	if err := LpacNotificationProcess(seq); err != nil {
 		ShowLpacErrDialog(err)
-		RefreshNotification()
+		err2 := RefreshNotification()
+		if err2 != nil {
+			ShowLpacErrDialog(err2)
+		}
 	} else {
-		notification := Notification{}
+		var notification *Notification
 		for _, n := range Notifications {
 			if n.SeqNumber == seq {
 				notification = n
@@ -780,11 +694,17 @@ func processNotification(seq int) {
 			OnTapped: func() {
 				go func() {
 					d.Hide()
-					if err := LpacNotificationRemove(seq); err != nil {
-						ShowLpacErrDialog(err)
+					if err2 := LpacNotificationRemove(seq); err2 != nil {
+						ShowLpacErrDialog(err2)
 					}
-					RefreshNotification()
-					RefreshChipInfo()
+					if err2 := RefreshNotification(); err2 != nil {
+						ShowLpacErrDialog(err2)
+						return
+					}
+					if err2 := RefreshChipInfo(); err2 != nil {
+						ShowLpacErrDialog(err2)
+						return
+					}
 				}()
 			},
 		}
@@ -805,7 +725,7 @@ func processNotification(seq int) {
 	}
 }
 
-func findNewNotification(first, second []Notification) Notification {
+func findNewNotification(first, second []*Notification) *Notification {
 	exists := make(map[int]bool)
 	for _, notification := range first {
 		exists[notification.SeqNumber] = true
@@ -815,14 +735,14 @@ func findNewNotification(first, second []Notification) Notification {
 			return notification
 		}
 	}
-	return Notification{}
+	return nil
 }
 
-func findProfileByIccid(iccid string) (Profile, error) {
+func findProfileByIccid(iccid string) (*Profile, error) {
 	for _, profile := range Profiles {
 		if iccid == profile.Iccid {
 			return profile, nil
 		}
 	}
-	return Profile{}, errors.New("profile not found")
+	return nil, errors.New("profile not found")
 }

@@ -27,6 +27,8 @@ func LoadConfig() error {
 	const lpacDirName = "lpac"
 	const apduInterface = "libapduinterface_pcsc"
 	const httpInterface = "libhttpinterface_curl"
+	ConfigInstance.DebugAPDU = true
+	ConfigInstance.DebugHTTP = true
 
 	switch platform := runtime.GOOS; platform {
 	case "windows":

@@ -18,11 +18,6 @@ func init() {
 	App = app.New()
 	App.Settings().SetTheme(&MyTheme{})
 
-	StatusChan = make(chan int)
-	LockButtonChan = make(chan bool)
-	SelectedProfile = Unselected
-	SelectedNotification = Unselected
-	RefreshNeeded = true
 	if err := LoadConfig(); err != nil {
 		panic(err)
 	}
