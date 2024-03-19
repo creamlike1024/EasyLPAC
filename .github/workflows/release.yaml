@@ -27,8 +27,8 @@ jobs:
             sed -i "s/const Version = \"development\"/const Version = \"$VERSION\"/" main.go
             sed -i "s/const EUICCDataVersion = \"unknown\"/const EUICCDataVersion = \"$DATE\"/" main.go
           elif [[ "$RUNNER_OS" == "macOS" ]]; then
-            sed -i '' "s/var Version = \"development\"/var Version = \"$VERSION\"/" main.go
-            sed -i '' "s/var EUICCDataVersion = \"unknown\"/var EUICCDataVersion = \"$DATE\"/" main.go
+            sed -i '' "s/const Version = \"development\"/const Version = \"$VERSION\"/" main.go
+            sed -i '' "s/const EUICCDataVersion = \"unknown\"/const EUICCDataVersion = \"$DATE\"/" main.go
           fi
 
       - name: Setup go
