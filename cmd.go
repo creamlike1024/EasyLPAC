@@ -39,8 +39,8 @@ func runLpac(args []string) (json.RawMessage, error) {
 	cmd.Dir = ConfigInstance.LpacDir
 
 	cmd.Env = []string{
-		fmt.Sprintf("APDU_INTERFACE=%s", ConfigInstance.APDUInterface),
-		fmt.Sprintf("HTTP_INTERFACE=%s", ConfigInstance.HTTPInterface),
+		fmt.Sprintf("LPAC_APDU=pcsc"),
+		fmt.Sprintf("LPAC_HTTP=curl"),
 		fmt.Sprintf("DRIVER_IFID=%s", ConfigInstance.DriverIFID),
 	}
 	if ConfigInstance.DebugHTTP {
@@ -268,4 +268,18 @@ func LpacChipDefaultSmdp(smdp string) error {
 		return err
 	}
 	return nil
+}
+
+func LpacVersion() (string, error) {
+	args := []string{"version"}
+	payload, err := runLpac(args)
+	if err != nil {
+		return "", err
+	}
+	var version string
+	err = json.Unmarshal(payload, &version)
+	if err != nil {
+		return "", err
+	}
+	return version, nil
 }

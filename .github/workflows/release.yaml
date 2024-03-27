@@ -62,15 +62,13 @@ jobs:
           go generate
           fyne-cross windows --arch=amd64,arm64 --icon assets/icon64.png
           cd fyne-cross/bin/windows-amd64
-          mkdir lpac
-          wget https://github.com/creamlike1024/lpac/releases/download/v20240315/lpac-windows-x86_64-mingw.zip -O lpac.zip
-          unzip lpac.zip -d lpac
+          wget https://github.com/estkme-group/lpac/releases/download/v2.0.0/lpac-windows-x86_64-mingw.zip -O lpac.zip
+          unzip lpac.zip
           rm lpac.zip
           zip -r $GITHUB_WORKSPACE/EasyLPAC-windows-x86_64-with-lpac.zip ./*
           cd $GITHUB_WORKSPACE/fyne-cross/bin/windows-arm64
-          mkdir lpac
-          wget https://github.com/creamlike1024/lpac/releases/download/v20240315/lpac-windows-arm64-zig.zip -O lpac.zip
-          unzip lpac.zip -d lpac
+          wget https://github.com/estkme-group/lpac/releases/download/v2.0.0/lpac-windows-arm64-mingw.zip -O lpac.zip
+          unzip lpac.zip
           rm lpac.zip
           zip -r $GITHUB_WORKSPACE/EasyLPAC-windows-arm64-with-lpac.zip ./*
 
@@ -81,10 +79,8 @@ jobs:
           go generate
           fyne package --icon assets/icon128.png --release
           cd EasyLPAC.app/Contents/MacOS
-          mkdir lpac
-          wget https://github.com/creamlike1024/lpac/releases/download/v20240315/lpac-macos-universal.zip -O lpac.zip
-          unzip lpac.zip -d lpac && rm lpac.zip
-          chmod +x lpac/*
+          wget https://github.com/estkme-group/lpac/releases/download/v2.0.0/lpac-darwin-universal.zip -O lpac.zip
+          unzip lpac.zip && rm lpac.zip
           cd $GITHUB_WORKSPACE
           zip -r EasyLPAC-macOS-universal-with-lpac.zip EasyLPAC.app
           mkdir dmg && cp -r EasyLPAC.app dmg

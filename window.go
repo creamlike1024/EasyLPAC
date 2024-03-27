@@ -155,7 +155,9 @@ lpac GUI Frontend
 	aboutTabContent := container.NewBorder(
 		nil,
 		container.NewBorder(nil, nil,
-			widget.NewLabel(fmt.Sprintf("Version: %s", Version)),
+			container.NewHBox(
+				widget.NewLabel(fmt.Sprintf("Version: %s", Version)),
+				LpacVersionButton),
 			widget.NewLabel(fmt.Sprintf("eUICC Data: %s", EUICCDataVersion))),
 		nil,
 		nil,
