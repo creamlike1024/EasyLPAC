@@ -82,7 +82,7 @@ jobs:
           wget https://github.com/estkme-group/lpac/releases/download/v2.0.0/lpac-darwin-universal.zip -O lpac.zip
           unzip lpac.zip && rm lpac.zip
           cd $GITHUB_WORKSPACE
-          zip -r EasyLPAC-macOS-universal-with-lpac.zip EasyLPAC.app
+          zip -r EasyLPAC-macOS-x86_64-with-lpac.zip EasyLPAC.app
           mkdir dmg && cp -r EasyLPAC.app dmg
           hdiutil create -volname "EasyLPAC" -srcfolder dmg -ov -format UDRW EasyLPAC.dmg
           hdiutil attach EasyLPAC.dmg
@@ -90,7 +90,7 @@ jobs:
           SetFile -c icnC /Volumes/EasyLPAC/.VolumeIcon.icns
           SetFile -a C /Volumes/EasyLPAC
           hdiutil detach /Volumes/EasyLPAC
-          hdiutil convert EasyLPAC.dmg -format UDZO -o EasyLPAC-macOS-universal-with-lpac.dmg
+          hdiutil convert EasyLPAC.dmg -format UDZO -o EasyLPAC-macOS-x86_64-with-lpac.dmg
 
       - name: Upload Artifact
         uses: actions/upload-artifact@v3
@@ -99,8 +99,8 @@ jobs:
           path: |
             EasyLPAC-windows-x86_64-with-lpac.zip
             EasyLPAC-windows-arm64-with-lpac.zip
-            EasyLPAC-macOS-universal-with-lpac.zip
-            EasyLPAC-macOS-universal-with-lpac.dmg
+            EasyLPAC-macOS-x86_64-with-lpac.zip
+            EasyLPAC-macOS-x86_64-with-lpac.dmg
 
       - name: Release
         uses: softprops/action-gh-release@v1
@@ -109,5 +109,5 @@ jobs:
           files: |
             EasyLPAC-windows-x86_64-with-lpac.zip
             EasyLPAC-windows-arm64-with-lpac.zip
-            EasyLPAC-macOS-universal-with-lpac.zip
-            EasyLPAC-macOS-universal-with-lpac.dmg
+            EasyLPAC-macOS-x86_64-with-lpac.zip
+            EasyLPAC-macOS-x86_64-with-lpac.dmg

@@ -3,7 +3,6 @@
 package main
 
 import (
-	"fyne.io/fyne/v2"
 	"os/exec"
 	"syscall"
 )
@@ -14,5 +13,3 @@ func HideCmdWindow(cmd *exec.Cmd) {
 		HideWindow: true,
 	}
 }
-
-func SetFixedWindowSize(_ *fyne.Window) {}
