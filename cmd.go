@@ -58,7 +58,12 @@ func runLpac(args []string) (json.RawMessage, error) {
 
 	err := cmd.Run()
 	if err != nil && len(bytes.TrimSpace(stderr.Bytes())) != 0 {
-		return nil, errors.New(stderr.String())
+		// fixme
+		// if lpac debug enabled, some lpac debug output will write to stderr if something went wrong
+		// It shouldn't return here if it not pcsc error
+		if strings.Contains(stderr.String(), "SCard") {
+			return nil, errors.New(stderr.String())
+		}
 	}
 
 	var resp LpacReturnValue
@@ -66,7 +71,10 @@ func runLpac(args []string) (json.RawMessage, error) {
 	scanner := bufio.NewScanner(&stdout)
 	for scanner.Scan() {
 		if err := json.Unmarshal(scanner.Bytes(), &resp); err != nil {
-			return nil, err
+			continue
+		}
+		if resp.Type != "lpa" {
+			continue
 		}
 		if resp.Payload.Code != 0 {
 			var dataString string
