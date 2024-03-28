@@ -237,8 +237,8 @@ func deleteProfileButtonFunc() {
 		"ICCID: ", Profiles[SelectedProfile].Iccid, "\n",
 		"Provider: ", Profiles[SelectedProfile].ServiceProviderName, "\n",
 	)
-	if name := Profiles[SelectedProfile].ProfileNickname; name != nil {
-		profileText += fmt.Sprint("Nickname: ", name, "\n")
+	if Profiles[SelectedProfile].ProfileNickname != nil {
+		profileText += fmt.Sprint("Nickname: ", *Profiles[SelectedProfile].ProfileNickname, "\n")
 	}
 	d := dialog.NewCustomConfirm("Confirm",
 		"Confirm",
@@ -531,34 +531,36 @@ func initProfileList() *widget.List {
 		},
 		CreateItem: func() fyne.CanvasObject {
 			iccidLabel := &widget.Label{}
-			profileNameLabel := &widget.Label{}
+			nameLabel := &widget.Label{}
 			stateLabel := &widget.Label{TextStyle: fyne.TextStyle{Bold: true}}
 			enabledIcon := widget.NewIcon(theme.ConfirmIcon())
 			profileIcon := widget.NewIcon(theme.FileImageIcon())
 			providerLabel := &widget.Label{}
-			nicknameLabel := &widget.Label{}
 			return container.NewVBox(
-				container.NewHBox(iccidLabel, layout.NewSpacer(), profileNameLabel),
+				container.NewHBox(iccidLabel, layout.NewSpacer(), nameLabel),
 				container.NewHBox(container.NewVBox(layout.NewSpacer(), stateLabel),
-					enabledIcon, providerLabel, profileIcon, layout.NewSpacer(), nicknameLabel))
+					enabledIcon, providerLabel, profileIcon, layout.NewSpacer()))
 		},
 		UpdateItem: func(i widget.ListItemID, o fyne.CanvasObject) {
 			r1 := o.(*fyne.Container).Objects[0].(*fyne.Container)
 			r2 := o.(*fyne.Container).Objects[1].(*fyne.Container)
 			iccidLabel := r1.Objects[0].(*widget.Label)
-			profileNameLabel := r1.Objects[2].(*widget.Label)
+			nameLabel := r1.Objects[2].(*widget.Label)
 			stateLabel := r2.Objects[0].(*fyne.Container).Objects[1].(*widget.Label)
 			enabledIcon := r2.Objects[1].(*widget.Icon)
 			providerLabel := r2.Objects[2].(*widget.Label)
 			profileIcon := r2.Objects[3].(*widget.Icon)
-			nicknameLabel := r2.Objects[5].(*widget.Label)
 
 			iccid := Profiles[i].Iccid
 			if ProfileMaskNeeded {
 				iccid = Profiles[i].MaskedICCID()
 			}
 			iccidLabel.SetText(fmt.Sprintf("ICCID: %s", iccid))
-			profileNameLabel.SetText(Profiles[i].ProfileName)
+			if Profiles[i].ProfileNickname != nil {
+				nameLabel.SetText(*Profiles[i].ProfileNickname)
+			} else {
+				nameLabel.SetText(Profiles[i].ProfileName)
+			}
 			stateLabel.SetText(Profiles[i].CapitalizedState())
 			if Profiles[i].ProfileState == "enabled" {
 				enabledIcon.Show()
@@ -574,11 +576,6 @@ func initProfileList() *widget.List {
 			}
 
 			providerLabel.SetText("Provider: " + Profiles[i].ServiceProviderName)
-			if Profiles[i].ProfileNickname != nil {
-				nicknameLabel.SetText(*Profiles[i].ProfileNickname)
-			} else {
-				nicknameLabel.SetText("")
-			}
 		},
 		OnSelected: func(id widget.ListItemID) {
 			SelectedProfile = id
