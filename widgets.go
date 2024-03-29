@@ -22,6 +22,7 @@ var DownloadButton *widget.Button
 var DeleteProfileButton *widget.Button
 var SwitchStateButton *widget.Button
 var ProcessNotificationButton *widget.Button
+var ProcessAllNotificationButton *widget.Button
 var RemoveNotificationButton *widget.Button
 var RemoveAllNotificationButton *widget.Button
 
@@ -114,6 +115,10 @@ func InitWidgets() {
 	ProcessNotificationButton = &widget.Button{Text: "Process",
 		OnTapped: func() { go processNotificationButtonFunc() },
 		Icon:     theme.MediaPlayIcon()}
+
+	ProcessAllNotificationButton = &widget.Button{Text: "Process All",
+		OnTapped: func() { go processAllNotificationButtonFunc() },
+		Icon:     theme.MediaReplayIcon()}
 
 	RemoveNotificationButton = &widget.Button{Text: "Remove",
 		OnTapped: func() { go removeNotificationButtonFunc() },
@@ -322,6 +327,95 @@ func processNotificationButtonFunc() {
 	go processNotification(seq)
 }
 
+func processAllNotificationButtonFunc() {
+	if ConfigInstance.DriverIFID == "" {
+		ShowSelectCardReaderDialog()
+		return
+	}
+	if RefreshNeeded {
+		ShowRefreshNeededDialog()
+		return
+	}
+	config := map[string]bool{
+		"enable":  true,
+		"disable": true,
+		"install": true,
+		"delete":  false,
+	}
+	enableCheck := &widget.Check{
+		Text:    "Remove Enable notification after processing",
+		Checked: true,
+		OnChanged: func(b bool) {
+			config["enable"] = b
+		},
+	}
+	disableCheck := &widget.Check{
+		Text:    "Remove Disable notification after processing",
+		Checked: true,
+		OnChanged: func(b bool) {
+			config["disable"] = b
+		},
+	}
+	installCheck := &widget.Check{
+		Text:    "Remove Install notification after processing",
+		Checked: true,
+		OnChanged: func(b bool) {
+			config["install"] = b
+		},
+	}
+	deleteCheck := &widget.Check{
+		Text:    "Remove Delete notification after processing",
+		Checked: false,
+		OnChanged: func(b bool) {
+			config["delete"] = b
+		},
+	}
+	d := dialog.NewCustomConfirm("Process All Notifications",
+		"OK",
+		"Cancel",
+		container.NewVBox(
+			enableCheck,
+			disableCheck,
+			installCheck,
+			deleteCheck,
+		),
+		func(b bool) {
+			if b {
+				total := len(Notifications)
+				var count int
+				for _, notification := range Notifications {
+					switch notification.ProfileManagementOperation {
+					case "enable":
+						if err := LpacNotificationProcess(notification.SeqNumber, config["enable"]); err != nil {
+							count++
+						}
+					case "disable":
+						if err := LpacNotificationProcess(notification.SeqNumber, config["disable"]); err != nil {
+							count++
+						}
+					case "install":
+						if err := LpacNotificationProcess(notification.SeqNumber, config["install"]); err != nil {
+							count++
+						}
+					case "delete":
+						if err := LpacNotificationProcess(notification.SeqNumber, config["delete"]); err != nil {
+							count++
+						}
+					}
+				}
+				if err := RefreshNotification(); err != nil {
+					ShowLpacErrDialog(err)
+				}
+				d := dialog.NewCustom("Operation Finished",
+					"OK",
+					&widget.Label{Text: fmt.Sprintf("%d processed\n%d succeed\n%d failed", total, total-count, count)},
+					WMain)
+				d.Show()
+			}
+		}, WMain)
+	d.Show()
+}
+
 func removeNotificationButtonFunc() {
 	if ConfigInstance.DriverIFID == "" {
 		ShowSelectCardReaderDialog()
@@ -389,7 +483,6 @@ func removeAllNotificationButtonFunc() {
 						if err := LpacNotificationRemove(notification.SeqNumber); err != nil {
 							ShowLpacErrDialog(err)
 						}
-
 						if err := RefreshNotification(); err != nil {
 							ShowLpacErrDialog(err)
 						}
@@ -682,7 +775,7 @@ func initNotificationList() *widget.List {
 }
 
 func processNotification(seq int) {
-	if err := LpacNotificationProcess(seq); err != nil {
+	if err := LpacNotificationProcess(seq, false); err != nil {
 		ShowLpacErrDialog(err)
 		err2 := RefreshNotification()
 		if err2 != nil {

@@ -238,8 +238,11 @@ func LpacNotificationList() ([]*Notification, error) {
 	return notifications, nil
 }
 
-func LpacNotificationProcess(seq int) error {
+func LpacNotificationProcess(seq int, remove bool) error {
 	args := []string{"notification", "process", strconv.Itoa(seq)}
+	if remove {
+		args = append(args, "-r")
+	}
 	_, err := runLpac(args)
 	if err != nil {
 		return err

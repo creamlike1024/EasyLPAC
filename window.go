@@ -76,6 +76,7 @@ func InitMainWindow() fyne.Window {
 			nil,
 			container.NewHBox(NotificationMaskCheck,
 				spacer, ProcessNotificationButton,
+				spacer, ProcessAllNotificationButton,
 				spacer, RemoveAllNotificationButton,
 				spacer, RemoveNotificationButton),
 			statusBar),
@@ -113,14 +114,14 @@ func InitMainWindow() fyne.Window {
 		&widget.Label{Text: "lpac debug output", TextStyle: fyne.TextStyle{Bold: true}},
 		&widget.Check{
 			Text:    "Enable env LIBEUICC_DEBUG_HTTP",
-			Checked: true,
+			Checked: false,
 			OnChanged: func(b bool) {
 				ConfigInstance.DebugHTTP = b
 			},
 		},
 		&widget.Check{
 			Text:    "Enable env LIBEUICC_DEBUG_APDU",
-			Checked: true,
+			Checked: false,
 			OnChanged: func(b bool) {
 				ConfigInstance.DebugAPDU = b
 			},

@@ -22,9 +22,6 @@ type Config struct {
 var ConfigInstance Config
 
 func LoadConfig() error {
-	ConfigInstance.DebugAPDU = true
-	ConfigInstance.DebugHTTP = true
-
 	switch platform := runtime.GOOS; platform {
 	case "windows":
 		ConfigInstance.EXEName = "lpac.exe"
