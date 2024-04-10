@@ -7,11 +7,12 @@ Download: [GitHub Release](https://github.com/creamlike1024/EasyLPAC/releases/la
 System Requirement
 - Windows 7+
 - MacOS 12+
-- ~~Linux: ? glibc, glfw, gtk3dialog~~ Packaging for various distributions works in progress
 
 Currently, only APDUINTERFACE for pcsc and HTTPINTERFACE for curl are supported.
 
 # Usage
+
+**[estk.me User](https://www.estk.me/)**: If you are using the ACR38U card reader included with estk card and are currently using **macOS 14 Sonoma**, please install the [card reader driver](https://www.acs.com.hk/en/driver/228/acr38u-nd-pocketmate-smart-card-reader-micro-usb/) first
 
 Releases have lpac binary included
 
@@ -32,7 +33,7 @@ Step
 
 If you are using macOS Sonoma, you may encounter this error: `SCardTransmit() failed: 80100016`
 
-This is because there is a bug in Apple's USB CCID Card Reader Driver, you can solve it by reading the following article:
+This is because there is a bug in Apple's USB CCID Card Reader Driver, you can try installing the macOS driver provided by your card reader manufacturer, Or you can solve it by reading the following article:
 
 - [Apple's own CCID driver in Sonoma](https://blog.apdu.fr/posts/2023/11/apple-own-ccid-driver-in-sonoma/)
 - [macOS Sonoma bug: SCardControl() returns SCARD_E_NOT_TRANSACTED](https://blog.apdu.fr/posts/2023/09/macos-sonoma-bug-scardcontrol-returns-scard_e_not_transacted/)
