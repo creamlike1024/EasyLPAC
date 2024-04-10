@@ -77,7 +77,7 @@ func InitMainWindow() fyne.Window {
 			container.NewHBox(NotificationMaskCheck,
 				spacer, ProcessNotificationButton,
 				spacer, ProcessAllNotificationButton,
-				spacer, RemoveAllNotificationButton,
+				spacer, BatchRemoveNotificationButton,
 				spacer, RemoveNotificationButton),
 			statusBar),
 		nil,

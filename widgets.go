@@ -24,7 +24,7 @@ var SwitchStateButton *widget.Button
 var ProcessNotificationButton *widget.Button
 var ProcessAllNotificationButton *widget.Button
 var RemoveNotificationButton *widget.Button
-var RemoveAllNotificationButton *widget.Button
+var BatchRemoveNotificationButton *widget.Button
 
 var ProfileList *widget.List
 var NotificationList *widget.List
@@ -124,8 +124,8 @@ func InitWidgets() {
 		OnTapped: func() { go removeNotificationButtonFunc() },
 		Icon:     theme.ContentRemoveIcon()}
 
-	RemoveAllNotificationButton = &widget.Button{Text: "Remove All",
-		OnTapped: func() { go removeAllNotificationButtonFunc() },
+	BatchRemoveNotificationButton = &widget.Button{Text: "Batch Remove",
+		OnTapped: func() { go batchRemoveNotificationButtonFunc() },
 		Icon:     theme.DeleteIcon()}
 
 	FreeSpaceLabel = widget.NewLabel("")
@@ -454,7 +454,7 @@ func removeNotificationButtonFunc() {
 	d.Show()
 }
 
-func removeAllNotificationButtonFunc() {
+func batchRemoveNotificationButtonFunc() {
 	if ConfigInstance.DriverIFID == "" {
 		ShowSelectCardReaderDialog()
 		return
@@ -463,38 +463,85 @@ func removeAllNotificationButtonFunc() {
 		ShowRefreshNeededDialog()
 		return
 	}
-	var d dialog.Dialog
-	entry := &widget.Entry{PlaceHolder: "Confirm"}
-	content := container.NewBorder(container.NewVBox(
-		&widget.Label{Alignment: fyne.TextAlignCenter, Text: "Are you sure you want to delete all notifications?\n" +
-			"This operation is not recoverable"},
-		container.NewCenter(widget.NewRichTextFromMarkdown("Enter **Confirm** to proceed")),
-	),
-		container.NewCenter(container.NewHBox(
-			&widget.Button{Text: "Cancel", Icon: theme.CancelIcon(), OnTapped: func() { d.Hide() }},
-			spacer,
-			&widget.Button{Text: "OK", Icon: theme.ConfirmIcon(), OnTapped: func() {
-				d.Hide()
-				if strings.TrimSpace(entry.Text) != "Confirm" {
-					dError := dialog.NewError(errors.New("input mismatch, cancel operation"), WMain)
-					dError.Show()
-				} else {
-					for _, notification := range Notifications {
+	config := map[string]bool{
+		"enable":  true,
+		"disable": true,
+		"install": true,
+		"delete":  false,
+	}
+	enableCheck := &widget.Check{
+		Text:    "Enable",
+		Checked: true,
+		OnChanged: func(b bool) {
+			config["enable"] = b
+		},
+	}
+	disableCheck := &widget.Check{
+		Text:    "Disable",
+		Checked: true,
+		OnChanged: func(b bool) {
+			config["disable"] = b
+		},
+	}
+	installCheck := &widget.Check{
+		Text:    "Install",
+		Checked: true,
+		OnChanged: func(b bool) {
+			config["install"] = b
+		},
+	}
+	deleteCheck := &widget.Check{
+		Text:    "Delete",
+		Checked: false,
+		OnChanged: func(b bool) {
+			config["delete"] = b
+		},
+	}
+	d := dialog.NewCustomConfirm("Batch Remove Notifications", "Confirm", "Cancel",
+		container.NewVBox(
+			&widget.Label{Text: "Select the notification type to remove"},
+			enableCheck,
+			disableCheck,
+			installCheck,
+			deleteCheck),
+		func(b bool) {
+			if b {
+				var failedCount int
+				var total int
+				for _, notification := range Notifications {
+					switch notification.ProfileManagementOperation {
+					case "enable":
 						if err := LpacNotificationRemove(notification.SeqNumber); err != nil {
-							ShowLpacErrDialog(err)
+							failedCount++
 						}
-						if err := RefreshNotification(); err != nil {
-							ShowLpacErrDialog(err)
+						total++
+					case "disable":
+						if err := LpacNotificationProcess(notification.SeqNumber, config["disable"]); err != nil {
+							failedCount++
 						}
+						total++
+					case "install":
+						if err := LpacNotificationProcess(notification.SeqNumber, config["install"]); err != nil {
+							failedCount++
+						}
+						total++
+					case "delete":
+						if err := LpacNotificationProcess(notification.SeqNumber, config["delete"]); err == nil {
+							failedCount++
+						}
+						total++
 					}
-					dInfo := dialog.NewInformation("Info", "Operation finished", WMain)
-					dInfo.Show()
 				}
-			}})),
-		nil,
-		nil,
-		entry)
-	d = dialog.NewCustomWithoutButtons("Remove All Notification?", content, WMain)
+				if err := RefreshNotification(); err != nil {
+					ShowLpacErrDialog(err)
+				}
+				d := dialog.NewCustom("Operation Finished",
+					"OK",
+					&widget.Label{Text: fmt.Sprintf("%d processed\n%d succeed\n%d failed", total, total-failedCount, failedCount)},
+					WMain)
+				d.Show()
+			}
+		}, WMain)
 	d.Show()
 }
 
