@@ -343,28 +343,28 @@ func processAllNotificationButtonFunc() {
 		"delete":  false,
 	}
 	enableCheck := &widget.Check{
-		Text:    "Remove Enable notification after processing",
+		Text:    "Enable",
 		Checked: true,
 		OnChanged: func(b bool) {
 			config["enable"] = b
 		},
 	}
 	disableCheck := &widget.Check{
-		Text:    "Remove Disable notification after processing",
+		Text:    "Disable",
 		Checked: true,
 		OnChanged: func(b bool) {
 			config["disable"] = b
 		},
 	}
 	installCheck := &widget.Check{
-		Text:    "Remove Install notification after processing",
+		Text:    "Install",
 		Checked: true,
 		OnChanged: func(b bool) {
 			config["install"] = b
 		},
 	}
 	deleteCheck := &widget.Check{
-		Text:    "Remove Delete notification after processing",
+		Text:    "Delete",
 		Checked: false,
 		OnChanged: func(b bool) {
 			config["delete"] = b
@@ -374,6 +374,7 @@ func processAllNotificationButtonFunc() {
 		"OK",
 		"Cancel",
 		container.NewVBox(
+			&widget.Label{Text: "Remove the following notification type after processing:"},
 			enableCheck,
 			disableCheck,
 			installCheck,
