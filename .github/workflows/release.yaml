@@ -48,13 +48,16 @@ jobs:
           go install fyne.io/fyne/v2/cmd/fyne@latest
           go install github.com/fyne-io/fyne-cross@latest
 
-#      - name: Build for Linux
-#        if: runner.os == 'Linux'
-#        run: |
-#          go build -ldflags="-s -w"
-#          mkdir lpac
-#          chmod +x EasyLPAC
-#          tar zcf EasyLPAC-linux-x86_64.tar.gz EasyLPAC lpac
+      - name: Build for Linux
+        if: runner.os == 'Linux'
+        run: |
+          go generate
+          go build -ldflags="-s -w"
+          wget https://github.com/estkme-group/lpac/releases/download/v2.0.0/lpac-linux-x86_64.zip -O lpac.zip && unzip lpac.zip && rm lpac.zip
+          chmod +x lpac
+          chmod +x EasyLPAC
+          tar zcf EasyLPAC-linux-x86_64-with-lpac.tar.gz EasyLPAC lpac
+          tar zcf EasyLPAC-linux-x86_64.tar.gz EasyLPAC
 
       - name: Build for Windows
         if: runner.os == 'Linux'
@@ -101,6 +104,8 @@ jobs:
             EasyLPAC-windows-arm64-with-lpac.zip
             EasyLPAC-macOS-x86_64-with-lpac.zip
             EasyLPAC-macOS-x86_64-with-lpac.dmg
+            EasyLPAC-linux-x86_64-with-lpac.tar.gz
+            EasyLPAC-linux-x86_64.tar.gz
 
       - name: Release
         uses: softprops/action-gh-release@v1
@@ -111,3 +116,5 @@ jobs:
             EasyLPAC-windows-arm64-with-lpac.zip
             EasyLPAC-macOS-x86_64-with-lpac.zip
             EasyLPAC-macOS-x86_64-with-lpac.dmg
+            EasyLPAC-linux-x86_64-with-lpac.tar.gz
+            EasyLPAC-linux-x86_64.tar.gz
