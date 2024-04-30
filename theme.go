@@ -12,9 +12,9 @@ type MyTheme struct{}
 func (MyTheme) Color(n fyne.ThemeColorName, v fyne.ThemeVariant) color.Color {
 	switch n {
 	case theme.ColorNamePrimary:
-		return color.NRGBA{R: 0xf6, G: 0x5d, B: 0x29, A: 0xff}
+		return color.NRGBA{R: 0xe6, G: 0x77, B: 0x2e, A: 0xff}
 	case theme.ColorNameHyperlink:
-		return color.NRGBA{R: 0xf6, G: 0x5d, B: 0x29, A: 0xff}
+		return color.NRGBA{R: 0xe6, G: 0x77, B: 0x2e, A: 0xff}
 	case theme.ColorNameFocus:
 		return color.NRGBA{R: 0xf5, G: 0x65, B: 0x08, A: 0x2a}
 	case theme.ColorNameSelection:
