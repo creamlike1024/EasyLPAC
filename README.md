@@ -4,9 +4,9 @@
 
 Download: [GitHub Release](https://github.com/creamlike1024/EasyLPAC/releases/latest)
 
-System Requirement
-- Windows 7+
-- macOS 12+
+System requirements:
+- Windows7+
+- latest macOS
 - Linux: gtk3dialog? I'm not sure about dependencies.
 
 Currently, only APDUINTERFACE for pcsc and HTTPINTERFACE for curl are supported.
@@ -15,7 +15,9 @@ Currently, only APDUINTERFACE for pcsc and HTTPINTERFACE for curl are supported.
 
 **[estk.me User](https://www.estk.me/)**: If you are using the ACR38U card reader included with estk card and are currently using **macOS 14 Sonoma**, please install the [card reader driver](https://www.acs.com.hk/en/driver/228/acr38u-nd-pocketmate-smart-card-reader-micro-usb/) first
 
-Linux release `with-lpac` including the pre-built lpac from [lpac release](https://github.com/estkme-group/lpac/releases/latest), if it can't run on your system, you should [compile lpac](https://github.com/estkme-group/lpac?tab=readme-ov-file#compile) by yourself. The lpac binary file should be placed in the same directory as the EasyLPAC binary file
+Linux release does not include lpac binary, you need to [compile lpac](https://github.com/estkme-group/lpac?tab=readme-ov-file#compile) by yourself. The lpac binary file should be placed in the same directory as the EasyLPAC binary file
+
+Note: Reading LPA activation code and QRCode from clipboard not working in Wayland
 
 # Screenshots
 <p>
