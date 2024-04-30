@@ -15,6 +15,8 @@ jobs:
         os: [ ubuntu-latest,  macos-latest ]
 
     runs-on: ${{ matrix.os }}
+    env:
+      LPAC_VERSION: v2.0.1
     steps:
       - name: Checkout repo
         uses: actions/checkout@v4
@@ -54,8 +56,8 @@ jobs:
           go generate
           go build -ldflags="-s -w"
           chmod +x EasyLPAC
-          wget https://github.com/estkme-group/lpac/archive/refs/tags/v2.0.1.tar.gz -O lpac-v2.0.1-src.tar.gz
-          tar zcf EasyLPAC-linux-x86_64.tar.gz EasyLPAC lpac-v2.0.1-src.tar.gz
+          wget https://github.com/estkme-group/lpac/archive/refs/tags/$LPAC_VERSION.tar.gz -O lpac-$LPAC_VERSION-src.tar.gz
+          tar zcf EasyLPAC-linux-x86_64.tar.gz EasyLPAC lpac-$LPAC_VERSION-src.tar.gz
 
       - name: Build for Windows
         if: runner.os == 'Linux'
@@ -63,15 +65,15 @@ jobs:
           go generate
           fyne-cross windows --arch=amd64,arm64 --icon assets/icon64.png
           cd fyne-cross/bin/windows-amd64
-          wget https://github.com/estkme-group/lpac/releases/download/v2.0.1/lpac-windows-x86_64-mingw.zip -O lpac.zip
-          wget https://github.com/estkme-group/lpac/archive/refs/tags/v2.0.1.zip -O lpac-v2.0.1-src.zip
+          wget https://github.com/estkme-group/lpac/releases/download/$LPAC_VERSION/lpac-windows-x86_64-mingw.zip -O lpac.zip
+          wget https://github.com/estkme-group/lpac/archive/refs/tags/$LPAC_VERSION.zip -O lpac-$LPAC_VERSION-src.zip
           unzip lpac.zip && rm lpac.zip
           zip -r $GITHUB_WORKSPACE/EasyLPAC-windows-x86_64-with-lpac.zip ./*
-          cd $GITHUB_WORKSPACE/fyne-cross/bin/windows-arm64
-          wget https://github.com/estkme-group/lpac/releases/download/v2.0.1/lpac-windows-arm64-mingw.zip -O lpac.zip
-          wget https://github.com/estkme-group/lpac/archive/refs/tags/v2.0.1.zip -O lpac-v2.0.1-src.zip
-          unzip lpac.zip && rm lpac.zip
-          zip -r $GITHUB_WORKSPACE/EasyLPAC-windows-arm64-with-lpac.zip ./*
+#          cd $GITHUB_WORKSPACE/fyne-cross/bin/windows-arm64
+#          wget https://github.com/estkme-group/lpac/releases/download/v2.0.1/lpac-windows-arm64-mingw.zip -O lpac.zip
+#          wget https://github.com/estkme-group/lpac/archive/refs/tags/v2.0.1.zip -O lpac-v2.0.1-src.zip
+#          unzip lpac.zip && rm lpac.zip
+#          zip -r $GITHUB_WORKSPACE/EasyLPAC-windows-arm64-with-lpac.zip ./*
 
       - name: Build for macOS
         if: runner.os == 'macOS'
@@ -80,19 +82,19 @@ jobs:
           go generate
           fyne package --icon assets/icon128.png --release
           cd EasyLPAC.app/Contents/MacOS
-          wget https://github.com/estkme-group/lpac/releases/download/v2.0.1/lpac-darwin-universal.zip -O lpac.zip
-          wget https://github.com/estkme-group/lpac/archive/refs/tags/v2.0.1.zip -O lpac-v2.0.1-src.zip
+          wget https://github.com/estkme-group/lpac/releases/download/$LPAC_VERSION/lpac-darwin-universal.zip -O lpac.zip
           unzip lpac.zip && rm lpac.zip
           cd $GITHUB_WORKSPACE
-          zip -r EasyLPAC-macOS-x86_64-with-lpac.zip EasyLPAC.app
-          mkdir dmg && cp -r EasyLPAC.app dmg
+          wget https://github.com/estkme-group/lpac/archive/refs/tags/$LPAC_VERSION.zip -O lpac-$LPAC_VERSION-src.zip
+          zip -r EasyLPAC-macOS-arm64-with-lpac.zip EasyLPAC.app lpac-$LPAC_VERSION-src.zip
+          mkdir dmg && cp -r EasyLPAC.app lpac-$LPAC_VERSION-src.zip dmg
           hdiutil create -volname "EasyLPAC" -srcfolder dmg -ov -format UDRW EasyLPAC.dmg
           hdiutil attach EasyLPAC.dmg
           cp assets/icon.icns /Volumes/EasyLPAC/.VolumeIcon.icns
           SetFile -c icnC /Volumes/EasyLPAC/.VolumeIcon.icns
           SetFile -a C /Volumes/EasyLPAC
           hdiutil detach /Volumes/EasyLPAC
-          hdiutil convert EasyLPAC.dmg -format UDZO -o EasyLPAC-macOS-x86_64-with-lpac.dmg
+          hdiutil convert EasyLPAC.dmg -format UDZO -o EasyLPAC-macOS-arm64-with-lpac.dmg
 
       - name: Upload Artifact
         uses: actions/upload-artifact@v3
@@ -100,10 +102,8 @@ jobs:
           name: build-artifact-${{ matrix.os }}
           path: |
             EasyLPAC-windows-x86_64-with-lpac.zip
-            EasyLPAC-windows-arm64-with-lpac.zip
-            EasyLPAC-macOS-x86_64-with-lpac.zip
-            EasyLPAC-macOS-x86_64-with-lpac.dmg
-#            EasyLPAC-linux-x86_64-with-lpac.tar.gz
+            EasyLPAC-macOS-arm64-with-lpac.zip
+            EasyLPAC-macOS-arm64-with-lpac.dmg
             EasyLPAC-linux-x86_64.tar.gz
 
       - name: Release
@@ -112,8 +112,6 @@ jobs:
         with:
           files: |
             EasyLPAC-windows-x86_64-with-lpac.zip
-            EasyLPAC-windows-arm64-with-lpac.zip
-            EasyLPAC-macOS-x86_64-with-lpac.zip
-            EasyLPAC-macOS-x86_64-with-lpac.dmg
-#            EasyLPAC-linux-x86_64-with-lpac.tar.gz
+            EasyLPAC-macOS-arm64-with-lpac.zip
+            EasyLPAC-macOS-arm64-with-lpac.dmg
             EasyLPAC-linux-x86_64.tar.gz
