@@ -126,14 +126,7 @@ func InitMainWindow() fyne.Window {
 				ConfigInstance.DebugAPDU = b
 			},
 		},
-		&widget.Label{Text: "lpac download settings", TextStyle: fyne.TextStyle{Bold: true}},
-		container.NewGridWrap(fyne.Size{
-			Width:  400,
-			Height: FakeIMEIEntry.MinSize().Height,
-		}, widget.NewForm(&widget.FormItem{
-			Text:   "Fake IMEI",
-			Widget: FakeIMEIEntry,
-		})))
+		&widget.Label{Text: "lpac download settings", TextStyle: fyne.TextStyle{Bold: true}})
 	SettingsTab = container.NewTabItem("Settings", settingsTabContent)
 
 	thankstoText := widget.NewRichTextFromMarkdown(`
@@ -175,11 +168,13 @@ func InitDownloadDialog() dialog.Dialog {
 	smdpEntry := &widget.Entry{PlaceHolder: "Leave it empty to use default SM-DP+"}
 	matchIDEntry := &widget.Entry{PlaceHolder: "Activation code. Optional"}
 	confirmCodeEntry := &widget.Entry{PlaceHolder: "Optional"}
+	imeiEntry := &widget.Entry{PlaceHolder: "The IMEI sent to SM-DP+. Optional"}
 
 	formItems := []*widget.FormItem{
 		{Text: "SM-DP+", Widget: smdpEntry},
 		{Text: "Matching ID", Widget: matchIDEntry},
 		{Text: "Confirm Code", Widget: confirmCodeEntry},
+		{Text: "IMEI", Widget: imeiEntry},
 	}
 
 	form := widget.NewForm(formItems...)
@@ -207,7 +202,7 @@ func InitDownloadDialog() dialog.Dialog {
 				SMDP:        strings.TrimSpace(smdpEntry.Text),
 				MatchID:     strings.TrimSpace(matchIDEntry.Text),
 				ConfirmCode: strings.TrimSpace(confirmCodeEntry.Text),
-				IMEI:        strings.TrimSpace(FakeIMEIEntry.Text),
+				IMEI:        strings.TrimSpace(imeiEntry.Text),
 			}
 			go func() {
 				err := RefreshNotification()
@@ -327,10 +322,6 @@ func InitDownloadDialog() dialog.Dialog {
 			}()
 		},
 	}
-	fakeIMEISetHintLabel := &widget.Label{Text: "", Alignment: fyne.TextAlignCenter}
-	if strings.TrimSpace(FakeIMEIEntry.Text) != "" {
-		fakeIMEISetHintLabel.SetText("Fake IMEI has been set.")
-	}
 	d = dialog.NewCustomWithoutButtons("Download", container.NewBorder(
 		nil,
 		container.NewVBox(spacer, container.NewCenter(selectQRCodeButton), spacer,
@@ -338,10 +329,10 @@ func InitDownloadDialog() dialog.Dialog {
 			container.NewCenter(container.NewHBox(cancelButton, spacer, downloadButton))),
 		nil,
 		nil,
-		container.NewVBox(form, fakeIMEISetHintLabel)), WMain)
+		form), WMain)
 	d.Resize(fyne.Size{
 		Width:  520,
-		Height: 370,
+		Height: 380,
 	})
 	return d
 }

@@ -44,7 +44,6 @@ var SetDefaultSmdpButton *widget.Button
 var ViewCertInfoButton *widget.Button
 var EUICCManufacturerLabel *widget.Label
 var CopyEuiccInfo2Button *widget.Button
-var FakeIMEIEntry *widget.Entry
 
 var ApduDriverSelect *widget.Select
 var ApduDriverRefreshButton *widget.Button
@@ -179,7 +178,6 @@ func InitWidgets() {
 		OnTapped: func() { go copyEuiccInfo2ButtonFunc() },
 		Icon:     theme.ContentCopyIcon()}
 	CopyEuiccInfo2Button.Hide()
-	FakeIMEIEntry = &widget.Entry{PlaceHolder: "The IMEI sent to SM-DP+. Optional"}
 	ApduDriverSelect = widget.NewSelect([]string{}, func(s string) { SetDriverIFID(s) })
 	ApduDriverRefreshButton = &widget.Button{OnTapped: func() { go RefreshApduDriver() },
 		Icon: theme.SearchReplaceIcon()}
