@@ -53,11 +53,9 @@ jobs:
         run: |
           go generate
           go build -ldflags="-s -w"
-          wget https://github.com/estkme-group/lpac/releases/download/v2.0.0/lpac-linux-x86_64.zip -O lpac.zip && unzip lpac.zip && rm lpac.zip
-          chmod +x lpac
           chmod +x EasyLPAC
-          tar zcf EasyLPAC-linux-x86_64-with-lpac.tar.gz EasyLPAC lpac
-          tar zcf EasyLPAC-linux-x86_64.tar.gz EasyLPAC
+          wget https://github.com/estkme-group/lpac/archive/refs/tags/v2.0.1.tar.gz -O lpac-v2.0.1-src.tar.gz
+          tar zcf EasyLPAC-linux-x86_64.tar.gz EasyLPAC lpac-v2.0.1-src.tar.gz
 
       - name: Build for Windows
         if: runner.os == 'Linux'
@@ -65,14 +63,14 @@ jobs:
           go generate
           fyne-cross windows --arch=amd64,arm64 --icon assets/icon64.png
           cd fyne-cross/bin/windows-amd64
-          wget https://github.com/estkme-group/lpac/releases/download/v2.0.0/lpac-windows-x86_64-mingw.zip -O lpac.zip
-          unzip lpac.zip
-          rm lpac.zip
+          wget https://github.com/estkme-group/lpac/releases/download/v2.0.1/lpac-windows-x86_64-mingw.zip -O lpac.zip
+          wget https://github.com/estkme-group/lpac/archive/refs/tags/v2.0.1.zip -O lpac-v2.0.1-src.zip
+          unzip lpac.zip && rm lpac.zip
           zip -r $GITHUB_WORKSPACE/EasyLPAC-windows-x86_64-with-lpac.zip ./*
           cd $GITHUB_WORKSPACE/fyne-cross/bin/windows-arm64
-          wget https://github.com/estkme-group/lpac/releases/download/v2.0.0/lpac-windows-arm64-mingw.zip -O lpac.zip
-          unzip lpac.zip
-          rm lpac.zip
+          wget https://github.com/estkme-group/lpac/releases/download/v2.0.1/lpac-windows-arm64-mingw.zip -O lpac.zip
+          wget https://github.com/estkme-group/lpac/archive/refs/tags/v2.0.1.zip -O lpac-v2.0.1-src.zip
+          unzip lpac.zip && rm lpac.zip
           zip -r $GITHUB_WORKSPACE/EasyLPAC-windows-arm64-with-lpac.zip ./*
 
       - name: Build for macOS
@@ -82,7 +80,8 @@ jobs:
           go generate
           fyne package --icon assets/icon128.png --release
           cd EasyLPAC.app/Contents/MacOS
-          wget https://github.com/estkme-group/lpac/releases/download/v2.0.0/lpac-darwin-universal.zip -O lpac.zip
+          wget https://github.com/estkme-group/lpac/releases/download/v2.0.1/lpac-darwin-universal.zip -O lpac.zip
+          wget https://github.com/estkme-group/lpac/archive/refs/tags/v2.0.1.zip -O lpac-v2.0.1-src.zip
           unzip lpac.zip && rm lpac.zip
           cd $GITHUB_WORKSPACE
           zip -r EasyLPAC-macOS-x86_64-with-lpac.zip EasyLPAC.app
@@ -104,7 +103,7 @@ jobs:
             EasyLPAC-windows-arm64-with-lpac.zip
             EasyLPAC-macOS-x86_64-with-lpac.zip
             EasyLPAC-macOS-x86_64-with-lpac.dmg
-            EasyLPAC-linux-x86_64-with-lpac.tar.gz
+#            EasyLPAC-linux-x86_64-with-lpac.tar.gz
             EasyLPAC-linux-x86_64.tar.gz
 
       - name: Release
@@ -116,5 +115,5 @@ jobs:
             EasyLPAC-windows-arm64-with-lpac.zip
             EasyLPAC-macOS-x86_64-with-lpac.zip
             EasyLPAC-macOS-x86_64-with-lpac.dmg
-            EasyLPAC-linux-x86_64-with-lpac.tar.gz
+#            EasyLPAC-linux-x86_64-with-lpac.tar.gz
             EasyLPAC-linux-x86_64.tar.gz
