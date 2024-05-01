@@ -41,11 +41,11 @@ func LoadConfig() error {
 		ConfigInstance.LogDir = filepath.Join("/tmp", "EasyLPAC-log")
 	default:
 		ConfigInstance.EXEName = "lpac"
-		pwd, err := os.Getwd()
+		exePath, err := os.Executable()
 		if err != nil {
 			return err
 		}
-		ConfigInstance.LpacDir = pwd
+		ConfigInstance.LpacDir = filepath.Dir(exePath)
 		ConfigInstance.LogDir = filepath.Join("/tmp", "EasyLPAC-log")
 	}
 
