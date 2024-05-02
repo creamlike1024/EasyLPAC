@@ -22,30 +22,24 @@ type Config struct {
 var ConfigInstance Config
 
 func LoadConfig() error {
+	exePath, err := os.Executable()
+	if err != nil {
+		return err
+	}
+	exePath, err = filepath.EvalSymlinks(exePath)
+	if err != nil {
+		return err
+	}
+	exeDir := filepath.Dir(exePath)
+
 	switch platform := runtime.GOOS; platform {
 	case "windows":
 		ConfigInstance.EXEName = "lpac.exe"
-		pwd, err := os.Getwd()
-		if err != nil {
-			return err
-		}
-		ConfigInstance.LpacDir = pwd
-		ConfigInstance.LogDir = filepath.Join(pwd, "log")
-	case "darwin":
-		ConfigInstance.EXEName = "lpac"
-		exePath, err := os.Executable()
-		if err != nil {
-			return err
-		}
-		ConfigInstance.LpacDir = filepath.Dir(exePath)
-		ConfigInstance.LogDir = filepath.Join("/tmp", "EasyLPAC-log")
+		ConfigInstance.LpacDir = exeDir
+		ConfigInstance.LogDir = filepath.Join(exeDir, "log")
 	default:
 		ConfigInstance.EXEName = "lpac"
-		exePath, err := os.Executable()
-		if err != nil {
-			return err
-		}
-		ConfigInstance.LpacDir = filepath.Dir(exePath)
+		ConfigInstance.LpacDir = exeDir
 		ConfigInstance.LogDir = filepath.Join("/tmp", "EasyLPAC-log")
 	}
 
