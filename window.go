@@ -125,8 +125,7 @@ func InitMainWindow() fyne.Window {
 			OnChanged: func(b bool) {
 				ConfigInstance.DebugAPDU = b
 			},
-		},
-		&widget.Label{Text: "lpac download settings", TextStyle: fyne.TextStyle{Bold: true}})
+		})
 	SettingsTab = container.NewTabItem("Settings", settingsTabContent)
 
 	thankstoText := widget.NewRichTextFromMarkdown(`
