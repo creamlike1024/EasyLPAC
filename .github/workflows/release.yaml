@@ -69,7 +69,6 @@ jobs:
           wget https://github.com/estkme-group/lpac/releases/download/$LPAC_VERSION/lpac-windows-x86_64-mingw.zip -O lpac.zip
           wget https://github.com/estkme-group/lpac/archive/refs/tags/$LPAC_VERSION.zip -O lpac-$LPAC_VERSION-src.zip
           wget https://github.com/estkme-group/lpac/raw/main/src/LICENSE -O LICENSE-lpac
-          wget https://github.com/estkme-group/lpac/raw/main/euicc/LICENSE -O LICENSE-lpac-libeuicc
           cp $GITHUB_WORKSPACE/LICENSE ./
           unzip lpac.zip && rm lpac.zip
           zip -r $GITHUB_WORKSPACE/EasyLPAC-windows-x86_64-with-lpac.zip ./*
@@ -86,7 +85,6 @@ jobs:
           cd $GITHUB_WORKSPACE
           wget https://github.com/estkme-group/lpac/archive/refs/tags/$LPAC_VERSION.zip -O lpac-$LPAC_VERSION-src.zip
           wget https://github.com/estkme-group/lpac/raw/main/src/LICENSE -O LICENSE-lpac
-          wget https://github.com/estkme-group/lpac/raw/main/euicc/LICENSE -O LICENSE-lpac-libeuicc
           zip -r EasyLPAC-macOS-arm64-with-lpac.zip EasyLPAC.app lpac-$LPAC_VERSION-src.zip LICENSE*
           mkdir dmg && cp -r EasyLPAC.app lpac-$LPAC_VERSION-src.zip LICENSE* dmg
           hdiutil create -volname "EasyLPAC" -srcfolder dmg -ov -format UDRW EasyLPAC.dmg
