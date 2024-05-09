@@ -9,6 +9,7 @@ import (
 	"math"
 	"os/exec"
 	"runtime"
+	"sort"
 	"strings"
 )
 
@@ -47,6 +48,9 @@ func RefreshNotification() error {
 	if err != nil {
 		return err
 	}
+	sort.Slice(Notifications, func(i, j int) bool {
+		return Notifications[i].SeqNumber < Notifications[j].SeqNumber
+	})
 	// 刷新 List
 	NotificationList.Refresh()
 	NotificationList.UnselectAll()
