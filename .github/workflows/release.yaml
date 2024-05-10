@@ -12,7 +12,13 @@ jobs:
   build:
     strategy:
       matrix:
-        os: [ ubuntu-latest,  macos-latest ]
+        include:
+          - os: ubuntu-latest
+            label: 'ubuntu'
+          - os: macos-latest
+            label: 'macos-arm'
+          - os: macos-13
+            label: 'macos-x86'
 
     runs-on: ${{ matrix.os }}
     env:
@@ -73,8 +79,8 @@ jobs:
           unzip lpac.zip && rm lpac.zip
           zip -r $GITHUB_WORKSPACE/EasyLPAC-windows-x86_64-with-lpac.zip ./*
 
-      - name: Build for macOS
-        if: runner.os == 'macOS'
+      - name: Build for macOS ARM
+        if: matrix.label == 'macos-arm'
         run: |
           go install fyne.io/fyne/v2/cmd/fyne@latest
           go generate
@@ -95,14 +101,38 @@ jobs:
           hdiutil detach /Volumes/EasyLPAC
           hdiutil convert EasyLPAC.dmg -format UDZO -o EasyLPAC-macOS-arm64-with-lpac.dmg
 
+      - name: Build for macOS x86
+        if: matrix.label == 'macos-x86'
+        run: |
+          go install fyne.io/fyne/v2/cmd/fyne@latest
+          go generate
+          fyne package --icon assets/icon128.png --release
+          cd EasyLPAC.app/Contents/MacOS
+          wget https://github.com/estkme-group/lpac/releases/download/$LPAC_VERSION/lpac-darwin-universal.zip -O lpac.zip
+          unzip lpac.zip && rm lpac.zip
+          cd $GITHUB_WORKSPACE
+          wget https://github.com/estkme-group/lpac/archive/refs/tags/$LPAC_VERSION.zip -O lpac-$LPAC_VERSION-src.zip
+          wget https://github.com/estkme-group/lpac/raw/main/src/LICENSE -O LICENSE-lpac
+          zip -r EasyLPAC-macOS-x86_64-with-lpac.zip EasyLPAC.app lpac-$LPAC_VERSION-src.zip LICENSE*
+          mkdir dmg && cp -r EasyLPAC.app lpac-$LPAC_VERSION-src.zip LICENSE* dmg
+          hdiutil create -volname "EasyLPAC" -srcfolder dmg -ov -format UDRW EasyLPAC.dmg
+          hdiutil attach EasyLPAC.dmg
+          cp assets/icon.icns /Volumes/EasyLPAC/.VolumeIcon.icns
+          SetFile -c icnC /Volumes/EasyLPAC/.VolumeIcon.icns
+          SetFile -a C /Volumes/EasyLPAC
+          hdiutil detach /Volumes/EasyLPAC
+          hdiutil convert EasyLPAC.dmg -format UDZO -o EasyLPAC-macOS-x86_64-with-lpac.dmg
+
       - name: Upload Artifact
         uses: actions/upload-artifact@v4
         with:
-          name: build-artifact-${{ matrix.os }}
+          name: build-artifact-${{ matrix.label }}
           path: |
             EasyLPAC-windows-x86_64-with-lpac.zip
             EasyLPAC-macOS-arm64-with-lpac.zip
             EasyLPAC-macOS-arm64-with-lpac.dmg
+            EasyLPAC-macOS-x86_64-with-lpac.zip
+            EasyLPAC-macOS-x86_64-with-lpac.dmg
             EasyLPAC-linux-x86_64.tar.gz
 
       - name: Release
@@ -113,4 +143,6 @@ jobs:
             EasyLPAC-windows-x86_64-with-lpac.zip
             EasyLPAC-macOS-arm64-with-lpac.zip
             EasyLPAC-macOS-arm64-with-lpac.dmg
+            EasyLPAC-macOS-x86_64-with-lpac.zip
+            EasyLPAC-macOS-x86_64-with-lpac.dmg
             EasyLPAC-linux-x86_64.tar.gz
