@@ -17,6 +17,7 @@ type Config struct {
 	LogDir      string
 	LogFilename string
 	LogFile     *os.File
+	AutoMode    bool
 }
 
 var ConfigInstance Config
@@ -42,6 +43,7 @@ func LoadConfig() error {
 		ConfigInstance.LpacDir = exeDir
 		ConfigInstance.LogDir = filepath.Join("/tmp", "EasyLPAC-log")
 	}
+	ConfigInstance.AutoMode = true
 
 	ConfigInstance.LogFilename = fmt.Sprintf("lpac-%s.txt", time.Now().Format("20060102-150405"))
 	return nil

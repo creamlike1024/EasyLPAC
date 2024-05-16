@@ -251,27 +251,79 @@ func deleteProfileButtonFunc() {
 		func(b bool) {
 			if b {
 				go func() {
-					notificationOrigin := Notifications
 					if err := LpacProfileDelete(Profiles[SelectedProfile].Iccid); err != nil {
 						ShowLpacErrDialog(err)
 						Refresh()
 					} else {
+						notificationOrigin := Notifications
 						Refresh()
-						d := dialog.NewConfirm("Delete Successful",
-							"The profile has been successfully deleted\nSend the delete notification now?\n",
-							func(b bool) {
-								if b {
-									deleteNotification := findNewNotification(notificationOrigin, Notifications)
-									if deleteNotification == nil {
-										dError := dialog.NewError(errors.New("notification not found"), WMain)
-										dError.Show()
-										return
-									}
-									go processNotification(deleteNotification.SeqNumber)
+						deleteNotification := findNewNotification(notificationOrigin, Notifications)
+						if deleteNotification == nil {
+							dError := dialog.NewError(errors.New("notification not found"), WMain)
+							dError.Show()
+							return
+						}
+						if ConfigInstance.AutoMode {
+							// 默认保留 delete 通知
+							if err2 := LpacNotificationProcess(deleteNotification.SeqNumber, false); err2 != nil {
+								dialog.ShowError(errors.New("Successfully deleted profile but failed to send notification\nYou should try to send delete notification manually"), WMain)
+							} else {
+								// Ask to remove delete notification
+								// fixme 和手动操作通知模式重构
+								var d *dialog.CustomDialog
+								notNowButton := &widget.Button{
+									Text: "Not Now",
+									Icon: theme.CancelIcon(),
+									OnTapped: func() {
+										d.Hide()
+									},
 								}
-							},
-							WMain)
-						d.Show()
+								removeButton := &widget.Button{
+									Text: "Remove",
+									Icon: theme.DeleteIcon(),
+									OnTapped: func() {
+										go func() {
+											d.Hide()
+											if err3 := LpacNotificationRemove(deleteNotification.SeqNumber); err3 != nil {
+												ShowLpacErrDialog(err3)
+											}
+											if err3 := RefreshNotification(); err3 != nil {
+												ShowLpacErrDialog(err3)
+												return
+											}
+											if err3 := RefreshChipInfo(); err3 != nil {
+												ShowLpacErrDialog(err3)
+												return
+											}
+										}()
+									},
+								}
+								d = dialog.NewCustomWithoutButtons("Remove Notification",
+									container.NewBorder(
+										nil,
+										container.NewCenter(container.NewHBox(notNowButton, spacer, removeButton)),
+										nil,
+										nil,
+										container.NewVBox(
+											&widget.Label{Text: "Successfully deleted profile and sent notification\nDo you want to remove delete notification now?",
+												Alignment: fyne.TextAlignCenter},
+											&widget.Label{Text: fmt.Sprintf("Seq: %d\nICCID: %s\nOperation: %s\nAddress: %s\n",
+												deleteNotification.SeqNumber, deleteNotification.Iccid,
+												deleteNotification.ProfileManagementOperation, deleteNotification.NotificationAddress)})),
+									WMain)
+								d.Show()
+							}
+						} else {
+							d := dialog.NewConfirm("Delete Successful",
+								"The profile has been successfully deleted\nSend the delete notification now?\n",
+								func(b bool) {
+									if b {
+										go processNotificationManually(deleteNotification.SeqNumber)
+									}
+								},
+								WMain)
+							d.Show()
+						}
 					}
 				}()
 			}
@@ -301,6 +353,37 @@ func switchStateButtonFunc() {
 			ShowLpacErrDialog(err)
 		}
 	}
+	if ConfigInstance.AutoMode {
+		notificationsOrigin := Notifications
+		Refresh()
+		switchNotifications := findNewNotifications(notificationsOrigin, Notifications)
+		// 考虑两种情况
+		// 所有 Profile 禁用的情况下，启用 Profile 产生一个 enable 通知
+		// 有一个 Profile 已启用，启用另外一个，产生一个 disable 和一个 enable 通知
+		// 禁用 Profile，产生一个 disable 通知
+		if switchNotifications == nil || len(switchNotifications) > 2 {
+			dialog.ShowError(errors.New("failed to found notification"), WMain)
+		} else {
+			dialogText := "successfully enabled profile\n"
+			var hasError bool
+			for _, notification := range switchNotifications {
+				if err2 := LpacNotificationProcess(notification.SeqNumber, true); err2 != nil {
+					hasError = true
+					switch notification.ProfileManagementOperation {
+					case "enable":
+						dialogText += "failed to process enable notification\n"
+						break
+					case "disable":
+						dialogText += "failed to process disable notification\n"
+						break
+					}
+				}
+			}
+			if hasError {
+				dialog.ShowError(errors.New(dialogText), WMain)
+			}
+		}
+	}
 	Refresh()
 	if ProfileStateAllowDisable {
 		SwitchStateButton.SetText("Enable")
@@ -322,7 +405,7 @@ func processNotificationButtonFunc() {
 		return
 	}
 	seq := Notifications[SelectedNotification].SeqNumber
-	go processNotification(seq)
+	go processNotificationManually(seq)
 }
 
 func processAllNotificationButtonFunc() {
@@ -820,7 +903,7 @@ func initNotificationList() *widget.List {
 		}}
 }
 
-func processNotification(seq int) {
+func processNotificationManually(seq int) {
 	if err := LpacNotificationProcess(seq, false); err != nil {
 		ShowLpacErrDialog(err)
 		err2 := RefreshNotification()
@@ -879,17 +962,31 @@ func processNotification(seq int) {
 	}
 }
 
-func findNewNotification(first, second []*Notification) *Notification {
+func findNewNotification(origin, new []*Notification) *Notification {
 	exists := make(map[int]bool)
-	for _, notification := range first {
+	for _, notification := range origin {
 		exists[notification.SeqNumber] = true
 	}
-	for _, notification := range second {
+	for _, notification := range new {
 		if !exists[notification.SeqNumber] {
 			return notification
 		}
 	}
 	return nil
+}
+
+func findNewNotifications(origin, new []*Notification) []*Notification {
+	exists := make(map[int]bool)
+	var foundNotifications []*Notification
+	for _, notification := range origin {
+		exists[notification.SeqNumber] = true
+	}
+	for _, notification := range new {
+		if !exists[notification.SeqNumber] {
+			foundNotifications = append(foundNotifications, notification)
+		}
+	}
+	return foundNotifications
 }
 
 func findProfileByIccid(iccid string) (*Profile, error) {

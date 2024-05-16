@@ -125,6 +125,14 @@ func InitMainWindow() fyne.Window {
 			OnChanged: func(b bool) {
 				ConfigInstance.DebugAPDU = b
 			},
+		},
+		&widget.Label{Text: "EasyLPAC settings", TextStyle: fyne.TextStyle{Bold: true}},
+		&widget.Check{
+			Text:    "Auto process notification",
+			Checked: true,
+			OnChanged: func(b bool) {
+				ConfigInstance.AutoMode = b
+			},
 		})
 	SettingsTab = container.NewTabItem("Settings", settingsTabContent)
 
