@@ -1,8 +1,10 @@
 # EasyLPAC
-
 [lpac](https://github.com/estkme-group/lpac) GUI Frontend
 
 Download: [GitHub Release](https://github.com/creamlike1024/EasyLPAC/releases/latest)
+
+Arch Linux: ![AUR package](https://img.shields.io/aur/version/easylpac) [AUR - easylpac](https://aur.archlinux.org/packages/easylpac)
+ thanks to [@1ridic](https://github.com/1ridic)
 
 System requirements:
 - Windows7+
@@ -18,6 +20,13 @@ Currently, only APDUINTERFACE for pcsc and HTTPINTERFACE for curl are supported.
 Linux release does not include lpac binary, you need to [compile lpac](https://github.com/estkme-group/lpac?tab=readme-ov-file#compile) by yourself. The lpac binary file should be placed in the same directory as the EasyLPAC binary file
 
 Note: Reading LPA activation code and QRCode from clipboard not working in Wayland
+
+## Auto process notification
+EasyLPAC will process notification for any operation and remove it after successfully processing by default.
+
+You can go to Settings Tab and uncheck "Auto process notification" to disable this behavior.
+
+However, arbitrary manipulation of notifications does not comply with GSMA specifications, so manual operation is not recommended.
 
 # Screenshots
 <p>
