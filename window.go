@@ -187,10 +187,9 @@ func InitDownloadDialog() dialog.Dialog {
 	form := widget.NewForm(formItems...)
 	var d dialog.Dialog
 	showConfirmCodeNeededDialog := func() {
-		dConfirmCodeNeeded := dialog.NewInformation("Confirm Code Required",
+		dialog.ShowInformation("Confirm Code Required",
 			"This profile needs confirm code to download.\n"+
 				"Please fill the confirm code manually.", WMain)
-		dConfirmCodeNeeded.Show()
 	}
 	cancelButton := &widget.Button{
 		Text: "Cancel",
@@ -264,13 +263,11 @@ func InitDownloadDialog() dialog.Dialog {
 				} else {
 					result, err := ScanQRCodeImageFile(filename)
 					if err != nil {
-						dError := dialog.NewError(err, WMain)
-						dError.Show()
+						dialog.ShowError(err, WMain)
 					} else {
 						pullInfo, confirmCodeNeeded, err2 := DecodeLpaActivationCode(result.String())
 						if err2 != nil {
-							dError := dialog.NewError(err2, WMain)
-							dError.Show()
+							dialog.ShowError(err2, WMain)
 						} else {
 							smdpEntry.SetText(pullInfo.SMDP)
 							matchIDEntry.SetText(pullInfo.MatchID)
@@ -297,16 +294,14 @@ func InitDownloadDialog() dialog.Dialog {
 
 				format, result, err := PasteFromClipboard()
 				if err != nil {
-					dError := dialog.NewError(err, WMain)
-					dError.Show()
+					dialog.ShowError(err, WMain)
 					return
 				}
 				switch format {
 				case clipboard.FmtImage:
 					qrResult, err = ScanQRCodeImageBytes(result)
 					if err != nil {
-						dError := dialog.NewError(err, WMain)
-						dError.Show()
+						dialog.ShowError(err, WMain)
 						return
 					}
 					pullInfo, confirmCodeNeeded, err = DecodeLpaActivationCode(qrResult.String())
@@ -317,8 +312,7 @@ func InitDownloadDialog() dialog.Dialog {
 					panic(nil)
 				}
 				if err != nil {
-					dError := dialog.NewError(err, WMain)
-					dError.Show()
+					dialog.ShowError(err, WMain)
 					return
 				}
 				smdpEntry.SetText(pullInfo.SMDP)
@@ -399,8 +393,7 @@ func ShowLpacErrDialog(err error) {
 				widget.NewLabel("lpac error"))),
 			container.NewCenter(l),
 			container.NewCenter(widget.NewLabel("Please check the log for details")))
-		d := dialog.NewCustom("Error", "OK", content, WMain)
-		d.Show()
+		dialog.ShowCustom("Error", "OK", content, WMain)
 	}()
 }
 
@@ -417,14 +410,12 @@ func ShowSelectItemDialog() {
 
 func ShowSelectCardReaderDialog() {
 	go func() {
-		d := dialog.NewInformation("Info", "Please select a card reader.", WMain)
-		d.Show()
+		dialog.ShowInformation("Info", "Please select a card reader.", WMain)
 	}()
 }
 
 func ShowRefreshNeededDialog() {
 	go func() {
-		d := dialog.NewInformation("Info", "Please refresh before proceeding.\n", WMain)
-		d.Show()
+		dialog.ShowInformation("Info", "Please refresh before proceeding.\n", WMain)
 	}()
 }

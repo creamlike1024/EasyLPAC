@@ -101,6 +101,7 @@ func runLpac(args []string) (json.RawMessage, error) {
 					var currentWidth int
 					var currentLine strings.Builder
 					for _, runeValue := range line {
+						// fixme 现在貌似没有必要了
 						// 使用字符宽度而不是长度，让包含 CJK 字符的字符串也能正确限制显示长度
 						runeWidth := runewidth.RuneWidth(runeValue)
 						if currentWidth+runeWidth > maxWidth {
@@ -201,8 +202,7 @@ func LpacProfileDownload(info PullInfo) {
 		Refresh()
 		downloadNotification := findNewNotification(notificationOrigin, Notifications)
 		if downloadNotification == nil {
-			dError := dialog.NewError(errors.New("notification not found"), WMain)
-			dError.Show()
+			dialog.ShowError(errors.New("notification not found"), WMain)
 			return
 		}
 		if ConfigInstance.AutoMode {
@@ -214,14 +214,13 @@ func LpacProfileDownload(info PullInfo) {
 			}
 			dialog.ShowInformation("Info", dialogText, WMain)
 		} else {
-			d := dialog.NewConfirm("Send Install Notification",
+			dialog.ShowConfirm("Send Install Notification",
 				"Download successful\nSend the install notification now?\n",
 				func(b bool) {
 					if b {
 						go processNotificationManually(downloadNotification.SeqNumber)
 					}
 				}, WMain)
-			d.Show()
 		}
 	}
 }

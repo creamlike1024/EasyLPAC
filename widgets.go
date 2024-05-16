@@ -105,8 +105,9 @@ func InitWidgets() {
 		OnTapped: func() { go deleteProfileButtonFunc() },
 		Icon:     theme.DeleteIcon()}
 
-	SwitchStateButton = &widget.Button{Text: "Enable", OnTapped: func() { go switchStateButtonFunc() },
-		Icon: theme.ConfirmIcon()}
+	SwitchStateButton = &widget.Button{Text: "Enable",
+		OnTapped: func() { go switchStateButtonFunc() },
+		Icon:     theme.ConfirmIcon()}
 
 	ProfileList = initProfileList()
 	NotificationList = initNotificationList()
@@ -193,8 +194,7 @@ func downloadButtonFunc() {
 		ShowRefreshNeededDialog()
 		return
 	}
-	d := InitDownloadDialog()
-	d.Show()
+	InitDownloadDialog().Show()
 }
 
 func setNicknameButtonFunc() {
@@ -210,8 +210,7 @@ func setNicknameButtonFunc() {
 		ShowSelectItemDialog()
 		return
 	}
-	d := InitSetNicknameDialog()
-	d.Show()
+	InitSetNicknameDialog().Show()
 }
 
 func deleteProfileButtonFunc() {
@@ -243,7 +242,7 @@ func deleteProfileButtonFunc() {
 	if Profiles[SelectedProfile].ProfileNickname != nil {
 		profileText += fmt.Sprint("Nickname: ", *Profiles[SelectedProfile].ProfileNickname, "\n")
 	}
-	d := dialog.NewCustomConfirm("Confirm",
+	dialog.ShowCustomConfirm("Confirm",
 		"Confirm",
 		"Cancel",
 		container.NewVBox(container.NewCenter(widget.NewLabel("Are you sure you want to delete this profile?")),
@@ -259,8 +258,7 @@ func deleteProfileButtonFunc() {
 						Refresh()
 						deleteNotification := findNewNotification(notificationOrigin, Notifications)
 						if deleteNotification == nil {
-							dError := dialog.NewError(errors.New("notification not found"), WMain)
-							dError.Show()
+							dialog.ShowError(errors.New("notification not found"), WMain)
 							return
 						}
 						if ConfigInstance.AutoMode {
@@ -314,7 +312,7 @@ func deleteProfileButtonFunc() {
 								d.Show()
 							}
 						} else {
-							d := dialog.NewConfirm("Delete Successful",
+							dialog.ShowConfirm("Delete Successful",
 								"The profile has been successfully deleted\nSend the delete notification now?\n",
 								func(b bool) {
 									if b {
@@ -322,13 +320,11 @@ func deleteProfileButtonFunc() {
 									}
 								},
 								WMain)
-							d.Show()
 						}
 					}
 				}()
 			}
 		}, WMain)
-	d.Show()
 }
 
 func switchStateButtonFunc() {
@@ -451,7 +447,7 @@ func processAllNotificationButtonFunc() {
 			config["delete"] = b
 		},
 	}
-	d := dialog.NewCustomConfirm("Process All Notifications",
+	dialog.ShowCustomConfirm("Process All Notifications",
 		"OK",
 		"Cancel",
 		container.NewVBox(
@@ -488,14 +484,12 @@ func processAllNotificationButtonFunc() {
 				if err := RefreshNotification(); err != nil {
 					ShowLpacErrDialog(err)
 				}
-				d := dialog.NewCustom("Operation Finished",
+				dialog.ShowCustom("Operation Finished",
 					"OK",
 					&widget.Label{Text: fmt.Sprintf("%d processed\n%d succeed\n%d failed", total, total-count, count)},
 					WMain)
-				d.Show()
 			}
 		}, WMain)
-	d.Show()
 }
 
 func removeNotificationButtonFunc() {
@@ -511,7 +505,7 @@ func removeNotificationButtonFunc() {
 		ShowSelectItemDialog()
 		return
 	}
-	d := dialog.NewCustomConfirm("Confirm",
+	dialog.ShowCustomConfirm("Confirm",
 		"Confirm",
 		"Cancel",
 		&widget.Label{Text: "Are you sure you want to remove this notification?\n",
@@ -533,7 +527,6 @@ func removeNotificationButtonFunc() {
 				}
 			}
 		}, WMain)
-	d.Show()
 }
 
 func batchRemoveNotificationButtonFunc() {
@@ -579,7 +572,7 @@ func batchRemoveNotificationButtonFunc() {
 			config["delete"] = b
 		},
 	}
-	d := dialog.NewCustomConfirm("Batch Remove Notifications", "Confirm", "Cancel",
+	dialog.ShowCustomConfirm("Batch Remove Notifications", "Confirm", "Cancel",
 		container.NewVBox(
 			&widget.Label{Text: "Select the notification type to remove"},
 			enableCheck,
@@ -617,14 +610,12 @@ func batchRemoveNotificationButtonFunc() {
 				if err := RefreshNotification(); err != nil {
 					ShowLpacErrDialog(err)
 				}
-				d := dialog.NewCustom("Operation Finished",
+				dialog.ShowCustom("Operation Finished",
 					"OK",
 					&widget.Label{Text: fmt.Sprintf("%d processed\n%d succeed\n%d failed", total, total-failedCount, failedCount)},
 					WMain)
-				d.Show()
 			}
 		}, WMain)
-	d.Show()
 }
 
 func copyEidButtonFunc() {
@@ -650,8 +641,7 @@ func setDefaultSmdpButtonFunc() {
 		ShowRefreshNeededDialog()
 		return
 	}
-	d := InitSetDefaultSmdpDialog()
-	d.Show()
+	InitSetDefaultSmdpDialog().Show()
 }
 
 func viewCertInfoButtonFunc() {
@@ -701,19 +691,17 @@ func viewCertInfoButtonFunc() {
 		if selectedCI == Unselected {
 			ShowSelectItemDialog()
 		} else if issuer := GetIssuer(ciWidgetEls[selectedCI].KeyID); issuer == nil {
-			d := dialog.NewInformation("No Data",
+			dialog.ShowInformation("No Data",
 				"The information of this certificate is not included.\n"+
 					"If you have any information about this certificate,\n"+
 					"you can report it to <euicc-dev-manual@septs.pw>\n"+
 					"Thank you",
 				WMain)
-			d.Show()
 		} else {
 			const CiUrl = "https://euicc-manual.septs.app/docs/pki/ci/files/"
 			certificateURL := fmt.Sprint(CiUrl, issuer.KeyID, ".txt")
 			if err := OpenProgram(certificateURL); err != nil {
-				d := dialog.NewError(err, WMain)
-				d.Show()
+				dialog.ShowError(err, WMain)
 			}
 		}
 	}
@@ -915,7 +903,13 @@ func processNotificationManually(seq int) {
 		for _, n := range Notifications {
 			if n.SeqNumber == seq {
 				notification = n
+				break
 			}
+		}
+		if notification == nil {
+			// 不应该出现
+			dialog.ShowError(errors.New("failed to found notification"), WMain)
+			return
 		}
 		var d *dialog.CustomDialog
 		notNowButton := &widget.Button{
