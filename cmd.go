@@ -15,7 +15,7 @@ import (
 	"strings"
 )
 
-func runLpac(args []string) (json.RawMessage, error) {
+func runLpac(args ...string) (json.RawMessage, error) {
 	StatusChan <- StatusProcess
 	LockButtonChan <- true
 	defer func() {
@@ -128,8 +128,7 @@ func runLpac(args []string) (json.RawMessage, error) {
 }
 
 func LpacChipInfo() (*EuiccInfo, error) {
-	args := []string{"chip", "info"}
-	payload, err := runLpac(args)
+	payload, err := runLpac("chip", "info")
 	if err != nil {
 		return nil, err
 	}
@@ -141,8 +140,7 @@ func LpacChipInfo() (*EuiccInfo, error) {
 }
 
 func LpacProfileList() ([]*Profile, error) {
-	args := []string{"profile", "list"}
-	payload, err := runLpac(args)
+	payload, err := runLpac("profile", "list")
 	if err != nil {
 		return nil, err
 	}
@@ -154,8 +152,7 @@ func LpacProfileList() ([]*Profile, error) {
 }
 
 func LpacProfileEnable(iccid string) error {
-	args := []string{"profile", "enable", iccid}
-	_, err := runLpac(args)
+	_, err := runLpac("profile", "enable", iccid)
 	if err != nil {
 		return err
 	}
@@ -163,8 +160,7 @@ func LpacProfileEnable(iccid string) error {
 }
 
 func LpacProfileDisable(iccid string) error {
-	args := []string{"profile", "disable", iccid}
-	_, err := runLpac(args)
+	_, err := runLpac("profile", "disable", iccid)
 	if err != nil {
 		return err
 	}
@@ -172,8 +168,7 @@ func LpacProfileDisable(iccid string) error {
 }
 
 func LpacProfileDelete(iccid string) error {
-	args := []string{"profile", "delete", iccid}
-	_, err := runLpac(args)
+	_, err := runLpac("profile", "delete", iccid)
 	if err != nil {
 		return err
 	}
@@ -194,7 +189,7 @@ func LpacProfileDownload(info PullInfo) {
 	if info.IMEI != "" {
 		args = append(args, "-i", info.IMEI)
 	}
-	_, err := runLpac(args)
+	_, err := runLpac(args...)
 	if err != nil {
 		ShowLpacErrDialog(err)
 	} else {
@@ -226,8 +221,7 @@ func LpacProfileDownload(info PullInfo) {
 }
 
 func LpacProfileNickname(iccid, nickname string) error {
-	args := []string{"profile", "nickname", iccid, nickname}
-	_, err := runLpac(args)
+	_, err := runLpac("profile", "nickname", iccid, nickname)
 	if err != nil {
 		return err
 	}
@@ -235,8 +229,7 @@ func LpacProfileNickname(iccid, nickname string) error {
 }
 
 func LpacNotificationList() ([]*Notification, error) {
-	args := []string{"notification", "list"}
-	payload, err := runLpac(args)
+	payload, err := runLpac("notification", "list")
 	if err != nil {
 		return nil, err
 	}
@@ -252,7 +245,7 @@ func LpacNotificationProcess(seq int, remove bool) error {
 	if remove {
 		args = append(args, "-r")
 	}
-	_, err := runLpac(args)
+	_, err := runLpac(args...)
 	if err != nil {
 		return err
 	}
@@ -260,8 +253,7 @@ func LpacNotificationProcess(seq int, remove bool) error {
 }
 
 func LpacNotificationRemove(seq int) error {
-	args := []string{"notification", "remove", strconv.Itoa(seq)}
-	_, err := runLpac(args)
+	_, err := runLpac("notification", "remove", strconv.Itoa(seq))
 	if err != nil {
 		return err
 	}
@@ -269,8 +261,7 @@ func LpacNotificationRemove(seq int) error {
 }
 
 func LpacDriverApduList() ([]*ApduDriver, error) {
-	args := []string{"driver", "apdu", "list"}
-	payload, err := runLpac(args)
+	payload, err := runLpac("driver", "apdu", "list")
 	if err != nil {
 		return nil, err
 	}
@@ -282,8 +273,7 @@ func LpacDriverApduList() ([]*ApduDriver, error) {
 }
 
 func LpacChipDefaultSmdp(smdp string) error {
-	args := []string{"chip", "defaultsmdp", smdp}
-	_, err := runLpac(args)
+	_, err := runLpac("chip", "defaultsmdp", smdp)
 	if err != nil {
 		return err
 	}
@@ -291,8 +281,7 @@ func LpacChipDefaultSmdp(smdp string) error {
 }
 
 func LpacVersion() (string, error) {
-	args := []string{"version"}
-	payload, err := runLpac(args)
+	payload, err := runLpac("version")
 	if err != nil {
 		return "", err
 	}
