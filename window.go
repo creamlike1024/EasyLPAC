@@ -157,7 +157,7 @@ lpac GUI Frontend
 		container.NewBorder(nil, nil,
 			container.NewHBox(
 				widget.NewLabel(fmt.Sprintf("Version: %s", Version)),
-				LpacVersionButton),
+				LpacVersionLabel),
 			widget.NewLabel(fmt.Sprintf("eUICC Data: %s", EUICCDataVersion))),
 		nil,
 		nil,

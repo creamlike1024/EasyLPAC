@@ -55,7 +55,7 @@ var ChipInfoTab *container.TabItem
 var SettingsTab *container.TabItem
 var AboutTab *container.TabItem
 
-var LpacVersionButton *widget.Button
+var LpacVersionLabel *widget.Label
 
 type ReadOnlyEntry struct{ widget.Entry }
 
@@ -182,7 +182,7 @@ func InitWidgets() {
 	ApduDriverSelect = widget.NewSelect([]string{}, func(s string) { SetDriverIFID(s) })
 	ApduDriverRefreshButton = &widget.Button{OnTapped: func() { go RefreshApduDriver() },
 		Icon: theme.SearchReplaceIcon()}
-	LpacVersionButton = &widget.Button{Text: "lpac version", Icon: theme.InfoIcon(), OnTapped: func() { go showLpacVersionButtonFunc() }}
+	LpacVersionLabel = &widget.Label{}
 }
 
 func downloadButtonFunc() {
@@ -716,21 +716,6 @@ func viewCertInfoButtonFunc() {
 		Width:  600,
 		Height: 500,
 	})
-	d.Show()
-}
-
-func showLpacVersionButtonFunc() {
-	var d dialog.Dialog
-	version, err := LpacVersion()
-	if err != nil {
-		d = dialog.NewError(err, WMain)
-	} else {
-		d = dialog.NewInformation("lpac version", version, WMain)
-		d.Resize(fyne.Size{
-			Width:  200,
-			Height: 100,
-		})
-	}
 	d.Show()
 }
 
