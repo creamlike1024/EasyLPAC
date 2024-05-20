@@ -49,11 +49,3 @@ This is because there is a bug in Apple's USB CCID Card Reader Driver, you can t
 ## lpac error: `APDU library init error`
 
 If you see `SCardListReaders() failed` and `APDU library init error`, that means the card reader is not connected properly. Try connecting the card reader correctly and try again
-
-## Will it send notification automatically?
-
-EasyLPAC will ask you to send notification after install or delete operation.
-
-Other notification(enable, disable) will not be automatically processed. You should process them manually in the Notification Tab
-
-The notification will be kept in your eUICC, including those have been successfully processed. You should manually remove them or click confirm when the program asks you to remove them.
