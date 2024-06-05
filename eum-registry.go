@@ -1,4 +1,4 @@
-//go:generate curl -o eum-registry.json https://euicc-manual.septs.app/docs/pki/eum/manifest.json
+//go:generate curl -o eum-registry.json https://euicc-manual.osmocom.org/docs/pki/eum/manifest.json
 package main
 
 import (

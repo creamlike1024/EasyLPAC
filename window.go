@@ -141,7 +141,7 @@ func InitMainWindow() fyne.Window {
 
 [lpac](https://github.com/estkme-group/lpac) C-based eUICC LPA
 
-[eUICC Manual](https://euicc-manual.septs.app) eUICC Developer Manual
+[eUICC Manual](https://euicc-manual.osmocom.org) eUICC Developer Manual
 
 [fyne](https://github.com/fyne-io/fyne) Material Design GUI toolkit`)
 
