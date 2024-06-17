@@ -22,7 +22,7 @@ jobs:
 
     runs-on: ${{ matrix.os }}
     env:
-      LPAC_VERSION: v2.0.1
+      LPAC_VERSION: v2.0.2
     steps:
       - name: Checkout repo
         uses: actions/checkout@v4
