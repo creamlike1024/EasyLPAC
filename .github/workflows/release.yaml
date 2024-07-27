@@ -98,7 +98,6 @@ jobs:
           hdiutil create -volname "EasyLPAC" -srcfolder dmg -ov -format UDRW EasyLPAC.dmg
           hdiutil attach EasyLPAC.dmg
           cp assets/icon.icns /Volumes/EasyLPAC/.VolumeIcon.icns
-          chmod 644 /Volumes/EasyLPAC/.VolumeIcon.icns
           SetFile -c icnC /Volumes/EasyLPAC/.VolumeIcon.icns
           SetFile -a C /Volumes/EasyLPAC
 
