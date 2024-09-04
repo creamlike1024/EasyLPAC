@@ -207,6 +207,9 @@ func LpacProfileDownload(info PullInfo) {
 			} else {
 				dialogText = "Download successful\nSend install notification successful\nRemove install notification successful\n"
 			}
+			if err2 := RefreshNotification(); err2 != nil {
+				ShowLpacErrDialog(err2)
+			}
 			dialog.ShowInformation("Info", dialogText, WMain)
 		} else {
 			dialog.ShowConfirm("Send Install Notification",
