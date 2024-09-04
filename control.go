@@ -121,6 +121,10 @@ func RefreshApduDriver() {
 		if strings.Contains(d.Name, "canokeys.org") || strings.Contains(d.Name, "YubiKey") {
 			continue
 		}
+		// Workaround: lpac shows an empty driver when no card reader inserted under macOS
+		if d.Name == "" {
+			continue
+		}
 		options = append(options, d.Name)
 	}
 	ApduDriverSelect.SetOptions(options)
