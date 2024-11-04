@@ -698,7 +698,7 @@ func viewCertInfoButtonFunc() {
 					"Thank you",
 				WMain)
 		} else {
-			const CiUrl = "https://euicc-manual.septs.app/docs/pki/ci/files/"
+			const CiUrl = "https://euicc-manual.osmocom.org/docs/pki/ci/files/"
 			certificateURL := fmt.Sprint(CiUrl, issuer.KeyID, ".txt")
 			if err := OpenProgram(certificateURL); err != nil {
 				dialog.ShowError(err, WMain)
