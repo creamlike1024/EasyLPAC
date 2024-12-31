@@ -15,6 +15,8 @@ jobs:
         include:
           - os: ubuntu-latest
             label: 'ubuntu'
+          - os: windows-latest
+            label: 'windows'
           - os: macos-latest
             label: 'macos-arm'
           - os: macos-13
@@ -31,34 +33,37 @@ jobs:
         run: |
           VERSION=$(grep 'Version' FyneApp.toml | sed 's/Version = "\(.*\)"/\1/' | xargs)
           DATE=$(TZ=Asia/Shanghai date +"%Y-%m-%d")
-          if [[ "$RUNNER_OS" == "Linux" ]]; then
-            sed -i "s/const Version = \"development\"/const Version = \"$VERSION\"/" main.go
-            sed -i "s/const EUICCDataVersion = \"unknown\"/const EUICCDataVersion = \"$DATE\"/" main.go
-          elif [[ "$RUNNER_OS" == "macOS" ]]; then
+          if [[ "$RUNNER_OS" == "macOS" ]]; then
             sed -i '' "s/const Version = \"development\"/const Version = \"$VERSION\"/" main.go
             sed -i '' "s/const EUICCDataVersion = \"unknown\"/const EUICCDataVersion = \"$DATE\"/" main.go
+          else
+            sed -i "s/const Version = \"development\"/const Version = \"$VERSION\"/" main.go
+            sed -i "s/const EUICCDataVersion = \"unknown\"/const EUICCDataVersion = \"$DATE\"/" main.go
           fi
+        shell: bash
 
       - name: Setup go
         uses: actions/setup-go@v5
         with:
           go-version: '1.20'
 
-      - name: Setup Docker
-        if: runner.os == 'Linux'
-        uses: docker-practice/actions-setup-docker@master
-
       - name: Setup toolchain
         if: runner.os == 'Linux'
         run: |
           sudo apt-get update
           sudo apt-get install -y build-essential libgl1-mesa-dev xorg-dev libgtk-3-dev
-          go install fyne.io/fyne/v2/cmd/fyne@latest
-          go install github.com/fyne-io/fyne-cross@latest
+
+      - name: Setup msys2
+        if: runner.os == 'Windows'
+        uses: msys2/setup-msys2@v2
+        with:
+          install: git mingw-w64-x86_64-toolchain wget zip unzip
+          path-type: inherit
 
       - name: Build for Linux
         if: runner.os == 'Linux'
         run: |
+          go install fyne.io/fyne/v2/cmd/fyne@latest
           go generate
           go build -ldflags="-s -w"
           chmod +x EasyLPAC
@@ -67,17 +72,19 @@ jobs:
           tar zcf EasyLPAC-linux-x86_64.tar.gz EasyLPAC lpac-$LPAC_VERSION-src.tar.gz LICENSE
 
       - name: Build for Windows
-        if: runner.os == 'Linux'
+        if: runner.os == 'Windows'
         run: |
+          go install fyne.io/fyne/v2/cmd/fyne@latest
           go generate
-          fyne-cross windows --arch=amd64,arm64 --icon assets/icon64.png
-          cd fyne-cross/bin/windows-amd64
+          fyne package --icon assets/icon64.png
+          mkdir easylpac && cp EasyLPAC.exe easylpac && cd easylpac
           wget https://github.com/estkme-group/lpac/releases/download/$LPAC_VERSION/lpac-windows-x86_64-mingw.zip -O lpac.zip
           wget https://github.com/estkme-group/lpac/archive/refs/tags/$LPAC_VERSION.zip -O lpac-$LPAC_VERSION-src.zip
           wget https://github.com/estkme-group/lpac/raw/main/src/LICENSE -O LICENSE-lpac
-          cp $GITHUB_WORKSPACE/LICENSE ./
           unzip lpac.zip && rm lpac.zip
+          cp $GITHUB_WORKSPACE/LICENSE ./
           zip -r $GITHUB_WORKSPACE/EasyLPAC-windows-x86_64-with-lpac.zip ./*
+        shell: msys2 {0}
 
       - name: Build for macOS ARM
         if: matrix.label == 'macos-arm'
@@ -92,37 +99,6 @@ jobs:
           wget https://github.com/estkme-group/lpac/archive/refs/tags/$LPAC_VERSION.zip -O lpac-$LPAC_VERSION-src.zip
           wget https://github.com/estkme-group/lpac/raw/main/src/LICENSE -O LICENSE-lpac
           zip -r EasyLPAC-macOS-arm64-with-lpac.zip EasyLPAC.app lpac-$LPAC_VERSION-src.zip LICENSE*
-          mkdir dmg && cp -r EasyLPAC.app dmg/
-          mkdir dmg/Sources && cp -r lpac-$LPAC_VERSION-src.zip LICENSE* dmg/Sources
-          ln -s /Applications dmg/Applications
-          hdiutil create -volname "EasyLPAC" -srcfolder dmg -ov -format UDRW EasyLPAC.dmg
-          hdiutil attach EasyLPAC.dmg
-          cp assets/icon.icns /Volumes/EasyLPAC/.VolumeIcon.icns
-          SetFile -c icnC /Volumes/EasyLPAC/.VolumeIcon.icns
-          SetFile -a C /Volumes/EasyLPAC
-
-          osascript <<EOD
-          tell application "Finder"
-            tell disk "EasyLPAC"
-              open
-              set current view of container window to icon view
-              set toolbar visible of container window to false
-              set statusbar visible of container window to false
-              set the bounds of container window to {400, 100, 1060, 540}
-              set viewOptions to the icon view options of container window
-              set arrangement of viewOptions to not arranged
-              set icon size of viewOptions to 72
-              set position of item "EasyLPAC.app" of container window to {230, 180}
-              set position of item "Applications" of container window to {430, 180}
-              set position of item "Sources" of container window to {330, 320}
-              update without registering applications
-              delay 5
-            end tell
-          end tell
-          EOD
-
-          hdiutil detach /Volumes/EasyLPAC
-          hdiutil convert EasyLPAC.dmg -format UDZO -o EasyLPAC-macOS-arm64-with-lpac.dmg
 
       - name: Build for macOS x86
         if: matrix.label == 'macos-x86'
@@ -137,37 +113,6 @@ jobs:
           wget https://github.com/estkme-group/lpac/archive/refs/tags/$LPAC_VERSION.zip -O lpac-$LPAC_VERSION-src.zip
           wget https://github.com/estkme-group/lpac/raw/main/src/LICENSE -O LICENSE-lpac
           zip -r EasyLPAC-macOS-x86_64-with-lpac.zip EasyLPAC.app lpac-$LPAC_VERSION-src.zip LICENSE*
-          mkdir dmg && cp -r EasyLPAC.app dmg/
-          mkdir dmg/Sources && cp -r lpac-$LPAC_VERSION-src.zip LICENSE* dmg/Sources
-          ln -s /Applications dmg/Applications
-          hdiutil create -volname "EasyLPAC" -srcfolder dmg -ov -format UDRW EasyLPAC.dmg
-          hdiutil attach EasyLPAC.dmg
-          cp assets/icon.icns /Volumes/EasyLPAC/.VolumeIcon.icns
-          SetFile -c icnC /Volumes/EasyLPAC/.VolumeIcon.icns
-          SetFile -a C /Volumes/EasyLPAC
-
-          osascript <<EOD
-          tell application "Finder"
-            tell disk "EasyLPAC"
-              open
-              set current view of container window to icon view
-              set toolbar visible of container window to false
-              set statusbar visible of container window to false
-              set the bounds of container window to {400, 100, 1060, 540}
-              set viewOptions to the icon view options of container window
-              set arrangement of viewOptions to not arranged
-              set icon size of viewOptions to 72
-              set position of item "EasyLPAC.app" of container window to {230, 180}
-              set position of item "Applications" of container window to {430, 180}
-              set position of item "Sources" of container window to {330, 320}
-              update without registering applications
-              delay 5
-            end tell
-          end tell
-          EOD
-
-          hdiutil detach /Volumes/EasyLPAC
-          hdiutil convert EasyLPAC.dmg -format UDZO -o EasyLPAC-macOS-x86_64-with-lpac.dmg
 
       - name: Upload Artifact
         uses: actions/upload-artifact@v4
@@ -176,9 +121,7 @@ jobs:
           path: |
             EasyLPAC-windows-x86_64-with-lpac.zip
             EasyLPAC-macOS-arm64-with-lpac.zip
-            EasyLPAC-macOS-arm64-with-lpac.dmg
             EasyLPAC-macOS-x86_64-with-lpac.zip
-            EasyLPAC-macOS-x86_64-with-lpac.dmg
             EasyLPAC-linux-x86_64.tar.gz
 
       - name: Release
@@ -188,7 +131,5 @@ jobs:
           files: |
             EasyLPAC-windows-x86_64-with-lpac.zip
             EasyLPAC-macOS-arm64-with-lpac.zip
-            EasyLPAC-macOS-arm64-with-lpac.dmg
             EasyLPAC-macOS-x86_64-with-lpac.zip
-            EasyLPAC-macOS-x86_64-with-lpac.dmg
             EasyLPAC-linux-x86_64.tar.gz
