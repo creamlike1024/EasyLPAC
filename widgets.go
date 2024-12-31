@@ -10,7 +10,6 @@ import (
 	"fyne.io/fyne/v2/theme"
 	"fyne.io/fyne/v2/widget"
 	"golang.org/x/net/publicsuffix"
-	"slices"
 	"strings"
 	"time"
 )
@@ -654,7 +653,10 @@ func viewCertInfoButtonFunc() {
 	var ciWidgetEls []ciWidgetEl
 	// ChipInfo 中 signing 和 verification 同时存在则有效
 	for _, keyId := range ChipInfo.EUICCInfo2.EuiccCiPKIDListForSigning {
-		if !slices.Contains(ChipInfo.EUICCInfo2.EuiccCiPKIDListForVerification, keyId) {
+		// if !slices.Contains(ChipInfo.EUICCInfo2.EuiccCiPKIDListForVerification, keyId) {
+		// 	continue
+		// }
+		if !sliceContains(ChipInfo.EUICCInfo2.EuiccCiPKIDListForVerification, keyId) {
 			continue
 		}
 		var element ciWidgetEl
@@ -975,4 +977,13 @@ func findProfileByIccid(iccid string) (*Profile, error) {
 		}
 	}
 	return nil, errors.New("profile not found")
+}
+
+func sliceContains[T comparable](slice []T, element T) bool {
+	for _, v := range slice {
+		if v == element {
+			return true
+		}
+	}
+	return false
 }
