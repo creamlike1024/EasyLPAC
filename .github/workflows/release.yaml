@@ -79,9 +79,10 @@ jobs:
           fyne package --icon assets/icon64.png
           mkdir easylpac && cp EasyLPAC.exe easylpac && cd easylpac
           wget https://github.com/estkme-group/lpac/releases/download/$LPAC_VERSION/lpac-windows-x86_64-mingw.zip -O lpac.zip
+          unzip lpac.zip && rm lpac.zip
+          rm LICENSE* *.md
           wget https://github.com/estkme-group/lpac/archive/refs/tags/$LPAC_VERSION.zip -O lpac-$LPAC_VERSION-src.zip
           wget https://github.com/estkme-group/lpac/raw/main/src/LICENSE -O LICENSE-lpac
-          unzip lpac.zip && rm lpac.zip
           cp $GITHUB_WORKSPACE/LICENSE ./
           zip -r $GITHUB_WORKSPACE/EasyLPAC-windows-x86_64-with-lpac.zip ./*
         shell: msys2 {0}
