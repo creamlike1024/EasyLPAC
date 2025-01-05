@@ -98,7 +98,7 @@ func RefreshChipInfo() error {
 	EuiccInfo2Entry.SetText(string(bytes))
 	// 计算剩余空间
 	freeSpace := float64(ChipInfo.EUICCInfo2.ExtCardResource.FreeNonVolatileMemory) / 1024
-	FreeSpaceLabel.SetText(fmt.Sprintf("Free space: %.2f KB", math.Round(freeSpace*100)/100))
+	FreeSpaceLabel.SetText(fmt.Sprintf("Free space: %.2f KiB", math.Round(freeSpace*100)/100))
 
 	CopyEidButton.Show()
 	SetDefaultSmdpButton.Show()
