@@ -116,7 +116,7 @@ func InitMainWindow() fyne.Window {
 	aidEntry := &widget.Entry{
 		Text: ConfigInstance.LpacAID,
 		Validator: validation.NewAllStrings(
-			validation.NewRegexp(`.{32}`, "The custom AID must be 32 characters long!"),
+			validation.NewRegexp(`^.{32}$`, "The custom AID must be 32 characters long!"),
 			validation.NewRegexp(`[[:xdigit:]]{32}`, "Only hex characters are allowed!"),
 		),
 	}
@@ -130,10 +130,26 @@ func InitMainWindow() fyne.Window {
 			aidEntryHint.SetText("Valid.")
 		}
 	}
+	setToDefaultAidButton := widget.NewButton(
+		"Default",
+		func() {
+			aidEntry.SetText(AID_DEFAULT)
+		})
+	setTo5berAidButton := widget.NewButton(
+		"5ber",
+		func() {
+			aidEntry.SetText(AID_5BER)
+		})
 
 	settingsTabContent := container.NewVBox(
 		&widget.Label{Text: "lpac ISD-R AID", TextStyle: fyne.TextStyle{Bold: true}},
-		aidEntry,
+		container.NewHBox(container.NewGridWrap(
+			fyne.Size{
+				Width:  320,
+				Height: aidEntry.MinSize().Height,
+			}, aidEntry),
+			setToDefaultAidButton,
+			setTo5berAidButton),
 		aidEntryHint,
 
 		&widget.Label{Text: "lpac debug output", TextStyle: fyne.TextStyle{Bold: true}},

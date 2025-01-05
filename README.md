@@ -41,6 +41,10 @@ However, arbitrary manipulation of notifications does not comply with GSMA speci
 
 # FAQ
 
+## lpac error `euicc_init` when using 5ber
+
+Go to Settings -> lpac ISD-R AID and click 5ber to set 5ber's custom AID, then retry
+
 ## macOS `SCardTransmit() failed: 80100016`
 
 If you are using macOS Sonoma, you may encounter this error: `SCardTransmit() failed: 80100016`
