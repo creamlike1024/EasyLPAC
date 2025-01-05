@@ -10,6 +10,7 @@ import (
 
 type Config struct {
 	LpacDir     string
+	LpacAID     string
 	EXEName     string
 	DriverIFID  string
 	DebugHTTP   bool
@@ -44,6 +45,7 @@ func LoadConfig() error {
 		ConfigInstance.LogDir = filepath.Join("/tmp", "EasyLPAC-log")
 	}
 	ConfigInstance.AutoMode = true
+	ConfigInstance.LpacAID = "A0000005591010FFFFFFFF8900000100"
 
 	ConfigInstance.LogFilename = fmt.Sprintf("lpac-%s.txt", time.Now().Format("20060102-150405"))
 	return nil
