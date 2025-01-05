@@ -24,7 +24,9 @@ jobs:
 
     runs-on: ${{ matrix.os }}
     env:
-      LPAC_VERSION: v2.1.0
+      LPAC_VERSION: v2.2.0+0b81e8a
+      LPAC_VERSION_IN_URL: v2.2.0%2B0b81e8a
+      LPAC_REPO: https://github.com/creamlike1024/lpac
     steps:
       - name: Checkout repo
         uses: actions/checkout@v4
@@ -67,8 +69,8 @@ jobs:
           go generate
           go build -ldflags="-s -w"
           chmod +x EasyLPAC
-          wget https://github.com/estkme-group/lpac/archive/refs/tags/$LPAC_VERSION.tar.gz -O lpac-$LPAC_VERSION-src.tar.gz
-          wget https://github.com/estkme-group/lpac/archive/refs/tags/$LPAC_VERSION.zip -O lpac-$LPAC_VERSION-src.zip
+          wget $LPAC_REPO/archive/refs/tags/$LPAC_VERSION_IN_URL.tar.gz -O lpac-$LPAC_VERSION-src.tar.gz
+          wget $LPAC_REPO/archive/refs/tags/$LPAC_VERSION_IN_URL.zip -O lpac-$LPAC_VERSION-src.zip
           tar zcf EasyLPAC-linux-x86_64.tar.gz EasyLPAC lpac-$LPAC_VERSION-src.tar.gz LICENSE
 
       - name: Build for Windows
@@ -78,11 +80,11 @@ jobs:
           go generate
           fyne package --icon assets/icon64.png
           mkdir easylpac && cp EasyLPAC.exe easylpac && cd easylpac
-          wget https://github.com/estkme-group/lpac/releases/download/$LPAC_VERSION/lpac-windows-x86_64-mingw.zip -O lpac.zip
+          wget $LPAC_REPO/releases/download/$LPAC_VERSION_IN_URL/lpac-windows-x86_64-mingw.zip -O lpac.zip
           unzip lpac.zip && rm lpac.zip
           rm LICENSE* *.md
-          wget https://github.com/estkme-group/lpac/archive/refs/tags/$LPAC_VERSION.zip -O lpac-$LPAC_VERSION-src.zip
-          wget https://github.com/estkme-group/lpac/raw/main/src/LICENSE -O LICENSE-lpac
+          wget $LPAC_REPO/archive/refs/tags/$LPAC_VERSION_IN_URL.zip -O lpac-$LPAC_VERSION-src.zip
+          wget $LPAC_REPO/raw/main/src/LICENSE -O LICENSE-lpac
           cp $GITHUB_WORKSPACE/LICENSE ./
           zip -r $GITHUB_WORKSPACE/EasyLPAC-windows-x86_64-with-lpac.zip ./*
         shell: msys2 {0}
@@ -94,11 +96,12 @@ jobs:
           go generate
           fyne package --icon assets/icon128.png --release
           cd EasyLPAC.app/Contents/MacOS
-          wget https://github.com/estkme-group/lpac/releases/download/$LPAC_VERSION/lpac-darwin-universal.zip -O lpac.zip
+          wget $LPAC_REPO/releases/download/$LPAC_VERSION_IN_URL/lpac-darwin-universal.zip -O lpac.zip
           unzip lpac.zip && rm lpac.zip
+          rm LICENSE* *.md
           cd $GITHUB_WORKSPACE
-          wget https://github.com/estkme-group/lpac/archive/refs/tags/$LPAC_VERSION.zip -O lpac-$LPAC_VERSION-src.zip
-          wget https://github.com/estkme-group/lpac/raw/main/src/LICENSE -O LICENSE-lpac
+          wget $LPAC_REPO/archive/refs/tags/$LPAC_VERSION_IN_URL.zip -O lpac-$LPAC_VERSION-src.zip
+          wget $LPAC_REPO/raw/main/src/LICENSE -O LICENSE-lpac
           zip -r EasyLPAC-macOS-arm64-with-lpac.zip EasyLPAC.app lpac-$LPAC_VERSION-src.zip LICENSE*
 
       - name: Build for macOS x86
@@ -108,11 +111,12 @@ jobs:
           go generate
           fyne package --icon assets/icon128.png --release
           cd EasyLPAC.app/Contents/MacOS
-          wget https://github.com/estkme-group/lpac/releases/download/$LPAC_VERSION/lpac-darwin-universal.zip -O lpac.zip
+          wget $LPAC_REPO/releases/download/$LPAC_VERSION_IN_URL/lpac-darwin-universal.zip -O lpac.zip
           unzip lpac.zip && rm lpac.zip
+          rm LICENSE* *.md
           cd $GITHUB_WORKSPACE
-          wget https://github.com/estkme-group/lpac/archive/refs/tags/$LPAC_VERSION.zip -O lpac-$LPAC_VERSION-src.zip
-          wget https://github.com/estkme-group/lpac/raw/main/src/LICENSE -O LICENSE-lpac
+          wget $LPAC_REPO/archive/refs/tags/$LPAC_VERSION_IN_URL.zip -O lpac-$LPAC_VERSION-src.zip
+          wget $LPAC_REPO/raw/main/src/LICENSE -O LICENSE-lpac
           zip -r EasyLPAC-macOS-x86_64-with-lpac.zip EasyLPAC.app lpac-$LPAC_VERSION-src.zip LICENSE*
 
       - name: Upload Artifact
