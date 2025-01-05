@@ -45,7 +45,7 @@ func main() {
 
 	_, err = os.Stat(filepath.Join(ConfigInstance.LpacDir, ConfigInstance.EXEName))
 	if err != nil {
-		d := dialog.NewError(fmt.Errorf("lpac not found\nPlease make sure you have put lpac binary in the `lpac` folder"), WMain)
+		d := dialog.NewError(fmt.Errorf(" lpac not found\nPlease make sure you have put lpac binary in the `lpac` folder"), WMain)
 		d.SetOnClosed(func() {
 			os.Exit(127)
 		})
