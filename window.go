@@ -2,9 +2,13 @@ package main
 
 import (
 	"fmt"
+	"image/color"
+	"strings"
+
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/canvas"
 	"fyne.io/fyne/v2/container"
+	"fyne.io/fyne/v2/data/validation"
 	"fyne.io/fyne/v2/dialog"
 	"fyne.io/fyne/v2/layout"
 	"fyne.io/fyne/v2/theme"
@@ -12,8 +16,6 @@ import (
 	"github.com/makiuchi-d/gozxing"
 	nativeDialog "github.com/sqweek/dialog"
 	"golang.design/x/clipboard"
-	"image/color"
-	"strings"
 )
 
 var WMain fyne.Window
@@ -110,7 +112,30 @@ func InitMainWindow() fyne.Window {
 		))
 	ChipInfoTab = container.NewTabItem("Chip Info", chipInfoTabContent)
 
+	aidEntryHint := &widget.Label{Text: "Valid."}
+	aidEntry := &widget.Entry{
+		Text: ConfigInstance.LpacAID,
+		Validator: validation.NewAllStrings(
+			validation.NewRegexp(`.{32}`, "The custom AID must be 32 characters long!"),
+			validation.NewRegexp(`[[:xdigit:]]{32}`, "Only hex characters are allowed!"),
+		),
+	}
+	aidEntry.OnChanged = func(s string) {
+		val := aidEntry.Validate()
+		if val != nil {
+			aidEntryHint.SetText(val.Error())
+		} else {
+			// Use last known good value only
+			ConfigInstance.LpacAID = s
+			aidEntryHint.SetText("Valid.")
+		}
+	}
+
 	settingsTabContent := container.NewVBox(
+		&widget.Label{Text: "lpac ISD-R AID", TextStyle: fyne.TextStyle{Bold: true}},
+		aidEntry,
+		aidEntryHint,
+
 		&widget.Label{Text: "lpac debug output", TextStyle: fyne.TextStyle{Bold: true}},
 		&widget.Check{
 			Text:    "Enable env LIBEUICC_DEBUG_HTTP",
@@ -126,6 +151,7 @@ func InitMainWindow() fyne.Window {
 				ConfigInstance.DebugAPDU = b
 			},
 		},
+
 		&widget.Label{Text: "EasyLPAC settings", TextStyle: fyne.TextStyle{Bold: true}},
 		&widget.Check{
 			Text:    "Auto process notification",

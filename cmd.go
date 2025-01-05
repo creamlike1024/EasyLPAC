@@ -6,13 +6,14 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"fyne.io/fyne/v2/dialog"
-	"github.com/mattn/go-runewidth"
 	"io"
 	"os/exec"
 	"path/filepath"
 	"strconv"
 	"strings"
+
+	"fyne.io/fyne/v2/dialog"
+	"github.com/mattn/go-runewidth"
 )
 
 func runLpac(args ...string) (json.RawMessage, error) {
@@ -42,6 +43,7 @@ func runLpac(args ...string) (json.RawMessage, error) {
 		fmt.Sprintf("LPAC_APDU=pcsc"),
 		fmt.Sprintf("LPAC_HTTP=curl"),
 		fmt.Sprintf("DRIVER_IFID=%s", ConfigInstance.DriverIFID),
+		fmt.Sprintf("LPAC_CUSTOM_ISD_R_AID=%s", ConfigInstance.LpacAID),
 	}
 	if ConfigInstance.DebugHTTP {
 		cmd.Env = append(cmd.Env, "LIBEUICC_DEBUG_HTTP=1")
