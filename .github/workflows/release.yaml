@@ -68,10 +68,11 @@ jobs:
           go install fyne.io/fyne/v2/cmd/fyne@latest
           go generate
           go build -ldflags="-s -w"
-          chmod +x EasyLPAC
+          wget $LPAC_REPO/releases/download/$LPAC_VERSION_IN_URL/lpac-linux-x86_64.zip -O lpac.zip
+          unzip lpac.zip && rm lpac.zip
           wget $LPAC_REPO/archive/refs/tags/$LPAC_VERSION_IN_URL.tar.gz -O lpac-$LPAC_VERSION-src.tar.gz
-          wget $LPAC_REPO/archive/refs/tags/$LPAC_VERSION_IN_URL.zip -O lpac-$LPAC_VERSION-src.zip
-          tar zcf EasyLPAC-linux-x86_64.tar.gz EasyLPAC lpac-$LPAC_VERSION-src.tar.gz LICENSE
+          chmod +x EasyLPAC lpac
+          tar zcf EasyLPAC-linux-x86_64-with-lpac.tar.gz EasyLPAC lpac lpac-$LPAC_VERSION-src.tar.gz LICENSE LICENSE-lpac
 
       - name: Build for Windows
         if: runner.os == 'Windows'
