@@ -36,15 +36,21 @@ func LoadConfig() error {
 		return err
 	}
 	exeDir := filepath.Dir(exePath)
+	ConfigInstance.LpacDir = exeDir
 
 	switch platform := runtime.GOOS; platform {
 	case "windows":
 		ConfigInstance.EXEName = "lpac.exe"
-		ConfigInstance.LpacDir = exeDir
 		ConfigInstance.LogDir = filepath.Join(exeDir, "log")
+	case "linux":
+		ConfigInstance.EXEName = "lpac"
+		ConfigInstance.LogDir = filepath.Join("/tmp", "EasyLPAC-log")
+		_, err = os.Stat(filepath.Join(ConfigInstance.LpacDir, ConfigInstance.EXEName))
+		if err != nil {
+			ConfigInstance.LpacDir = "/usr/bin"
+		}
 	default:
 		ConfigInstance.EXEName = "lpac"
-		ConfigInstance.LpacDir = exeDir
 		ConfigInstance.LogDir = filepath.Join("/tmp", "EasyLPAC-log")
 	}
 	ConfigInstance.AutoMode = true

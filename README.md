@@ -21,7 +21,11 @@ Connect your card reader before running.
 
 **[estk.me User](https://www.estk.me/)**: If you are using the ACR38U card reader included with estk card and are currently using **macOS 14 Sonoma**, please install the [card reader driver](https://www.acs.com.hk/en/driver/228/acr38u-nd-pocketmate-smart-card-reader-micro-usb/) first
 
-Linux release does not include lpac binary, you need to [compile lpac](https://github.com/estkme-group/lpac?tab=readme-ov-file#compile) by yourself. The lpac binary file should be placed in the same directory as the EasyLPAC binary file
+## Linux
+
+lpac binary search order: First, search in the same directory as EasyLPAC. If not found, use `/usr/bin/lpac`
+
+`EasyLPAC-linux-x86_64-with-lpac.tar.gz` contain prebuilt lpac binary, if you can't run it, you need to install `lpac` by package manager or [compile lpac](https://github.com/estkme-group/lpac?tab=readme-ov-file#compile) by yourself.
 
 Note: Reading LPA activation code and QRCode from clipboard not working in Wayland
 
