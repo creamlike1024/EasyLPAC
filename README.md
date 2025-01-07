@@ -8,6 +8,8 @@ Arch Linux: ![AUR package](https://img.shields.io/aur/version/easylpac) [AUR - e
 
 NixOS: [NUR](https://github.com/nix-community/NUR#readme) package https://github.com/nix-community/nur-combined/blob/master/repos/linyinfeng/pkgs/easylpac/default.nix
 
+openSUSE: https://software.opensuse.org/package/easylpac ([OBS](https://build.opensuse.org/package/show/home:Psheng/EasyLPAC))
+
 System requirements:
 - Windows7+
 - latest macOS
