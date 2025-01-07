@@ -73,6 +73,7 @@ jobs:
           wget $LPAC_REPO/archive/refs/tags/$LPAC_VERSION_IN_URL.tar.gz -O lpac-$LPAC_VERSION-src.tar.gz
           chmod +x EasyLPAC lpac
           tar zcf EasyLPAC-linux-x86_64-with-lpac.tar.gz EasyLPAC lpac lpac-$LPAC_VERSION-src.tar.gz LICENSE LICENSE-lpac
+          tar zcf EasyLPAC-linux-x86_64.tar.gz EasyLPAC lpac-$LPAC_VERSION-src.tar.gz LICENSE LICENSE-lpac
 
       - name: Build for Windows
         if: runner.os == 'Windows'
@@ -128,6 +129,7 @@ jobs:
             EasyLPAC-windows-x86_64-with-lpac.zip
             EasyLPAC-macOS-arm64-with-lpac.zip
             EasyLPAC-macOS-x86_64-with-lpac.zip
+            EasyLPAC-linux-x86_64-with-lpac.tar.gz
             EasyLPAC-linux-x86_64.tar.gz
 
       - name: Release
@@ -138,4 +140,5 @@ jobs:
             EasyLPAC-windows-x86_64-with-lpac.zip
             EasyLPAC-macOS-arm64-with-lpac.zip
             EasyLPAC-macOS-x86_64-with-lpac.zip
+            EasyLPAC-linux-x86_64-with-lpac.tar.gz
             EasyLPAC-linux-x86_64.tar.gz
