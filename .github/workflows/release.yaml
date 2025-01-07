@@ -24,9 +24,9 @@ jobs:
 
     runs-on: ${{ matrix.os }}
     env:
-      LPAC_VERSION: v2.2.0+0b81e8a
-      LPAC_VERSION_IN_URL: v2.2.0%2B0b81e8a
-      LPAC_REPO: https://github.com/creamlike1024/lpac
+      LPAC_VERSION: v2.2.1
+      LPAC_VERSION_IN_URL: v2.2.1
+      LPAC_REPO: https://github.com/estkme-group/lpac
     steps:
       - name: Checkout repo
         uses: actions/checkout@v4
