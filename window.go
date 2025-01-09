@@ -288,8 +288,8 @@ func InitDownloadDialog() dialog.Dialog {
 				fileBuilder := nativeDialog.File().Title("Select a QR Code image file")
 				fileBuilder.Filters = []nativeDialog.FileFilter{
 					{
-						Desc:       "Image (*.png, *.jpg, *.jpeg)",
-						Extensions: []string{"PNG", "JPG", "JPEG"},
+						Desc:       "Image (*.PNG, *.png, *.JPG, *.jpg, *.JPEG, *.jpeg)",
+						Extensions: []string{"PNG", "png", "JPG", "jpg", "JPEG", "jpeg"},
 					},
 					{
 						Desc:       "All files (*.*)",
