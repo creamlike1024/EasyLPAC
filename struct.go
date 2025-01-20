@@ -12,6 +12,7 @@ type PullInfo struct {
 	ObjectID    string
 	ConfirmCode string
 	IMEI        string
+	OnlyPreview bool
 }
 
 type LpacReturnValue struct {
