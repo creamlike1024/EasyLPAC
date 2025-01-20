@@ -218,12 +218,14 @@ func InitDownloadDialog() dialog.Dialog {
 	matchIDEntry := &widget.Entry{PlaceHolder: "Activation code. Optional"}
 	confirmCodeEntry := &widget.Entry{PlaceHolder: "Optional"}
 	imeiEntry := &widget.Entry{PlaceHolder: "The IMEI sent to SM-DP+. Optional"}
+	onlyPreview := widget.NewCheck("Only Preview", nil)
 
 	formItems := []*widget.FormItem{
 		{Text: "SM-DP+", Widget: smdpEntry},
 		{Text: "Matching ID", Widget: matchIDEntry},
 		{Text: "Confirm Code", Widget: confirmCodeEntry},
 		{Text: "IMEI", Widget: imeiEntry},
+		{Text: "Only Preview", Widget: onlyPreview},
 	}
 
 	form := widget.NewForm(formItems...)
@@ -251,6 +253,7 @@ func InitDownloadDialog() dialog.Dialog {
 				MatchID:     strings.TrimSpace(matchIDEntry.Text),
 				ConfirmCode: strings.TrimSpace(confirmCodeEntry.Text),
 				IMEI:        strings.TrimSpace(imeiEntry.Text),
+				OnlyPreview: onlyPreview.Checked,
 			}
 			go func() {
 				err := RefreshNotification()
@@ -277,7 +280,6 @@ func InitDownloadDialog() dialog.Dialog {
 		selectQRCodeButton.Enable()
 		pasteFromClipboardButton.Enable()
 	}
-
 	selectQRCodeButton = &widget.Button{
 		Text: "Scan image file",
 		Icon: theme.FileImageIcon(),

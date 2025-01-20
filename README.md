@@ -70,6 +70,14 @@ Start `pcscd` on systemd based distribution: `sudo systemctl start pcscd`
 
 Card reader is not connected.
 
+## About OnlyPreview Feature
+
+This is an experimental feature that only previews card information without downloading it into the card. It allows for writing to other cards again. 
+
+Some carriers, such as Tele2, do not follow the standard protocol, which may result in a "Refused" status when attempting to write to the card again. 
+
+Please test and evaluate the risks on your own.
+
 ## Other `SCard` error codes
 
 For complete explanation list of PCSC error codes, see [pcsc-lite: ErrorCodes](https://pcsclite.apdu.fr/api/group__ErrorCodes.html)

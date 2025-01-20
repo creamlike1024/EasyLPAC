@@ -191,9 +191,20 @@ func LpacProfileDownload(info PullInfo) {
 	if info.IMEI != "" {
 		args = append(args, "-i", info.IMEI)
 	}
+	if info.OnlyPreview == true {
+		args = append(args, "-p")
+	}
 	_, err := runLpac(args...)
 	if err != nil {
-		ShowLpacErrDialog(err)
+		if info.OnlyPreview == true && strings.Contains(strings.ToLower(err.Error()), "cancelled") {
+			// Only Preview Normally
+			dialogText := "Preview Download successful"
+			dialog.ShowInformation("Info", dialogText, WMain)
+			return
+		} else {
+			ShowLpacErrDialog(err)
+			return
+		}
 	} else {
 		notificationOrigin := Notifications
 		Refresh()
