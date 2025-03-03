@@ -142,10 +142,7 @@ func InitMainWindow() fyne.Window {
 			for _, element := range aids {
 				name := element[0]
 				aid := element[1]
-				yield(widget.NewButton(
-					name,
-					func() { aidEntry.SetText(aid) },
-				))
+				yield(widget.NewButton(name, func() { aidEntry.SetText(aid) }))
 			}
 		}),
 		aidEntryHint,
