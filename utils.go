@@ -3,11 +3,14 @@ package main
 import (
 	"bytes"
 	"errors"
+	"fyne.io/fyne/v2"
+	"fyne.io/fyne/v2/container"
 	"github.com/makiuchi-d/gozxing"
 	"github.com/makiuchi-d/gozxing/qrcode"
 	"golang.design/x/clipboard"
 	"image"
 	_ "image/jpeg"
+	"iter"
 	"os"
 	"strings"
 )
@@ -122,4 +125,12 @@ func CompleteActivationCode(input string) string {
 		return "LPA:1" + input
 	}
 	return input
+}
+
+func newContainer(layout fyne.Layout, elements iter.Seq[fyne.CanvasObject]) *fyne.Container {
+	var objects []fyne.CanvasObject
+	for object := range elements {
+		objects = append(objects, object)
+	}
+	return container.New(layout, objects...)
 }

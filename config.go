@@ -8,8 +8,12 @@ import (
 	"time"
 )
 
-const AID_DEFAULT = "A0000005591010FFFFFFFF8900000100"
-const AID_5BER = "A0000005591010FFFFFFFF8900050500"
+var aids = [][2]string{
+	{"Default", "A0000005591010FFFFFFFF8900000100"},
+	{"eSTK.me", "A06573746B6D65FFFFFFFF4953442D52"},
+	{"eSIM.me", "A0000005591010000000008900000300"},
+	{"5ber.eSIM", "A0000005591010FFFFFFFF8900050500"},
+}
 
 type Config struct {
 	LpacDir     string
@@ -54,7 +58,7 @@ func LoadConfig() error {
 		ConfigInstance.LogDir = filepath.Join("/tmp", "EasyLPAC-log")
 	}
 	ConfigInstance.AutoMode = true
-	ConfigInstance.LpacAID = AID_DEFAULT
+	ConfigInstance.LpacAID = aids[0][1]
 
 	ConfigInstance.LogFilename = fmt.Sprintf("lpac-%s.txt", time.Now().Format("20060102-150405"))
 	return nil
