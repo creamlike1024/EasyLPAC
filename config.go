@@ -8,6 +8,8 @@ import (
 	"time"
 )
 
+// from <https://euicc-manual.osmocom.org/docs/lpa/applet-id/>
+// from <https://euicc-manual.osmocom.org/docs/lpa/applet-id-oem/>
 var aids = [][2]string{
 	{"Default", "A0000005591010FFFFFFFF8900000100"},
 	{"eSTK.me", "A06573746B6D65FFFFFFFF4953442D52"},
