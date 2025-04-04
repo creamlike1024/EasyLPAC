@@ -1,0 +1,134 @@
+tab_bar:
+  profile: Profile
+  notification: Notification
+  chip_info: Chip Info
+  settings: Settings
+  about: About
+label:
+  lpac_version: "lpac Version:"
+  lpac_version_unknown: "lpac Version: unknown"
+  menu_copy: Copy
+  status_ready: Ready.
+  status_processing: Processing...
+  download_profile_button: Download
+  set_nickname_button: Nickname
+  delete_profile_button: Delete
+  switch_state_button_enable: Enable
+  switch_state_button_disable: Disable
+  process_notification_button: Process
+  process_all_notification_button: Process All
+  remove_notification_button: Remove
+  batch_remove_notification_button: Batch Remove
+  open_log_button: Open Log
+  refresh_button: Refresh
+  profile_mask_check: Mask
+  notification_mask_check: Mask
+  copy_eid_button: Copy
+  copy_eid_button_copied: Copied!
+  view_cert_info_button: Certificate Issuer
+  copy_euicc_info2_button: Copy eUICCInfo2
+  copy_euicc_info2_button_copied: Copied eUICCInfo2!
+  info_iccid: "ICCID:"
+  info_provider: "Provider:"
+  info_nickname: "Nickname:"
+  info_seq: "Seq:"
+  info_address: "Address:"
+  info_operation: "Operation:"
+  notification_operation_enable: Enable
+  notification_operation_disable: Disable
+  notification_operation_install: Install
+  notification_operation_delete: Delete
+  ci_name_unknown: Unknown
+  ci_info_keyid: "KeyID:"
+  cert_data_button: Certificate Info
+  no_iccid: No ICCID!
+  deleted_profile: "?deleted profile"
+  aid_valid: Valid.
+  aid_default_button: Default
+  aid_5ber_button: 5ber
+  lpac_isdr_aid: lpac ISD-R AID
+  lpac_debug_output: lpac debug output
+  enable_env_LIBEUICC_DEBUG_HTTP_check: Enable env LIBEUICC_DEBUG_HTTP
+  enable_env_LIBEUICC_DEBUG_APDU_check: Enable env LIBEUICC_DEBUG_APDU
+  easylpac_settings: EasyLPAC settings
+  auto_process_notification_check: Auto process notification
+  version: "Version:"
+  euicc_data: "eUICC Data:"
+  smdp_entry_placeholder: Leave it empty to use default SM-DP+
+  match_id_entry_placeholder: Activation code. Optional
+  confirm_code_entry_placeholder: Optional
+  imei_entry_placeholder: The IMEI sent to SM-DP+. Optional
+  smdp: SM-DP+
+  match_id: Matching ID
+  confirm_code: Confirm Code
+  imei: IMEI
+  select_qrcode_button: Scan image file
+  paste_from_clipboard_button: "Paste QR Code or LPA:1 Activation Code from clipboard"
+  set_nickname_entry_placeholder: Leave it empty to remove nickname
+  set_nickname_form: Set Nickname
+  set_default_smdp_entry_placeholder: Leave it empty to remove default SM-DP+ setting
+  default_smdp: Default SM-DP+
+  set_default_smdp_form: Set Default SM-DP+
+  not_set: <not set>
+  info_eid: "EID:"
+  default_smdp_address: "Default SM-DP+ Address:"
+  root_smds_address: "Root SM-DS Address:"
+  manufacturer: "Manufacturer:"
+  manufacturer_unknown: "Manufacturer: Unknown"
+  free_space: "Free space:"
+  card_reader: "Card Reader:"
+
+dialog:
+  hint: Hint
+  confirm: Confirm
+  cancel: Cancel
+  ok: OK
+  not_now: Not Now
+  submit: Submit
+  delete_profile_remove_notification: Remove Notification
+  delete_profile_successfully: Delete Successful
+  process_all_notification: Process All Notifications
+  process_all_notification_finished: Operation Finished
+  batch_remove_notification: Batch Remove Notifications
+  batch_remove_notification_finished: Operation Finished
+  ci_no_data: No Data
+  ci: Certificate Issuer
+  process_notification_remove_notification: Remove Notification
+  confirm_code_required: Confirm Code Required
+  select_qrcode: Select a QR Code image file
+  image_desc: Image
+  all_files_desc: All files
+  lpac_error: lpac error
+  error: Error
+  info: Info
+
+message:
+  lpac_not_found: lpac not found
+  disable_profile_before_delete: You should disable the profile before deleting it.
+  delete_profile_confirm: Are you sure you want to delete this profile?
+  notification_not_found: notification not found
+  profile_not_found: profile not found
+  successfully_delete_profile_failed_send_notification: "Successfully deleted profile but failed to send notification\nYou should try to send delete notification manually"
+  successfully_delete_profile_ask_remove_notification: "Successfully deleted profile and sent notification\nDo you want to remove delete notification now?"
+  successfully_delete_profile_ask_send_notification: "The profile has been successfully deleted\nSend the delete notification now?\n"
+  successfully_enable_profile: successfully enable profile
+  failed_process_enable_notification: failed to process enable notification
+  failed_process_disable_notification: failed to process disable notification
+  select_remove_notification_type: "Remove the following notification type after processing:"
+  process_all_notification_result: "{total} processed\n{success} succeed\n{fail} failed"
+  remove_notification_confirm: Are you sure you want to remove this notification?
+  select_batch_remove_notification_type: Select the notification type to remove
+  batch_remove_notification_result: "{total} processed\n{success} succeed\n{fail} failed"
+  ci_no_data: "The information of this certificate is not included.\nIf you have any information about this certificate,\nyou can report it to <euicc-dev-manual@septs.pw>\nThank you"
+  process_notification_ask_remove_notification: "Successfully processed notification.\nDo you want to remove this notification now?"
+  aid_length_illegal: The custom AID must be 32 characters long!
+  aid_not_hex: Only hex characters are allowed!
+  confirm_code_required: "This profile needs confirm code to download.\nPlease fill the confirm code manually."
+  lpac_error: Please check the log for details
+  select_item: Please select a item.
+  select_card_reader: Please select a card reader.
+  refresh_required: Please refresh before proceeding.
+  failed_to_decode_euiccinfo2: "chip Info: failed to decode EUICCInfo2"
+
+thanks_to: "# Thanks to\n\n[lpac](https://github.com/estkme-group/lpac) C-based eUICC LPA\n\n[eUICC Manual](https://euicc-manual.osmocom.org) eUICC Developer Manual\n\n[fyne](https://github.com/fyne-io/fyne) Material Design GUI toolkit"
+about: "# EasyLPAC\n\nlpac GUI Frontend\n\n[Github](https://github.com/creamlike1024/EasyLPAC) Repo "

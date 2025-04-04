@@ -45,16 +45,16 @@ func main() {
 
 	_, err = os.Stat(filepath.Join(ConfigInstance.LpacDir, ConfigInstance.EXEName))
 	if err != nil {
-		d := dialog.NewError(fmt.Errorf(" lpac not found"), WMain)
+		d := dialog.NewError(fmt.Errorf(" "+TR.Trans("message.lpac_not_found")), WMain)
 		d.SetOnClosed(func() {
 			os.Exit(127)
 		})
 		d.Show()
 	} else {
 		if version, err2 := LpacVersion(); err2 != nil {
-			LpacVersionLabel.SetText("lpac Version: unknown")
+			LpacVersionLabel.SetText(TR.Trans("label.lpac_version_unknown"))
 		} else {
-			LpacVersionLabel.SetText("lpac Version: " + version)
+			LpacVersionLabel.SetText(TR.Trans("label.lpac_version") + " " + version)
 		}
 		RefreshApduDriver()
 		if ApduDrivers != nil {

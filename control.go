@@ -37,7 +37,7 @@ func RefreshProfile() error {
 	// 刷新 List
 	ProfileList.Refresh()
 	ProfileList.UnselectAll()
-	SwitchStateButton.SetText("Enable")
+	SwitchStateButton.SetText(TR.Trans("label.switch_state_button_enable"))
 	SwitchStateButton.SetIcon(theme.ConfirmIcon())
 	return nil
 }
@@ -69,36 +69,36 @@ func RefreshChipInfo() error {
 
 	convertToString := func(value interface{}) string {
 		if value == nil {
-			return "<not set>"
+			return TR.Trans("label.not_set")
 		}
 		if str, ok := value.(string); ok {
 			return str
 		}
-		return "<not set>"
+		return TR.Trans("label.not_set")
 	}
 
-	EidLabel.SetText(fmt.Sprintf("EID: %s", ChipInfo.EidValue))
-	DefaultDpAddressLabel.SetText(fmt.Sprintf("Default SM-DP+ Address:  %s", convertToString(ChipInfo.EuiccConfiguredAddresses.DefaultDpAddress)))
-	RootDsAddressLabel.SetText(fmt.Sprintf("Root SM-DS Address:  %s", convertToString(ChipInfo.EuiccConfiguredAddresses.RootDsAddress)))
+	EidLabel.SetText(fmt.Sprintf(TR.Trans("label.info_eid")+" %s", ChipInfo.EidValue))
+	DefaultDpAddressLabel.SetText(fmt.Sprintf(TR.Trans("label.default_smdp_address")+"  %s", convertToString(ChipInfo.EuiccConfiguredAddresses.DefaultDpAddress)))
+	RootDsAddressLabel.SetText(fmt.Sprintf(TR.Trans("label.root_smds_address")+"  %s", convertToString(ChipInfo.EuiccConfiguredAddresses.RootDsAddress)))
 	// eUICC Manufacturer Label
 	if eum := GetEUM(ChipInfo.EidValue); eum != nil {
 		manufacturer := fmt.Sprint(eum.Manufacturer, " ", CountryCodeToEmoji(eum.Country))
 		if productName := eum.ProductName(ChipInfo.EidValue); productName != "" {
 			manufacturer = fmt.Sprint(productName, " (", manufacturer, ")")
 		}
-		EUICCManufacturerLabel.SetText("Manufacturer: " + manufacturer)
+		EUICCManufacturerLabel.SetText(TR.Trans("label.manufacturer") + " " + manufacturer)
 	} else {
-		EUICCManufacturerLabel.SetText("Manufacturer: Unknown")
+		EUICCManufacturerLabel.SetText(TR.Trans("label.manufacturer_unknown"))
 	}
 	// EUICCInfo2 entry
 	bytes, err := json.MarshalIndent(ChipInfo.EUICCInfo2, "", "  ")
 	if err != nil {
-		ShowLpacErrDialog(fmt.Errorf("chip Info: failed to decode EUICCInfo2\n%s", err))
+		ShowLpacErrDialog(fmt.Errorf(TR.Trans("message.failed_to_decode_euiccinfo2")+"\n%s", err))
 	}
 	EuiccInfo2Entry.SetText(string(bytes))
 	// 计算剩余空间
 	freeSpace := float64(ChipInfo.EUICCInfo2.ExtCardResource.FreeNonVolatileMemory) / 1024
-	FreeSpaceLabel.SetText(fmt.Sprintf("Free space: %.2f KiB", math.Round(freeSpace*100)/100))
+	FreeSpaceLabel.SetText(fmt.Sprintf(TR.Trans("label.free_space")+" %.2f KiB", math.Round(freeSpace*100)/100))
 
 	CopyEidButton.Show()
 	SetDefaultSmdpButton.Show()
@@ -184,12 +184,12 @@ func UpdateStatusBarListener() {
 		status := <-StatusChan
 		switch status {
 		case StatusProcess:
-			StatusLabel.SetText("Processing...")
+			StatusLabel.SetText(TR.Trans("label.status_processing"))
 			StatusProcessBar.Start()
 			StatusProcessBar.Show()
 			continue
 		case StatusReady:
-			StatusLabel.SetText("Ready.")
+			StatusLabel.SetText(TR.Trans("label.status_ready"))
 			StatusProcessBar.Stop()
 			StatusProcessBar.Hide()
 			continue

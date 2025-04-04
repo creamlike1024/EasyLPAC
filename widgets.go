@@ -9,6 +9,7 @@ import (
 	"fyne.io/fyne/v2/layout"
 	"fyne.io/fyne/v2/theme"
 	"fyne.io/fyne/v2/widget"
+	"github.com/fullpipe/icu-mf/mf"
 	"golang.org/x/net/publicsuffix"
 	"strings"
 	"time"
@@ -69,7 +70,7 @@ func (entry *ReadOnlyEntry) TypedShortcut(shortcut fyne.Shortcut) {
 
 func (entry *ReadOnlyEntry) TappedSecondary(ev *fyne.PointEvent) {
 	c := fyne.CurrentApp().Driver().AllWindows()[0].Clipboard()
-	copyItem := fyne.NewMenuItem("Copy", func() {
+	copyItem := fyne.NewMenuItem(TR.Trans("label.menu_copy"), func() {
 		c.SetContent(entry.SelectedText())
 	})
 	menu := fyne.NewMenu("", copyItem)
@@ -90,54 +91,54 @@ func InitWidgets() {
 	StatusProcessBar.Stop()
 	StatusProcessBar.Hide()
 
-	StatusLabel = widget.NewLabel("Ready.")
+	StatusLabel = widget.NewLabel(TR.Trans("label.status_ready"))
 
-	DownloadButton = &widget.Button{Text: "Download",
+	DownloadButton = &widget.Button{Text: TR.Trans("label.download_profile_button"),
 		OnTapped: func() { go downloadButtonFunc() },
 		Icon:     theme.DownloadIcon()}
 
-	SetNicknameButton = &widget.Button{Text: "Nickname",
+	SetNicknameButton = &widget.Button{Text: TR.Trans("label.set_nickname_button"),
 		OnTapped: func() { go setNicknameButtonFunc() },
 		Icon:     theme.DocumentCreateIcon()}
 
-	DeleteProfileButton = &widget.Button{Text: "Delete",
+	DeleteProfileButton = &widget.Button{Text: TR.Trans("label.delete_profile_button"),
 		OnTapped: func() { go deleteProfileButtonFunc() },
 		Icon:     theme.DeleteIcon()}
 
-	SwitchStateButton = &widget.Button{Text: "Enable",
+	SwitchStateButton = &widget.Button{Text: TR.Trans("label.switch_state_button_enable"),
 		OnTapped: func() { go switchStateButtonFunc() },
 		Icon:     theme.ConfirmIcon()}
 
 	ProfileList = initProfileList()
 	NotificationList = initNotificationList()
 
-	ProcessNotificationButton = &widget.Button{Text: "Process",
+	ProcessNotificationButton = &widget.Button{Text: TR.Trans("label.process_notification_button"),
 		OnTapped: func() { go processNotificationButtonFunc() },
 		Icon:     theme.MediaPlayIcon()}
 
-	ProcessAllNotificationButton = &widget.Button{Text: "Process All",
+	ProcessAllNotificationButton = &widget.Button{Text: TR.Trans("label.process_all_notification_button"),
 		OnTapped: func() { go processAllNotificationButtonFunc() },
 		Icon:     theme.MediaReplayIcon()}
 
-	RemoveNotificationButton = &widget.Button{Text: "Remove",
+	RemoveNotificationButton = &widget.Button{Text: TR.Trans("label.remove_notification_button"),
 		OnTapped: func() { go removeNotificationButtonFunc() },
 		Icon:     theme.ContentRemoveIcon()}
 
-	BatchRemoveNotificationButton = &widget.Button{Text: "Batch Remove",
+	BatchRemoveNotificationButton = &widget.Button{Text: TR.Trans("label.batch_remove_notification_button"),
 		OnTapped: func() { go batchRemoveNotificationButtonFunc() },
 		Icon:     theme.DeleteIcon()}
 
 	FreeSpaceLabel = widget.NewLabel("")
 
-	OpenLogButton = &widget.Button{Text: "Open Log",
+	OpenLogButton = &widget.Button{Text: TR.Trans("label.open_log_button"),
 		OnTapped: func() { go OpenLog() },
 		Icon:     theme.FolderOpenIcon()}
 
-	RefreshButton = &widget.Button{Text: "Refresh",
+	RefreshButton = &widget.Button{Text: TR.Trans("label.refresh_button"),
 		OnTapped: func() { go Refresh() },
 		Icon:     theme.ViewRefreshIcon()}
 
-	ProfileMaskCheck = widget.NewCheck("Mask", func(b bool) {
+	ProfileMaskCheck = widget.NewCheck(TR.Trans("label.profile_mask_check"), func(b bool) {
 		if b {
 			ProfileMaskNeeded = true
 			ProfileList.Refresh()
@@ -146,7 +147,7 @@ func InitWidgets() {
 			ProfileList.Refresh()
 		}
 	})
-	NotificationMaskCheck = widget.NewCheck("Mask", func(b bool) {
+	NotificationMaskCheck = widget.NewCheck(TR.Trans("label.notification_mask_check"), func(b bool) {
 		if b {
 			NotificationMaskNeeded = true
 			NotificationList.Refresh()
@@ -161,20 +162,20 @@ func InitWidgets() {
 	RootDsAddressLabel = widget.NewLabel("")
 	EuiccInfo2Entry = NewReadOnlyEntry()
 	EuiccInfo2Entry.Hide()
-	CopyEidButton = &widget.Button{Text: "Copy",
+	CopyEidButton = &widget.Button{Text: TR.Trans("label.copy_eid_button"),
 		OnTapped: func() { go copyEidButtonFunc() },
 		Icon:     theme.ContentCopyIcon()}
 	CopyEidButton.Hide()
 	SetDefaultSmdpButton = &widget.Button{OnTapped: func() { go setDefaultSmdpButtonFunc() },
 		Icon: theme.DocumentCreateIcon()}
 	SetDefaultSmdpButton.Hide()
-	ViewCertInfoButton = &widget.Button{Text: "Certificate Issuer",
+	ViewCertInfoButton = &widget.Button{Text: TR.Trans("label.view_cert_info_button"),
 		OnTapped: func() { go viewCertInfoButtonFunc() },
 		Icon:     theme.InfoIcon()}
 	ViewCertInfoButton.Hide()
 	EUICCManufacturerLabel = &widget.Label{}
 	EUICCManufacturerLabel.Hide()
-	CopyEuiccInfo2Button = &widget.Button{Text: "Copy eUICCInfo2",
+	CopyEuiccInfo2Button = &widget.Button{Text: TR.Trans("label.copy_euicc_info2_button"),
 		OnTapped: func() { go copyEuiccInfo2ButtonFunc() },
 		Icon:     theme.ContentCopyIcon()}
 	CopyEuiccInfo2Button.Hide()
@@ -226,7 +227,7 @@ func deleteProfileButtonFunc() {
 		return
 	}
 	if Profiles[SelectedProfile].ProfileState == "enabled" {
-		d := dialog.NewInformation("Hint", "You should disable the profile before deleting it.", WMain)
+		d := dialog.NewInformation(TR.Trans("dialog.hint"), TR.Trans("message.disable_profile_before_delete"), WMain)
 		d.Resize(fyne.Size{
 			Width:  360,
 			Height: 170,
@@ -235,16 +236,16 @@ func deleteProfileButtonFunc() {
 		return
 	}
 	profileText := fmt.Sprint(
-		"ICCID: ", Profiles[SelectedProfile].Iccid, "\n",
-		"Provider: ", Profiles[SelectedProfile].ServiceProviderName, "\n",
+		TR.Trans("label.info_iccid")+" ", Profiles[SelectedProfile].Iccid, "\n",
+		TR.Trans("label.info_provider")+" ", Profiles[SelectedProfile].ServiceProviderName, "\n",
 	)
 	if Profiles[SelectedProfile].ProfileNickname != nil {
-		profileText += fmt.Sprint("Nickname: ", *Profiles[SelectedProfile].ProfileNickname, "\n")
+		profileText += fmt.Sprint(TR.Trans("label.info_nickname")+" ", *Profiles[SelectedProfile].ProfileNickname, "\n")
 	}
-	dialog.ShowCustomConfirm("Confirm",
-		"Confirm",
-		"Cancel",
-		container.NewVBox(container.NewCenter(widget.NewLabel("Are you sure you want to delete this profile?")),
+	dialog.ShowCustomConfirm(TR.Trans("dialog.confirm"),
+		TR.Trans("dialog.confirm"),
+		TR.Trans("dialog.cancel"),
+		container.NewVBox(container.NewCenter(widget.NewLabel(TR.Trans("message.delete_profile_confirm"))),
 			&widget.Label{Text: profileText}),
 		func(b bool) {
 			if b {
@@ -257,13 +258,13 @@ func deleteProfileButtonFunc() {
 						Refresh()
 						deleteNotification := findNewNotification(notificationOrigin, Notifications)
 						if deleteNotification == nil {
-							dialog.ShowError(errors.New("notification not found"), WMain)
+							dialog.ShowError(errors.New(TR.Trans("message.notification_not_found")), WMain)
 							return
 						}
 						if ConfigInstance.AutoMode {
 							// 默认保留 delete 通知
 							if err2 := LpacNotificationProcess(deleteNotification.SeqNumber, false); err2 != nil {
-								dialog.ShowError(errors.New("Successfully deleted profile but failed to send notification\nYou should try to send delete notification manually"), WMain)
+								dialog.ShowError(errors.New(TR.Trans("message.successfully_delete_profile_failed_send_notification")), WMain)
 							} else {
 								// Ask to remove delete notification
 								// fixme 和手动操作通知模式重构
@@ -295,24 +296,27 @@ func deleteProfileButtonFunc() {
 										}()
 									},
 								}
-								d = dialog.NewCustomWithoutButtons("Remove Notification",
+								d = dialog.NewCustomWithoutButtons(TR.Trans("dialog.delete_profile_remove_notification"),
 									container.NewBorder(
 										nil,
 										container.NewCenter(container.NewHBox(notNowButton, spacer, removeButton)),
 										nil,
 										nil,
 										container.NewVBox(
-											&widget.Label{Text: "Successfully deleted profile and sent notification\nDo you want to remove delete notification now?",
+											&widget.Label{Text: TR.Trans("message.successfully_delete_profile_ask_remove_notification"),
 												Alignment: fyne.TextAlignCenter},
-											&widget.Label{Text: fmt.Sprintf("Seq: %d\nICCID: %s\nOperation: %s\nAddress: %s\n",
+											&widget.Label{Text: fmt.Sprintf(TR.Trans("label.info_seq")+" %d\n"+
+												TR.Trans("label.info_iccid")+" %s\n"+
+												TR.Trans("label.info_operation")+" %s\n"+
+												TR.Trans("label.info_address")+" %s\n",
 												deleteNotification.SeqNumber, deleteNotification.Iccid,
 												deleteNotification.ProfileManagementOperation, deleteNotification.NotificationAddress)})),
 									WMain)
 								d.Show()
 							}
 						} else {
-							dialog.ShowConfirm("Delete Successful",
-								"The profile has been successfully deleted\nSend the delete notification now?\n",
+							dialog.ShowConfirm(TR.Trans("dialog.delete_profile_successfully"),
+								TR.Trans("dialog.successfully_delete_profile_ask_send_notification"),
 								func(b bool) {
 									if b {
 										go processNotificationManually(deleteNotification.SeqNumber)
@@ -357,19 +361,19 @@ func switchStateButtonFunc() {
 		// 有一个 Profile 已启用，启用另外一个，产生一个 disable 和一个 enable 通知
 		// 禁用 Profile，产生一个 disable 通知
 		if switchNotifications == nil || len(switchNotifications) > 2 {
-			dialog.ShowError(errors.New("failed to found notification"), WMain)
+			dialog.ShowError(errors.New(TR.Trans("message.notification_not_found")), WMain)
 		} else {
-			dialogText := "successfully enabled profile\n"
+			dialogText := TR.Trans("message.successfully_enable_profile") + "\n"
 			var hasError bool
 			for _, notification := range switchNotifications {
 				if err2 := LpacNotificationProcess(notification.SeqNumber, true); err2 != nil {
 					hasError = true
 					switch notification.ProfileManagementOperation {
 					case "enable":
-						dialogText += "failed to process enable notification\n"
+						dialogText += TR.Trans("message.failed_process_enable_notification") + "\n"
 						break
 					case "disable":
-						dialogText += "failed to process disable notification\n"
+						dialogText += TR.Trans("message.failed_process_disable_notification") + "\n"
 						break
 					}
 				}
@@ -381,7 +385,7 @@ func switchStateButtonFunc() {
 	}
 	Refresh()
 	if ProfileStateAllowDisable {
-		SwitchStateButton.SetText("Enable")
+		SwitchStateButton.SetText(TR.Trans("label.switch_state_button_enable"))
 		SwitchStateButton.SetIcon(theme.ConfirmIcon())
 	}
 }
@@ -419,38 +423,38 @@ func processAllNotificationButtonFunc() {
 		"delete":  false,
 	}
 	enableCheck := &widget.Check{
-		Text:    "Enable",
+		Text:    TR.Trans("label.notification_operation_enable"),
 		Checked: true,
 		OnChanged: func(b bool) {
 			config["enable"] = b
 		},
 	}
 	disableCheck := &widget.Check{
-		Text:    "Disable",
+		Text:    TR.Trans("label.notification_operation_disable"),
 		Checked: true,
 		OnChanged: func(b bool) {
 			config["disable"] = b
 		},
 	}
 	installCheck := &widget.Check{
-		Text:    "Install",
+		Text:    TR.Trans("label.notification_operation_install"),
 		Checked: true,
 		OnChanged: func(b bool) {
 			config["install"] = b
 		},
 	}
 	deleteCheck := &widget.Check{
-		Text:    "Delete",
+		Text:    TR.Trans("label.notification_operation_delete"),
 		Checked: false,
 		OnChanged: func(b bool) {
 			config["delete"] = b
 		},
 	}
-	dialog.ShowCustomConfirm("Process All Notifications",
-		"OK",
-		"Cancel",
+	dialog.ShowCustomConfirm(TR.Trans("dialog.process_all_notification"),
+		TR.Trans("dialog.ok"),
+		TR.Trans("dialog.cancel"),
 		container.NewVBox(
-			&widget.Label{Text: "Remove the following notification type after processing:"},
+			&widget.Label{Text: TR.Trans("message.select_remove_notification_type")},
 			enableCheck,
 			disableCheck,
 			installCheck,
@@ -483,9 +487,12 @@ func processAllNotificationButtonFunc() {
 				if err := RefreshNotification(); err != nil {
 					ShowLpacErrDialog(err)
 				}
-				dialog.ShowCustom("Operation Finished",
+				dialog.ShowCustom(TR.Trans("dialog.process_all_notification_finished"),
 					"OK",
-					&widget.Label{Text: fmt.Sprintf("%d processed\n%d succeed\n%d failed", total, total-count, count)},
+					&widget.Label{Text: TR.Trans("message.process_all_notification_result",
+						mf.Arg("total", total),
+						mf.Arg("success", total-count),
+						mf.Arg("fail", count))},
 					WMain)
 			}
 		}, WMain)
@@ -504,10 +511,10 @@ func removeNotificationButtonFunc() {
 		ShowSelectItemDialog()
 		return
 	}
-	dialog.ShowCustomConfirm("Confirm",
-		"Confirm",
-		"Cancel",
-		&widget.Label{Text: "Are you sure you want to remove this notification?\n",
+	dialog.ShowCustomConfirm(TR.Trans("dialog.confirm"),
+		TR.Trans("dialog.confirm"),
+		TR.Trans("dialog.cancel"),
+		&widget.Label{Text: TR.Trans("message.remove_notification_confirm") + "\n",
 			Alignment: fyne.TextAlignCenter},
 		func(b bool) {
 			if b {
@@ -544,36 +551,38 @@ func batchRemoveNotificationButtonFunc() {
 		"delete":  false,
 	}
 	enableCheck := &widget.Check{
-		Text:    "Enable",
+		Text:    TR.Trans("label.notification_operation_enable"),
 		Checked: true,
 		OnChanged: func(b bool) {
 			config["enable"] = b
 		},
 	}
 	disableCheck := &widget.Check{
-		Text:    "Disable",
+		Text:    TR.Trans("label.notification_operation_disable"),
 		Checked: true,
 		OnChanged: func(b bool) {
 			config["disable"] = b
 		},
 	}
 	installCheck := &widget.Check{
-		Text:    "Install",
+		Text:    TR.Trans("label.notification_operation_install"),
 		Checked: true,
 		OnChanged: func(b bool) {
 			config["install"] = b
 		},
 	}
 	deleteCheck := &widget.Check{
-		Text:    "Delete",
+		Text:    TR.Trans("label.notification_operation_delete"),
 		Checked: false,
 		OnChanged: func(b bool) {
 			config["delete"] = b
 		},
 	}
-	dialog.ShowCustomConfirm("Batch Remove Notifications", "Confirm", "Cancel",
+	dialog.ShowCustomConfirm(TR.Trans("dialog.batch_remove_notification"),
+		TR.Trans("dialog.confirm"),
+		TR.Trans("dialog.cancel"),
 		container.NewVBox(
-			&widget.Label{Text: "Select the notification type to remove"},
+			&widget.Label{Text: TR.Trans("message.select_batch_remove_notification_type")},
 			enableCheck,
 			disableCheck,
 			installCheck,
@@ -609,9 +618,12 @@ func batchRemoveNotificationButtonFunc() {
 				if err := RefreshNotification(); err != nil {
 					ShowLpacErrDialog(err)
 				}
-				dialog.ShowCustom("Operation Finished",
-					"OK",
-					&widget.Label{Text: fmt.Sprintf("%d processed\n%d succeed\n%d failed", total, total-failedCount, failedCount)},
+				dialog.ShowCustom(TR.Trans("dialog.batch_remove_notification_finished"),
+					TR.Trans("dialog.ok"),
+					&widget.Label{Text: TR.Trans("message.batch_remove_notification_result",
+						mf.Arg("total", total),
+						mf.Arg("success", total-failedCount),
+						mf.Arg("fail", failedCount))},
 					WMain)
 			}
 		}, WMain)
@@ -619,16 +631,16 @@ func batchRemoveNotificationButtonFunc() {
 
 func copyEidButtonFunc() {
 	WMain.Clipboard().SetContent(ChipInfo.EidValue)
-	CopyEidButton.SetText("Copied!")
+	CopyEidButton.SetText(TR.Trans("label.copy_eid_button_copied"))
 	time.Sleep(2 * time.Second)
-	CopyEidButton.SetText("Copy")
+	CopyEidButton.SetText(TR.Trans("label.copy_eid_button"))
 }
 
 func copyEuiccInfo2ButtonFunc() {
 	WMain.Clipboard().SetContent(EuiccInfo2Entry.Text)
-	CopyEuiccInfo2Button.SetText("Copied eUICCInfo2!")
+	CopyEuiccInfo2Button.SetText(TR.Trans("label.copy_euicc_info2_button_copied"))
 	time.Sleep(2 * time.Second)
-	CopyEuiccInfo2Button.SetText("Copy eUICCInfo2")
+	CopyEuiccInfo2Button.SetText(TR.Trans("label.copy_euicc_info2_button"))
 }
 
 func setDefaultSmdpButtonFunc() {
@@ -661,7 +673,7 @@ func viewCertInfoButtonFunc() {
 		}
 		var element ciWidgetEl
 		element.KeyID = keyId
-		element.Name = "Unknown"
+		element.Name = TR.Trans("label.ci_name_unknown")
 		if issuer := GetIssuer(keyId); issuer != nil {
 			element.Country = issuer.Country
 			element.Name = issuer.Name
@@ -680,7 +692,7 @@ func viewCertInfoButtonFunc() {
 		UpdateItem: func(i widget.ListItemID, o fyne.CanvasObject) {
 			o.(*fyne.Container).Objects[0].(*fyne.Container).Objects[0].(*widget.Label).SetText(ciWidgetEls[i].Name)
 			o.(*fyne.Container).Objects[0].(*fyne.Container).Objects[1].(*widget.Label).SetText(CountryCodeToEmoji(ciWidgetEls[i].Country))
-			o.(*fyne.Container).Objects[1].(*widget.Label).SetText(fmt.Sprintf("KeyID: %s", ciWidgetEls[i].KeyID))
+			o.(*fyne.Container).Objects[1].(*widget.Label).SetText(fmt.Sprintf(TR.Trans("label.ci_info_keyid")+" %s", ciWidgetEls[i].KeyID))
 		},
 		OnSelected: func(id widget.ListItemID) {
 			selectedCI = id
@@ -693,11 +705,8 @@ func viewCertInfoButtonFunc() {
 		if selectedCI == Unselected {
 			ShowSelectItemDialog()
 		} else if issuer := GetIssuer(ciWidgetEls[selectedCI].KeyID); issuer == nil {
-			dialog.ShowInformation("No Data",
-				"The information of this certificate is not included.\n"+
-					"If you have any information about this certificate,\n"+
-					"you can report it to <euicc-dev-manual@septs.pw>\n"+
-					"Thank you",
+			dialog.ShowInformation(TR.Trans("dialog.ci_no_data"),
+				TR.Trans("message.ci_no_data"),
 				WMain)
 		} else {
 			const CiUrl = "https://euicc-manual.osmocom.org/docs/pki/ci/files/"
@@ -708,11 +717,11 @@ func viewCertInfoButtonFunc() {
 		}
 	}
 	certDataButton := &widget.Button{
-		Text:     "Certificate Info",
+		Text:     TR.Trans("label.cert_data_button"),
 		OnTapped: certDataButtonFunc,
 		Icon:     theme.InfoIcon(),
 	}
-	d := dialog.NewCustom("Certificate Issuer", "OK",
+	d := dialog.NewCustom(TR.Trans("dialog.ci"), TR.Trans("dialog.ok"),
 		container.NewBorder(nil, container.NewCenter(certDataButton), nil, nil, list), WMain)
 	d.Resize(fyne.Size{
 		Width:  600,
@@ -752,7 +761,7 @@ func initProfileList() *widget.List {
 			if ProfileMaskNeeded {
 				iccid = Profiles[i].MaskedICCID()
 			}
-			iccidLabel.SetText(fmt.Sprintf("ICCID: %s", iccid))
+			iccidLabel.SetText(fmt.Sprintf(TR.Trans("label.info_iccid")+" %s", iccid))
 			if Profiles[i].ProfileNickname != nil {
 				nameLabel.SetText(*Profiles[i].ProfileNickname)
 			} else {
@@ -772,17 +781,17 @@ func initProfileList() *widget.List {
 				profileIcon.Hide()
 			}
 
-			providerLabel.SetText("Provider: " + Profiles[i].ServiceProviderName)
+			providerLabel.SetText(TR.Trans("label.info_provider") + " " + Profiles[i].ServiceProviderName)
 		},
 		OnSelected: func(id widget.ListItemID) {
 			SelectedProfile = id
 			if Profiles[SelectedProfile].ProfileState == "enabled" {
 				ProfileStateAllowDisable = true
-				SwitchStateButton.SetText("Disable")
+				SwitchStateButton.SetText(TR.Trans("label.switch_state_button_disable"))
 				SwitchStateButton.SetIcon(theme.CancelIcon())
 			} else {
 				ProfileStateAllowDisable = false
-				SwitchStateButton.SetText("Enable")
+				SwitchStateButton.SetText(TR.Trans("label.switch_state_button_enable"))
 				SwitchStateButton.SetIcon(theme.ConfirmIcon())
 			}
 		},
@@ -841,20 +850,20 @@ func initNotificationList() *widget.List {
 			}
 			// ICCID
 			if iccid == "" {
-				iccid = "No ICCID!"
+				iccid = TR.Trans("label.no_iccid")
 			}
 			iccidLabel.SetText(fmt.Sprint("(", iccid, ")"))
 			// Notification Address
 			notificationAddressLabel.SetText(notificationAddress)
 			// Seq number
-			seqLabel.SetText(fmt.Sprint("Seq: ", Notifications[i].SeqNumber))
+			seqLabel.SetText(fmt.Sprint(TR.Trans("label.info_seq")+" ", Notifications[i].SeqNumber))
 			// Operation
 			operationLabel.
 				SetText(Notifications[i].CapitalizedOperation())
 			// Provider
 			profile, err := findProfileByIccid(Notifications[i].Iccid)
 			if err != nil {
-				providerLabel.SetText("?deleted profile")
+				providerLabel.SetText(TR.Trans("label.deleted_profile"))
 				providerIcon.Hide()
 			} else {
 				name := profile.ServiceProviderName
@@ -895,19 +904,19 @@ func processNotificationManually(seq int) {
 		}
 		if notification == nil {
 			// 不应该出现
-			dialog.ShowError(errors.New("failed to found notification"), WMain)
+			dialog.ShowError(errors.New(TR.Trans("message.notification_not_found")), WMain)
 			return
 		}
 		var d *dialog.CustomDialog
 		notNowButton := &widget.Button{
-			Text: "Not Now",
+			Text: TR.Trans("dialog.not_now"),
 			Icon: theme.CancelIcon(),
 			OnTapped: func() {
 				d.Hide()
 			},
 		}
 		removeButton := &widget.Button{
-			Text: "Remove",
+			Text: TR.Trans("label.remove_notification_button"),
 			Icon: theme.DeleteIcon(),
 			OnTapped: func() {
 				go func() {
@@ -926,16 +935,19 @@ func processNotificationManually(seq int) {
 				}()
 			},
 		}
-		d = dialog.NewCustomWithoutButtons("Remove Notification",
+		d = dialog.NewCustomWithoutButtons(TR.Trans("dialog.process_notification_remove_notification"),
 			container.NewBorder(
 				nil,
 				container.NewCenter(container.NewHBox(notNowButton, spacer, removeButton)),
 				nil,
 				nil,
 				container.NewVBox(
-					&widget.Label{Text: "Successfully processed notification.\nDo you want to remove this notification now?",
+					&widget.Label{Text: TR.Trans("message.process_notification_ask_remove_notification"),
 						Alignment: fyne.TextAlignCenter},
-					&widget.Label{Text: fmt.Sprintf("Seq: %d\nICCID: %s\nOperation: %s\nAddress: %s\n",
+					&widget.Label{Text: fmt.Sprintf(TR.Trans("label.info_seq")+" %d\n"+
+						TR.Trans("label.info_iccid")+" %s\n"+
+						TR.Trans("label.info_operation")+" %s\n"+
+						TR.Trans("label.info_address")+" %s\n",
 						notification.SeqNumber, notification.Iccid,
 						notification.ProfileManagementOperation, notification.NotificationAddress)})),
 			WMain)
@@ -976,7 +988,7 @@ func findProfileByIccid(iccid string) (*Profile, error) {
 			return profile, nil
 		}
 	}
-	return nil, errors.New("profile not found")
+	return nil, errors.New(TR.Trans("message.profile_not_found"))
 }
 
 func sliceContains[T comparable](slice []T, element T) bool {

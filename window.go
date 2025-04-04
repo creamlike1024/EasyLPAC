@@ -45,7 +45,7 @@ func InitMainWindow() fyne.Window {
 		container.NewBorder(
 			nil,
 			nil,
-			widget.NewLabel("Card Reader:"),
+			widget.NewLabel(TR.Trans("label.card_reader")),
 			nil,
 			container.NewHBox(container.NewGridWrap(fyne.Size{
 				Width:  280,
@@ -68,7 +68,7 @@ func InitMainWindow() fyne.Window {
 		nil,
 		nil,
 		ProfileList)
-	ProfileTab = container.NewTabItem("Profile", profileTabContent)
+	ProfileTab = container.NewTabItem(TR.Trans("tab_bar.profile"), profileTabContent)
 
 	notificationTabContent := container.NewBorder(
 		topToolBar,
@@ -85,7 +85,7 @@ func InitMainWindow() fyne.Window {
 		nil,
 		nil,
 		NotificationList)
-	NotificationTab = container.NewTabItem("Notification", notificationTabContent)
+	NotificationTab = container.NewTabItem(TR.Trans("tab_bar.notification"), notificationTabContent)
 
 	chipInfoTabContent := container.NewBorder(
 		topToolBar,
@@ -110,14 +110,14 @@ func InitMainWindow() fyne.Window {
 			nil,
 			container.NewScroll(EuiccInfo2Entry),
 		))
-	ChipInfoTab = container.NewTabItem("Chip Info", chipInfoTabContent)
+	ChipInfoTab = container.NewTabItem(TR.Trans("tab_bar.chip_info"), chipInfoTabContent)
 
-	aidEntryHint := &widget.Label{Text: "Valid."}
+	aidEntryHint := &widget.Label{Text: TR.Trans("label.aid_valid")}
 	aidEntry := &widget.Entry{
 		Text: ConfigInstance.LpacAID,
 		Validator: validation.NewAllStrings(
-			validation.NewRegexp(`^.{32}$`, "The custom AID must be 32 characters long!"),
-			validation.NewRegexp(`[[:xdigit:]]{32}`, "Only hex characters are allowed!"),
+			validation.NewRegexp(`^.{32}$`, TR.Trans("message.aid_length_illegal")),
+			validation.NewRegexp(`[[:xdigit:]]{32}`, TR.Trans("message.aid_not_hex")),
 		),
 	}
 	aidEntry.OnChanged = func(s string) {
@@ -127,22 +127,22 @@ func InitMainWindow() fyne.Window {
 		} else {
 			// Use last known good value only
 			ConfigInstance.LpacAID = s
-			aidEntryHint.SetText("Valid.")
+			aidEntryHint.SetText(TR.Trans("label.aid_valid"))
 		}
 	}
 	setToDefaultAidButton := widget.NewButton(
-		"Default",
+		TR.Trans("label.aid_default_button"),
 		func() {
 			aidEntry.SetText(AID_DEFAULT)
 		})
 	setTo5berAidButton := widget.NewButton(
-		"5ber",
+		TR.Trans("label.aid_5ber_button"),
 		func() {
 			aidEntry.SetText(AID_5BER)
 		})
 
 	settingsTabContent := container.NewVBox(
-		&widget.Label{Text: "lpac ISD-R AID", TextStyle: fyne.TextStyle{Bold: true}},
+		&widget.Label{Text: TR.Trans("label.lpac_isdr_aid"), TextStyle: fyne.TextStyle{Bold: true}},
 		container.NewHBox(container.NewGridWrap(
 			fyne.Size{
 				Width:  320,
@@ -152,59 +152,47 @@ func InitMainWindow() fyne.Window {
 			setTo5berAidButton),
 		aidEntryHint,
 
-		&widget.Label{Text: "lpac debug output", TextStyle: fyne.TextStyle{Bold: true}},
+		&widget.Label{Text: TR.Trans("label.lpac_debug_output"), TextStyle: fyne.TextStyle{Bold: true}},
 		&widget.Check{
-			Text:    "Enable env LIBEUICC_DEBUG_HTTP",
+			Text:    TR.Trans("label.enable_env_LIBEUICC_DEBUG_HTTP_check"),
 			Checked: false,
 			OnChanged: func(b bool) {
 				ConfigInstance.DebugHTTP = b
 			},
 		},
 		&widget.Check{
-			Text:    "Enable env LIBEUICC_DEBUG_APDU",
+			Text:    TR.Trans("label.enable_env_LIBEUICC_DEBUG_APDU_check"),
 			Checked: false,
 			OnChanged: func(b bool) {
 				ConfigInstance.DebugAPDU = b
 			},
 		},
 
-		&widget.Label{Text: "EasyLPAC settings", TextStyle: fyne.TextStyle{Bold: true}},
+		&widget.Label{Text: TR.Trans("label.easylpac_settings"), TextStyle: fyne.TextStyle{Bold: true}},
 		&widget.Check{
-			Text:    "Auto process notification",
+			Text:    TR.Trans("label.auto_process_notification_check"),
 			Checked: true,
 			OnChanged: func(b bool) {
 				ConfigInstance.AutoMode = b
 			},
 		})
-	SettingsTab = container.NewTabItem("Settings", settingsTabContent)
+	SettingsTab = container.NewTabItem(TR.Trans("tab_bar.settings"), settingsTabContent)
 
-	thankstoText := widget.NewRichTextFromMarkdown(`
-# Thanks to
+	thankstoText := widget.NewRichTextFromMarkdown(TR.Trans("thanks_to"))
 
-[lpac](https://github.com/estkme-group/lpac) C-based eUICC LPA
-
-[eUICC Manual](https://euicc-manual.osmocom.org) eUICC Developer Manual
-
-[fyne](https://github.com/fyne-io/fyne) Material Design GUI toolkit`)
-
-	aboutText := widget.NewRichTextFromMarkdown(`
-# EasyLPAC
-
-lpac GUI Frontend
-
-[Github](https://github.com/creamlike1024/EasyLPAC) Repo `)
+	aboutText := widget.NewRichTextFromMarkdown(TR.Trans("about"))
 
 	aboutTabContent := container.NewBorder(
 		nil,
 		container.NewBorder(nil, nil,
 			container.NewHBox(
-				widget.NewLabel(fmt.Sprintf("Version: %s", Version)),
+				widget.NewLabel(fmt.Sprintf(TR.Trans("label.version")+" %s", Version)),
 				LpacVersionLabel),
-			widget.NewLabel(fmt.Sprintf("eUICC Data: %s", EUICCDataVersion))),
+			widget.NewLabel(fmt.Sprintf(TR.Trans("label.euicc_data")+" %s", EUICCDataVersion))),
 		nil,
 		nil,
 		container.NewCenter(container.NewVBox(thankstoText, aboutText)))
-	AboutTab = container.NewTabItem("About", aboutTabContent)
+	AboutTab = container.NewTabItem(TR.Trans("tab_bar.about"), aboutTabContent)
 
 	Tabs = container.NewAppTabs(ProfileTab, NotificationTab, ChipInfoTab, SettingsTab, AboutTab)
 
@@ -214,34 +202,33 @@ lpac GUI Frontend
 }
 
 func InitDownloadDialog() dialog.Dialog {
-	smdpEntry := &widget.Entry{PlaceHolder: "Leave it empty to use default SM-DP+"}
-	matchIDEntry := &widget.Entry{PlaceHolder: "Activation code. Optional"}
-	confirmCodeEntry := &widget.Entry{PlaceHolder: "Optional"}
-	imeiEntry := &widget.Entry{PlaceHolder: "The IMEI sent to SM-DP+. Optional"}
+	smdpEntry := &widget.Entry{PlaceHolder: TR.Trans("label.smdp_entry_placeholder")}
+	matchIDEntry := &widget.Entry{PlaceHolder: TR.Trans("label.match_id_entry_placeholder")}
+	confirmCodeEntry := &widget.Entry{PlaceHolder: TR.Trans("label.confirm_code_entry_placeholder")}
+	imeiEntry := &widget.Entry{PlaceHolder: TR.Trans("label.imei_entry_placeholder")}
 
 	formItems := []*widget.FormItem{
-		{Text: "SM-DP+", Widget: smdpEntry},
-		{Text: "Matching ID", Widget: matchIDEntry},
-		{Text: "Confirm Code", Widget: confirmCodeEntry},
-		{Text: "IMEI", Widget: imeiEntry},
+		{Text: TR.Trans("label.smdp"), Widget: smdpEntry},
+		{Text: TR.Trans("label.match_id"), Widget: matchIDEntry},
+		{Text: TR.Trans("label.confirm_code"), Widget: confirmCodeEntry},
+		{Text: TR.Trans("label.imei"), Widget: imeiEntry},
 	}
 
 	form := widget.NewForm(formItems...)
 	var d dialog.Dialog
 	showConfirmCodeNeededDialog := func() {
-		dialog.ShowInformation("Confirm Code Required",
-			"This profile needs confirm code to download.\n"+
-				"Please fill the confirm code manually.", WMain)
+		dialog.ShowInformation(TR.Trans("dialog.confirm_code_required"),
+			TR.Trans("message.confirm_code_required"), WMain)
 	}
 	cancelButton := &widget.Button{
-		Text: "Cancel",
+		Text: TR.Trans("dialog.cancel"),
 		Icon: theme.CancelIcon(),
 		OnTapped: func() {
 			d.Hide()
 		},
 	}
 	downloadButton := &widget.Button{
-		Text:       "Download",
+		Text:       TR.Trans("label.download_profile_button"),
 		Icon:       theme.ConfirmIcon(),
 		Importance: widget.HighImportance,
 		OnTapped: func() {
@@ -279,20 +266,20 @@ func InitDownloadDialog() dialog.Dialog {
 	}
 
 	selectQRCodeButton = &widget.Button{
-		Text: "Scan image file",
+		Text: TR.Trans("label.select_qrcode_button"),
 		Icon: theme.FileImageIcon(),
 		OnTapped: func() {
 			go func() {
 				disableButtons()
 				defer enableButtons()
-				fileBuilder := nativeDialog.File().Title("Select a QR Code image file")
+				fileBuilder := nativeDialog.File().Title(TR.Trans("dialog.select_qrcode"))
 				fileBuilder.Filters = []nativeDialog.FileFilter{
 					{
-						Desc:       "Image (*.PNG, *.png, *.JPG, *.jpg, *.JPEG, *.jpeg)",
+						Desc:       TR.Trans("dialog.image_desc") + " (*.PNG, *.png, *.JPG, *.jpg, *.JPEG, *.jpeg)",
 						Extensions: []string{"PNG", "png", "JPG", "jpg", "JPEG", "jpeg"},
 					},
 					{
-						Desc:       "All files (*.*)",
+						Desc:       TR.Trans("dialog.all_files_desc") + " (*.*)",
 						Extensions: []string{"*"},
 					},
 				}
@@ -323,7 +310,7 @@ func InitDownloadDialog() dialog.Dialog {
 		},
 	}
 	pasteFromClipboardButton = &widget.Button{
-		Text: "Paste QR Code or LPA:1 Activation Code from clipboard",
+		Text: TR.Trans("label.paste_from_clipboard_button"),
 		Icon: theme.ContentPasteIcon(),
 		OnTapped: func() {
 			go func() {
@@ -365,7 +352,7 @@ func InitDownloadDialog() dialog.Dialog {
 			}()
 		},
 	}
-	d = dialog.NewCustomWithoutButtons("Download", container.NewBorder(
+	d = dialog.NewCustomWithoutButtons(TR.Trans("label.download_profile_button"), container.NewBorder(
 		nil,
 		container.NewVBox(spacer, container.NewCenter(selectQRCodeButton), spacer,
 			container.NewCenter(pasteFromClipboardButton), spacer,
@@ -381,11 +368,11 @@ func InitDownloadDialog() dialog.Dialog {
 }
 
 func InitSetNicknameDialog() dialog.Dialog {
-	entry := &widget.Entry{PlaceHolder: "Leave it empty to remove nickname"}
+	entry := &widget.Entry{PlaceHolder: TR.Trans("label.set_nickname_entry_placeholder")}
 	form := []*widget.FormItem{
-		{Text: "Nickname", Widget: entry},
+		{Text: TR.Trans("label.set_nickname_button"), Widget: entry},
 	}
-	d := dialog.NewForm("Set Nickname", "Submit", "Cancel", form, func(b bool) {
+	d := dialog.NewForm(TR.Trans("label.set_nickname_form"), TR.Trans("dialog.submit"), TR.Trans("dialog.cancel"), form, func(b bool) {
 		if b {
 			if err := LpacProfileNickname(Profiles[SelectedProfile].Iccid, entry.Text); err != nil {
 				ShowLpacErrDialog(err)
@@ -404,11 +391,11 @@ func InitSetNicknameDialog() dialog.Dialog {
 }
 
 func InitSetDefaultSmdpDialog() dialog.Dialog {
-	entry := &widget.Entry{PlaceHolder: "Leave it empty to remove default SM-DP+ setting"}
+	entry := &widget.Entry{PlaceHolder: TR.Trans("label.set_default_smdp_entry_placeholder")}
 	form := []*widget.FormItem{
-		{Text: "Default SM-DP+", Widget: entry},
+		{Text: TR.Trans("label.default_smdp"), Widget: entry},
 	}
-	d := dialog.NewForm("Set Default SM-DP+", "Submit", "Cancel", form, func(b bool) {
+	d := dialog.NewForm(TR.Trans("label.set_default_smdp_form"), TR.Trans("dialog.submit"), TR.Trans("dialog.cancel"), form, func(b bool) {
 		if b {
 			if err := LpacChipDefaultSmdp(entry.Text); err != nil {
 				ShowLpacErrDialog(err)
@@ -432,16 +419,16 @@ func ShowLpacErrDialog(err error) {
 		content := container.NewVBox(
 			container.NewCenter(container.NewHBox(
 				widget.NewIcon(theme.ErrorIcon()),
-				widget.NewLabel("lpac error"))),
+				widget.NewLabel(TR.Trans("dialog.lpac_error")))),
 			container.NewCenter(l),
-			container.NewCenter(widget.NewLabel("Please check the log for details")))
-		dialog.ShowCustom("Error", "OK", content, WMain)
+			container.NewCenter(widget.NewLabel(TR.Trans("message.lpac_error"))))
+		dialog.ShowCustom(TR.Trans("dialog.error"), TR.Trans("dialog.ok"), content, WMain)
 	}()
 }
 
 func ShowSelectItemDialog() {
 	go func() {
-		d := dialog.NewInformation("Info", "Please select a item.", WMain)
+		d := dialog.NewInformation(TR.Trans("dialog.info"), TR.Trans("message.select_item"), WMain)
 		d.Resize(fyne.Size{
 			Width:  220,
 			Height: 160,
@@ -452,12 +439,12 @@ func ShowSelectItemDialog() {
 
 func ShowSelectCardReaderDialog() {
 	go func() {
-		dialog.ShowInformation("Info", "Please select a card reader.", WMain)
+		dialog.ShowInformation(TR.Trans("dialog.info"), TR.Trans("message.select_card_reader"), WMain)
 	}()
 }
 
 func ShowRefreshNeededDialog() {
 	go func() {
-		dialog.ShowInformation("Info", "Please refresh before proceeding.\n", WMain)
+		dialog.ShowInformation(TR.Trans("dialog.info"), TR.Trans("message.refresh_required")+"\n", WMain)
 	}()
 }
