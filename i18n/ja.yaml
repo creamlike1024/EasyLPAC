@@ -121,7 +121,8 @@ message:
   batch_remove_notification_result: "{total} 件が処理済み\n{success} 件が成功\n{fail} 件が失敗"
   ci_no_data: "この証明書の情報は含まれていません。\nこの証明書に関する情報がある場合は、\n<euicc-dev-manual@septs.pw> にご報告ください。\n感謝します。"
   process_notification_ask_remove_notification: "通知が正常に処理されました。\nこの通知を今すぐ削除しますか？"
-  aid_length_illegal: カスタム AID は 32 文字の長さにする必要があります。 aid_not_hex: 16 進文字のみが許可されます。
+  aid_length_illegal: カスタム AID は 32 文字の長さにする必要があります！
+  aid_not_hex: 16 進数のみが許可されます。
   confirm_code_required: "このプロファイルをダウンロードするには確認コードが必要です。\n確認コードを手動で入力してください。"
   lpac_error: 詳細はログを確認してください。
   select_item: 項目を選択してください。
