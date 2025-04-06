@@ -5,8 +5,8 @@ tab_bar:
   settings: 設定
   about: バージョン情報
 label:
-  lpac_version: "lpac バージョン:"
-  lpac_version_unknown: "lpac バージョン: 不明"
+  lpac_version: "lpac のバージョン:"
+  lpac_version_unknown: "lpac のバージョン: 不明"
   menu_copy: コピー
   status_ready: 待機中
   status_processing: 処理中...
@@ -25,13 +25,13 @@ label:
   notification_mask_check: マスク
   copy_eid_button: コピー
   copy_eid_button_copied: コピーしました！
-  view_cert_info_button: Certificate Issuer
+  view_cert_info_button: 証明書発行者
   copy_euicc_info2_button: eUICCInfo2 をコピー
   copy_euicc_info2_button_copied: eUICCInfo2 をコピーしました！
   info_iccid: "ICCID:"
   info_provider: "プロバイダー:"
   info_nickname: "ニックネーム:"
-  info_seq: "Seq:"
+  info_seq: "シーケンス:"
   info_address: "アドレス:"
   info_operation: "操作:"
   notification_operation_enable: 有効
@@ -40,33 +40,33 @@ label:
   notification_operation_delete: 削除
   ci_name_unknown: 不明
   ci_info_keyid: "キー ID:"
-  cert_data_button: Certificate Info
+  cert_data_button: 証明書情報
   no_iccid: ICCID がありません！
-  deleted_profile: "?deleted profile"
-  aid_valid: Valid.
+  deleted_profile: "? 削除されたプロファイル"
+  aid_valid: 有効
   aid_default_button: 既定
   aid_5ber_button: 5ber
   lpac_isdr_aid: lpac ISD-R AID
   lpac_debug_output: lpac デバッグ出力
-  enable_env_LIBEUICC_DEBUG_HTTP_check: Enable env LIBEUICC_DEBUG_HTTP
-  enable_env_LIBEUICC_DEBUG_APDU_check: Enable env LIBEUICC_DEBUG_APDU
+  enable_env_LIBEUICC_DEBUG_HTTP_check: LIBEUICC_DEBUG_HTTP を有効化する
+  enable_env_LIBEUICC_DEBUG_APDU_check: LIBEUICC_DEBUG_APDU を有効化する
   easylpac_settings: EasyLPAC の設定
   auto_process_notification_check: 通知を自動で処理する
   version: "バージョン:"
   euicc_data: "eUICC データ:"
-  smdp_entry_placeholder: Leave it empty to use default SM-DP+
-  match_id_entry_placeholder: Activation code. Optional
+  smdp_entry_placeholder: 既定の SM-DP+ を使用するには空白のままにしてください
+  match_id_entry_placeholder: アクティベーションコード (任意)
   confirm_code_entry_placeholder: 任意
-  imei_entry_placeholder: The IMEI sent to SM-DP+. Optional
+  imei_entry_placeholder: SM-DP+ に送信される IMEI (任意)
   smdp: SM-DP+
   match_id: マッチング ID
   confirm_code: 確認コード
   imei: IMEI
   select_qrcode_button: 画像ファイルをスキャン
-  paste_from_clipboard_button: "Paste QR Code or LPA:1 Activation Code from clipboard"
-  set_nickname_entry_placeholder: Leave it empty to remove nickname
+  paste_from_clipboard_button: "クリップボードから QR コードまたは LPA:1 アクティベーションコードを貼り付けてください"
+  set_nickname_entry_placeholder: ニックネームを削除するには空白のままにしてください
   set_nickname_form: ニックネームを設定
-  set_default_smdp_entry_placeholder: Leave it empty to remove default SM-DP+ setting
+  set_default_smdp_entry_placeholder: 既定の SM-DP+ 設定を削除するには空のままにしてください
   default_smdp: 既定の SM-DP+
   set_default_smdp_form: 既定の SM-DP+ を設定
   not_set: <未設定>
@@ -83,7 +83,7 @@ dialog:
   confirm: 確認
   cancel: キャンセル
   ok: OK
-  not_now: Not Now
+  not_now: 今はしない
   submit: 送信
   delete_profile_remove_notification: 通知を削除
   delete_profile_successfully: 削除が成功しました
@@ -104,31 +104,30 @@ dialog:
 
 message:
   lpac_not_found: lpac がありません
-  disable_profile_before_delete: You should disable the profile before deleting it.
+  disable_profile_before_delete: プロファイルを削除する前に無効化する必要があります。
   delete_profile_confirm: このプロファイルを削除してもよろしいですか？
   notification_not_found: 通知はありません
   profile_not_found: プロファイルはありません
-  successfully_delete_profile_failed_send_notification: "Successfully deleted profile but failed to send notification\nYou should try to send delete notification manually"
-  successfully_delete_profile_ask_remove_notification: "Successfully deleted profile and sent notification\nDo you want to remove delete notification now?"
-  successfully_delete_profile_ask_send_notification: "The profile has been successfully deleted\nSend the delete notification now?\n"
-  successfully_enable_profile: successfully enable profile
-  failed_process_enable_notification: failed to process enable notification
-  failed_process_disable_notification: failed to process disable notification
-  select_remove_notification_type: "Remove the following notification type after processing:"
-  process_all_notification_result: "{total} processed\n{success} succeed\n{fail} failed"
-  remove_notification_confirm: Are you sure you want to remove this notification?
-  select_batch_remove_notification_type: Select the notification type to remove
-  batch_remove_notification_result: "{total} processed\n{success} succeed\n{fail} failed"
-  ci_no_data: "The information of this certificate is not included.\nIf you have any information about this certificate,\nyou can report it to <euicc-dev-manual@septs.pw>\nThank you"
-  process_notification_ask_remove_notification: "Successfully processed notification.\nDo you want to remove this notification now?"
-  aid_length_illegal: The custom AID must be 32 characters long!
-  aid_not_hex: Only hex characters are allowed!
-  confirm_code_required: "This profile needs confirm code to download.\nPlease fill the confirm code manually."
-  lpac_error: Please check the log for details
-  select_item: Please select a item.
-  select_card_reader: Please select a card reader.
-  refresh_required: Please refresh before proceeding.
-  failed_to_decode_euiccinfo2: "chip Info: failed to decode EUICCInfo2"
+  successfully_delete_profile_failed_send_notification: "プロファイルは正常に削除されましたが、通知の送信に失敗しました\n削除通知を手動で送信してください"
+  successfully_delete_profile_ask_remove_notification: "プロファイルの削除と通知が正常に完了しました。\n削除通知を今すぐ削除しますか？"
+  successfully_delete_profile_ask_send_notification: "プロファイルの削除と通知が正常に完了しました。\n削除通知を今すぐ削除しますか？\n"
+  successfully_enable_profile: プロファイルを有効化しました
+  failed_process_enable_notification: 有効化の通知処理に失敗しました
+  failed_process_disable_notification: 無効化の通知処理に失敗しました
+  select_remove_notification_type: "処理後に次の通知タイプを削除します:"
+  process_all_notification_result: "{total} 件が処理済み\n{success} 件が成功\n{fail} 件が失敗"
+  remove_notification_confirm: この通知を削除してもよろしいですか？
+  select_batch_remove_notification_type: 削除する通知タイプを選択してください
+  batch_remove_notification_result: "{total} 件が処理済み\n{success} 件が成功\n{fail} 件が失敗"
+  ci_no_data: "この証明書の情報は含まれていません。\nこの証明書に関する情報がある場合は、\n<euicc-dev-manual@septs.pw> にご報告ください。\n感謝します。"
+  process_notification_ask_remove_notification: "通知が正常に処理されました。\nこの通知を今すぐ削除しますか？"
+  aid_length_illegal: カスタム AID は 32 文字の長さにする必要があります。 aid_not_hex: 16 進文字のみが許可されます。
+  confirm_code_required: "このプロファイルをダウンロードするには確認コードが必要です。\n確認コードを手動で入力してください。"
+  lpac_error: 詳細はログを確認してください。
+  select_item: 項目を選択してください。
+  select_card_reader: カードリーダーを選択してください。
+  refresh_required: 続行する前に更新してください。
+  failed_to_decode_euiccinfo2: "チップ情報: EUICCInfo2 のデコードに失敗しました"
 
-thanks_to: "# Thanks to\n\n[lpac](https://github.com/estkme-group/lpac) C-based eUICC LPA\n\n[eUICC Manual](https://euicc-manual.osmocom.org) eUICC Developer Manual\n\n[fyne](https://github.com/fyne-io/fyne) Material Design GUI toolkit"
-about: "# EasyLPAC\n\nlpac GUI Frontend\n\n[Github](https://github.com/creamlike1024/EasyLPAC) Repo "
+thanks_to: "# 謝辞:\n\n[lpac](https://github.com/estkme-group/lpac) C 言語ベースの eUICC LPA\n\n[eUICC マニュアル](https://euicc-manual.osmocom.org) eUICC 開発者マニュアル\n\n[fyne](https://github.com/fyne-io/fyne) Material デザイン GUI ツールキット"
+about: "# EasyLPAC\n\nlpac GUI フロントエンド\n\n[GitHub](https://github.com/creamlike1024/EasyLPAC) リポジトリ"
