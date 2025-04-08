@@ -11,6 +11,8 @@ label:
   menu_copy: コピー
   status_ready: 待機中
   status_processing: 処理中...
+  profile_status_enabled: Enabled
+  profile_status_disabled: Disabled
   download_profile_button: ダウンロード
   set_nickname_button: ニックネーム
   delete_profile_button: 削除
@@ -131,6 +133,7 @@ message:
   select_card_reader: カードリーダーを選択してください。
   refresh_required: 続行する前に更新してください。
   failed_to_decode_euiccinfo2: "チップ情報: EUICCInfo2 のデコードに失敗しました"
+  qr_code_format_error: failed to decode LPA Activation Code from QR Code
 
 thanks_to: "# 謝辞:\n\n[lpac](https://github.com/estkme-group/lpac) C 言語ベースの eUICC LPA\n\n[eUICC マニュアル](https://euicc-manual.osmocom.org) eUICC 開発者マニュアル\n\n[fyne](https://github.com/fyne-io/fyne) Material デザイン GUI ツールキット"
 about: "# EasyLPAC\n\nlpac GUI フロントエンド\n\n[GitHub](https://github.com/creamlike1024/EasyLPAC) リポジトリ"

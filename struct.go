@@ -71,10 +71,6 @@ func (p *Profile) MaskedICCID() string {
 	return p.Iccid[0:7] + strings.Repeat("*", len(p.Iccid)-7)
 }
 
-func (p *Profile) CapitalizedState() string {
-	return strings.ToUpper(p.ProfileState[0:1]) + p.ProfileState[1:]
-}
-
 type Notification struct {
 	SeqNumber                  int    `json:"seqNumber"`
 	ProfileManagementOperation string `json:"profileManagementOperation"`
@@ -84,10 +80,6 @@ type Notification struct {
 
 func (n *Notification) MaskedICCID() string {
 	return n.Iccid[0:7] + strings.Repeat("*", len(n.Iccid)-7)
-}
-
-func (n *Notification) CapitalizedOperation() string {
-	return strings.ToUpper(n.ProfileManagementOperation[0:1]) + n.ProfileManagementOperation[1:]
 }
 
 type ApduDriver struct {

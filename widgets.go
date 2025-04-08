@@ -767,7 +767,12 @@ func initProfileList() *widget.List {
 			} else {
 				nameLabel.SetText(Profiles[i].ProfileName)
 			}
-			stateLabel.SetText(Profiles[i].CapitalizedState())
+			switch Profiles[i].ProfileState {
+			case "enabled":
+				stateLabel.SetText(TR.Trans("label.profile_status_enabled"))
+			case "disabled":
+				stateLabel.SetText(TR.Trans("label.profile_status_disabled"))
+			}
 			if Profiles[i].ProfileState == "enabled" {
 				enabledIcon.Show()
 			} else {
@@ -858,8 +863,16 @@ func initNotificationList() *widget.List {
 			// Seq number
 			seqLabel.SetText(fmt.Sprint(TR.Trans("label.info_seq")+" ", Notifications[i].SeqNumber))
 			// Operation
-			operationLabel.
-				SetText(Notifications[i].CapitalizedOperation())
+			switch Notifications[i].ProfileManagementOperation {
+			case "enable":
+				operationLabel.SetText(TR.Trans("label.notification_operation_enable"))
+			case "disable":
+				operationLabel.SetText(TR.Trans("label.notification_operation_disable"))
+			case "install":
+				operationLabel.SetText(TR.Trans("label.notification_operation_install"))
+			case "delete":
+				operationLabel.SetText(TR.Trans("label.notification_operation_delete"))
+			}
 			// Provider
 			profile, err := findProfileByIccid(Notifications[i].Iccid)
 			if err != nil {

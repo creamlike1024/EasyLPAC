@@ -11,6 +11,8 @@ label:
   menu_copy: Copy
   status_ready: Ready.
   status_processing: Processing...
+  profile_status_enabled: Enabled
+  profile_status_disabled: Disabled
   download_profile_button: Download
   set_nickname_button: Nickname
   delete_profile_button: Delete
@@ -131,6 +133,7 @@ message:
   select_card_reader: Please select a card reader.
   refresh_required: Please refresh before proceeding.
   failed_to_decode_euiccinfo2: "chip Info: failed to decode EUICCInfo2"
+  qr_code_format_error: failed to decode LPA Activation Code from QR Code
 
 thanks_to: "# Thanks to\n\n[lpac](https://github.com/estkme-group/lpac) C-based eUICC LPA\n\n[eUICC Manual](https://euicc-manual.osmocom.org) eUICC Developer Manual\n\n[fyne](https://github.com/fyne-io/fyne) Material Design GUI toolkit"
 about: "# EasyLPAC\n\nlpac GUI Frontend\n\n[Github](https://github.com/creamlike1024/EasyLPAC) Repo "

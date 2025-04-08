@@ -435,10 +435,6 @@ func ShowLpacErrDialog(err error) {
 func ShowSelectItemDialog() {
 	go func() {
 		d := dialog.NewInformation(TR.Trans("dialog.info"), TR.Trans("message.select_item"), WMain)
-		d.Resize(fyne.Size{
-			Width:  220,
-			Height: 160,
-		})
 		d.Show()
 	}()
 }
