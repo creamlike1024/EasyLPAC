@@ -11,8 +11,8 @@ label:
   menu_copy: コピー
   status_ready: 待機中
   status_processing: 処理中...
-  profile_status_enabled: Enabled
-  profile_status_disabled: Disabled
+  profile_status_enabled: 有効化済み
+  profile_status_disabled: 無効化済み
   download_profile_button: ダウンロード
   set_nickname_button: ニックネーム
   delete_profile_button: 削除
@@ -21,14 +21,14 @@ label:
   process_notification_button: 処理
   process_all_notification_button: すべての処理
   remove_notification_button: 削除
-  batch_remove_notification_button: 一括削除
+  batch_remove_notification_button: 一括で削除
   open_log_button: ログを開く
   refresh_button: 更新
   profile_mask_check: マスク
   notification_mask_check: マスク
   copy_eid_button: コピー
   copy_eid_button_copied: コピーしました！
-  view_cert_info_button: 証明書発行者
+  view_cert_info_button: 証明書の発行者
   copy_euicc_info2_button: eUICCInfo2 をコピー
   copy_euicc_info2_button_copied: eUICCInfo2 をコピーしました！
   info_iccid: "ICCID:"
@@ -43,7 +43,7 @@ label:
   notification_operation_delete: 削除
   ci_name_unknown: 不明
   ci_info_keyid: "キー ID:"
-  cert_data_button: 証明書情報
+  cert_data_button: 証明書の情報
   no_iccid: ICCID がありません！
   deleted_profile: "? 削除されたプロファイル"
   aid_valid: 有効
@@ -134,7 +134,7 @@ message:
   select_card_reader: カードリーダーを選択してください。
   refresh_required: 続行する前に更新してください。
   failed_to_decode_euiccinfo2: "チップ情報: EUICCInfo2 のデコードに失敗しました"
-  qr_code_format_error: failed to decode LPA Activation Code from QR Code
+  qr_code_format_error: QR コードから LPA アクティベーションコードのデコードに失敗しました
 
 thanks_to: "# 謝辞:\n\n[lpac](https://github.com/estkme-group/lpac) C 言語ベースの eUICC LPA\n\n[eUICC マニュアル](https://euicc-manual.osmocom.org) eUICC 開発者マニュアル\n\n[fyne](https://github.com/fyne-io/fyne) Material デザイン GUI ツールキット"
 about: "# EasyLPAC\n\nlpac GUI フロントエンド\n\n[GitHub](https://github.com/creamlike1024/EasyLPAC) リポジトリ"
