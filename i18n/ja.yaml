@@ -50,6 +50,7 @@ label:
   aid_default_button: 既定
   aid_5ber_button: 5ber
   aid_esimme_button: eSIM.me
+  aid_xesim_button: Xesim
   lpac_isdr_aid: lpac ISD-R AID
   lpac_debug_output: lpac デバッグ出力
   enable_env_LIBEUICC_DEBUG_HTTP_check: LIBEUICC_DEBUG_HTTP を有効化する
