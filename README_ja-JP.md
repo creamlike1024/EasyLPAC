@@ -25,7 +25,8 @@ openSUSE: https://software.opensuse.org/package/easylpac ([OBS](https://build.op
 
 ## Linux
 
-lpac バイナリの検索順序: 始めに EasyLPAC を同じディレクトリを検索します。見つからない場合は、`/usr/bin/lpac` を使用します。
+lpac バイナリの検索順序: 始めに EasyLPAC を同じディレクトリを検索します。<br>
+見つからない場合は、`/usr/bin/lpac` を使用します。
 
 `EasyLPAC-linux-x86_64-with-lpac.tar.gz` には、ビルド済みの lpac バイナリが含まれています。実行できない場合は、パッケージマネージャーで `lpac` をインストールするか自分で [lpac をコンパイル](https://github.com/estkme-group/lpac?tab=readme-ov-file#compile)する必要があります。
 
@@ -49,7 +50,7 @@ EasyLPAC は既定ですべての操作の通知を処理し、正常に処理�
 
 ## 5ber 使用時に発生する `euicc_init` の lpac エラー
 
-設定 -> lpac ISD-R AID に移動し、5ber をクリックして 5ber のカスタム AID を設定して再試行してください。
+設定 -> lpac ISD-R AID に移動し、5ber をクリックして 5ber のカスタム AID を設定後に再試行してください。
 
 ## macOS で `SCardTransmit() が失敗しました: 80100016` が発生する
 
