@@ -1,5 +1,7 @@
 # EasyLPAC
-[lpac](https://github.com/estkme-group/lpac) GUI フロントエンド
+**Language:** [English](./README.md)
+
+[lpac](https://github.com/estkme-group/lpac) の GUI フロントエンド
 
 ダウンロード: [GitHub リリース](https://github.com/creamlike1024/EasyLPAC/releases/latest)
 
