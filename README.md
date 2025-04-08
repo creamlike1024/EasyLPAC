@@ -1,4 +1,6 @@
 # EasyLPAC
+**Language:** [日本語](./README_ja-JP.md)
+
 [lpac](https://github.com/estkme-group/lpac) GUI Frontend
 
 Download: [GitHub Release](https://github.com/creamlike1024/EasyLPAC/releases/latest)
