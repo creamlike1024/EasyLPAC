@@ -4,6 +4,7 @@ tab_bar:
   chip_info: チップ情報
   settings: 設定
   about: バージョン情報
+
 label:
   lpac_version: "lpac のバージョン:"
   lpac_version_unknown: "lpac のバージョン: 不明"
@@ -46,6 +47,7 @@ label:
   aid_valid: 有効
   aid_default_button: 既定
   aid_5ber_button: 5ber
+  aid_esimme_button: eSIM.me
   lpac_isdr_aid: lpac ISD-R AID
   lpac_debug_output: lpac デバッグ出力
   enable_env_LIBEUICC_DEBUG_HTTP_check: LIBEUICC_DEBUG_HTTP を有効化する

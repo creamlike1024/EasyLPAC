@@ -140,6 +140,11 @@ func InitMainWindow() fyne.Window {
 		func() {
 			aidEntry.SetText(AID_5BER)
 		})
+	setToEsimmeAidButton := widget.NewButton(
+		TR.Trans("label.aid_esimme_button"),
+		func() {
+			aidEntry.SetText(AID_ESIMME)
+		})
 
 	settingsTabContent := container.NewVBox(
 		&widget.Label{Text: TR.Trans("label.lpac_isdr_aid"), TextStyle: fyne.TextStyle{Bold: true}},
@@ -149,7 +154,8 @@ func InitMainWindow() fyne.Window {
 				Height: aidEntry.MinSize().Height,
 			}, aidEntry),
 			setToDefaultAidButton,
-			setTo5berAidButton),
+			setTo5berAidButton,
+			setToEsimmeAidButton),
 		aidEntryHint,
 
 		&widget.Label{Text: TR.Trans("label.lpac_debug_output"), TextStyle: fyne.TextStyle{Bold: true}},

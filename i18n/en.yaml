@@ -4,6 +4,7 @@ tab_bar:
   chip_info: Chip Info
   settings: Settings
   about: About
+
 label:
   lpac_version: "lpac Version:"
   lpac_version_unknown: "lpac Version: unknown"
@@ -46,6 +47,7 @@ label:
   aid_valid: Valid.
   aid_default_button: Default
   aid_5ber_button: 5ber
+  aid_esimme_button: eSIM.me
   lpac_isdr_aid: lpac ISD-R AID
   lpac_debug_output: lpac debug output
   enable_env_LIBEUICC_DEBUG_HTTP_check: Enable env LIBEUICC_DEBUG_HTTP
