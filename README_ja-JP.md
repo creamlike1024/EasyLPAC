@@ -15,7 +15,7 @@ openSUSE: https://software.opensuse.org/package/easylpac ([OBS](https://build.op
 システム要件:
 - Windows7 以降
 - 最新の macOS
-- Linux: `pcscd`, `pcsclite`、 `libcurl`(lpac 用) と `gtk3dialog` (EasyLPAC 用)。 依存関係についてはよく理解してません。
+- Linux: `pcscd`、 `pcsclite`、 `libcurl`(lpac 用) と `gtk3dialog` (EasyLPAC 用)。 依存関係についてはよく理解してません。
 
 現在、pcsc の APDUINTERFACE と curl の HTTPINTERFACE のみがサポートされています。
 
@@ -23,7 +23,7 @@ openSUSE: https://software.opensuse.org/package/easylpac ([OBS](https://build.op
 
 実行する前にカードリーダーを接続してください。
 
-[eSTK.me のユーザー](https://www.estk.me/): eSTK カードに付属の ACR38U カードリーダーを使用しており、現在の OS が **macOS 14 Sonoma** を使用している場合は[カードリーダードライバー](https://www.acs.com.hk/en/driver/228/acr38u-nd-pocketmate-smart-card-reader-micro-usb/)をインストールしてください。
+[eSTK.me のユーザー](https://www.estk.me/): eSTK.me カードに付属の ACR38U カードリーダーと **macOS 14 Sonoma** を使用している場合は[カードリーダードライバー](https://www.acs.com.hk/en/driver/228/acr38u-nd-pocketmate-smart-card-reader-micro-usb/)をインストールしてください。
 
 ## Linux
 
