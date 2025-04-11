@@ -13,7 +13,7 @@ NixOS: [NUR](https://github.com/nix-community/NUR#readme) パッケージ https:
 openSUSE: https://software.opensuse.org/package/easylpac ([OBS](https://build.opensuse.org/package/show/home:Psheng/EasyLPAC))
 
 システム要件:
-- Windows7 以降
+- Windows10 以降
 - 最新の macOS
 - Linux: `pcscd`、 `pcsclite`、 `libcurl`(lpac 用) と `gtk3dialog` (EasyLPAC 用)。 依存関係についてはよく理解してません。
 
