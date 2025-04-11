@@ -2,8 +2,8 @@ package main
 
 import (
 	"embed"
+	"github.com/Xuanwo/go-locale"
 	"github.com/fullpipe/icu-mf/mf"
-	"github.com/jeandeaual/go-locale"
 	"golang.org/x/text/language"
 )
 
@@ -12,12 +12,11 @@ var i18nDir embed.FS
 var TR mf.Translator
 
 func detectSystemLanguate() string {
-	userLanguage, err := locale.GetLanguage()
+	tag, err := locale.Detect()
 	if err != nil {
-		return "en"
-	} else {
-		return userLanguage
+		return "en-US"
 	}
+	return tag.String()
 }
 
 func init() {

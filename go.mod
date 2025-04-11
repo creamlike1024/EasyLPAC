@@ -4,8 +4,8 @@ go 1.24
 
 require (
 	fyne.io/fyne/v2 v2.6.0
+	github.com/Xuanwo/go-locale v1.1.3
 	github.com/fullpipe/icu-mf v1.0.1
-	github.com/jeandeaual/go-locale v0.0.0-20241217141322-fcc2cadd6f08
 	github.com/makiuchi-d/gozxing v0.1.1
 	github.com/mattn/go-runewidth v0.0.16
 	github.com/sqweek/dialog v0.0.0-20240226140203-065105509627
@@ -35,6 +35,7 @@ require (
 	github.com/godbus/dbus/v5 v5.1.0 // indirect
 	github.com/hack-pad/go-indexeddb v0.3.2 // indirect
 	github.com/hack-pad/safejs v0.1.0 // indirect
+	github.com/jeandeaual/go-locale v0.0.0-20241217141322-fcc2cadd6f08 // indirect
 	github.com/jsummers/gobmp v0.0.0-20230614200233-a9de23ed2e25 // indirect
 	github.com/kr/text v0.2.0 // indirect
 	github.com/nfnt/resize v0.0.0-20180221191011-83c6a9932646 // indirect
