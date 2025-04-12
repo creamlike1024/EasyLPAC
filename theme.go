@@ -32,7 +32,13 @@ func (MyTheme) Font(s fyne.TextStyle) fyne.Resource {
 		return resourceDroidSansMono
 	}
 	if s.Bold {
+		if LanguageTag == "ja-JP" {
+			return resourceNotoSansJPBold
+		}
 		return resourceDroidSansBold
+	}
+	if LanguageTag == "ja-JP" {
+		return resourceNotoSansJP
 	}
 	return resourceDroidSansFallback
 }
