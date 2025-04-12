@@ -19,7 +19,7 @@ func detectSystemLanguate() string {
 	return tag.String()
 }
 
-func init() {
+func InitI18n() {
 	bundle, err := mf.NewBundle(
 		mf.WithDefaultLangFallback(language.English),
 		mf.WithYamlProvider(i18nDir))

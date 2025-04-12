@@ -18,7 +18,7 @@ type CertificateIssuer struct {
 
 var issuerRegistry []*CertificateIssuer
 
-func init() {
+func InitCiRegistry() {
 	if err := json.Unmarshal(ciRegistryBundle, &issuerRegistry); err != nil {
 		panic(err)
 	}

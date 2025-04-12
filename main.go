@@ -15,6 +15,9 @@ const EUICCDataVersion = "unknown"
 var App fyne.App
 
 func init() {
+	InitCiRegistry()
+	InitEumRegistry()
+	InitI18n()
 	App = app.New()
 	App.Settings().SetTheme(&MyTheme{})
 
