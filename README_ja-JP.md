@@ -54,7 +54,7 @@ EasyLPAC は既定ですべての通知の操作を処理し、正常に処理�
 
 設定 -> lpac ISD-R AID に移動し、5ber をクリックして 5ber のカスタム AID を設定後に再試行してください。
 
-## macOS で `SCardTransmit() が失敗しました: 80100016` が発生する
+## macOS で `SCardTransmit() failed: 80100016` が発生する
 
 macOS Sonoma を使用している場合にこのエラーが発生する可能性があります: `SCardTransmit() が失敗しました: 80100016`
 
@@ -63,13 +63,13 @@ macOS Sonoma を使用している場合にこのエラーが発生する可能�
 - [Apple's own CCID driver in Sonoma](https://blog.apdu.fr/posts/2023/11/apple-own-ccid-driver-in-sonoma/)
 - [macOS Sonoma bug: SCardControl() returns SCARD_E_NOT_TRANSACTED](https://blog.apdu.fr/posts/2023/09/macos-sonoma-bug-scardcontrol-returns-scard_e_not_transacted/)
 
-## `SCardEstablishContext() が失敗しました: 8010001D` が発生する
+## `SCardEstablishContext() failed: 8010001D` が発生する
 
 これは PCSC サービスが実行されていないことが原因です。Linux の場合は、`pcscd` サービスです。
 
 systemd ベースのディストリビューションで `pcscd` を起動します: `sudo systemctl start pcscd`
 
-## `SCardListReaders() が失敗しました: 8010002E` が発生する
+## `SCardListReaders() failed: 8010002E` が発生する
 
 カードリーダーが未接続です。
 
