@@ -14,7 +14,7 @@ var TR mf.Translator
 func detectSystemLanguate() string {
 	tag, err := locale.Detect()
 	if err != nil {
-		return "en-US"
+		return "en"
 	}
 	return tag.String()
 }
