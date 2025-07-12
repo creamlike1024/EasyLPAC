@@ -84,7 +84,7 @@ label:
   card_reader: "讀卡機:"
 
 dialog:
-  hint: Hint
+  hint: 提示
   confirm: 確認
   cancel: 取消
   ok: 好
@@ -127,7 +127,7 @@ message:
   ci_no_data: "這份憑證的相關資訊尚未收錄。\n如果你有關於這張憑證的任何資訊，\n歡迎回報至 <euicc-dev-manual@septs.pw>\n謝謝您"
   process_notification_ask_remove_notification: "已成功處理通知。\n您現在要刪除這則通知嗎?"
   aid_length_illegal: 客製化AID長度必須是32個字元!
-  aid_not_hex: 只允許十六進制字元!
+  aid_not_hex: 只接受十六進制字元!
   confirm_code_required: "此設定檔需要確認碼才能下載。\n請手動填寫確認碼。"
   lpac_error: 請查看日誌了解詳情
   select_item: 請選擇一個項目。
