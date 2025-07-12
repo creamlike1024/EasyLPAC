@@ -1,0 +1,140 @@
+tab_bar:
+  profile: 設定檔
+  notification: 通知
+  chip_info: 晶片資訊
+  settings: 設定
+  about: 關於
+
+label:
+  lpac_version: "lpac 版本:"
+  lpac_version_unknown: "lpac 版本: 未知"
+  menu_copy: 複製
+  status_ready: 預備
+  status_processing: 正在處理...
+  profile_status_enabled: 啟用
+  profile_status_disabled: 停用
+  download_profile_button: 下載
+  set_nickname_button: 暱稱
+  delete_profile_button: 刪除
+  switch_state_button_enable: 啟用
+  switch_state_button_disable: 停用
+  process_notification_button: 處理
+  process_all_notification_button: 處理全部
+  remove_notification_button: 移除
+  batch_remove_notification_button: 大量移除
+  open_log_button: 開啟日誌
+  refresh_button: 重新整理
+  profile_mask_check: 隱藏敏感資訊
+  notification_mask_check: 隱藏敏感資訊
+  copy_eid_button: 複製
+  copy_eid_button_copied: 已複製!
+  view_cert_info_button: 憑證頒發機構
+  copy_euicc_info2_button: 複製 eUICCInfo2 資訊
+  copy_euicc_info2_button_copied: 已複製 eUICCInfo2資訊!
+  info_iccid: "ICCID:"
+  info_provider: "供應商:"
+  info_nickname: "暱稱:"
+  info_seq: "佇列:"
+  info_address: "位址:"
+  info_operation: "作業:"
+  notification_operation_enable: 啟用
+  notification_operation_disable: 停用
+  notification_operation_install: 安裝
+  notification_operation_delete: 刪除
+  ci_name_unknown: 未知
+  ci_info_keyid: "KeyID:"
+  cert_data_button: 憑證資訊
+  no_iccid: 沒有 ICCID!
+  deleted_profile: "?刪除設定檔"
+  aid_valid: 有效
+  aid_default_button: 預設
+  aid_5ber_button: 5ber
+  aid_esimme_button: eSIM.me
+  aid_xesim_button: Xesim
+  lpac_isdr_aid: lpac ISD-R AID
+  lpac_debug_output: lpac 除錯輸出
+  enable_env_LIBEUICC_DEBUG_HTTP_check: 啟用 LIBEUICC_DEBUG_HTTP 環境
+  enable_env_LIBEUICC_DEBUG_APDU_check: 啟用 LIBEUICC_DEBUG_APDU 環境
+  easylpac_settings: EasyLPAC 設定
+  auto_process_notification_check: 自動處理通知
+  version: "版本:"
+  euicc_data: "eUICC 資料:"
+  smdp_entry_placeholder: 留空則使用預設 SM-DP+
+  match_id_entry_placeholder: 授權碼 可選
+  confirm_code_entry_placeholder: 可選
+  imei_entry_placeholder: 傳送至 SM-DP+ 的 IMEI. 可選
+  smdp: SM-DP+
+  match_id: 正在配對 ID
+  confirm_code: 確認碼
+  imei: IMEI
+  select_qrcode_button: 掃描圖片檔
+  paste_from_clipboard_button: "從剪貼簿貼上QRcode或 LPA:1 啟動碼"
+  set_nickname_entry_placeholder: 留空則移除暱稱
+  set_nickname_form: 設定暱稱
+  set_default_smdp_entry_placeholder: 留空則移除預設 SM-DP+ 設定
+  default_smdp: 預設 SM-DP+
+  set_default_smdp_form: 設定預設 SM-DP+
+  not_set: <未設定>
+  info_eid: "EID:"
+  default_smdp_address: "預設 SM-DP+ 位址:"
+  root_smds_address: "根 SM-DS 位址:"
+  manufacturer: "製造商:"
+  manufacturer_unknown: "製造商: 未知"
+  free_space: "可用空間:"
+  card_reader: "讀卡機:"
+
+dialog:
+  hint: Hint
+  confirm: 確認
+  cancel: 取消
+  ok: 好
+  not_now: 現在不要
+  submit: 送出
+  delete_profile_remove_notification: 移除通知
+  delete_profile_successfully: 成功移除
+  process_all_notification: 處理全部通知
+  process_all_notification_finished: 作業完成
+  batch_remove_notification: 大量移除通知
+  batch_remove_notification_finished: 作業完成
+  ci_no_data: 沒有資料
+  ci: 憑證頒發機構
+  process_notification_remove_notification: 移除通知
+  confirm_code_required: 需要確認碼
+  select_qrcode: 選一個 QR Code 圖片檔
+  image_desc: 圖片檔
+  all_files_desc: 全部檔案
+  lpac_error: lpac 錯誤
+  error: 錯誤
+  info: 資訊
+
+message:
+  lpac_not_found: 找不到 lpac
+  disable_profile_before_delete: 您必須先停用該設定檔後才能刪除
+  delete_profile_confirm: 您確定要移除這個設定檔嗎?
+  notification_not_found: 找不到通知
+  profile_not_found: 找不到設定檔
+  successfully_delete_profile_failed_send_notification: "成功刪除設定檔，但傳送通知失敗\n請手動嘗試傳送刪除通知。"
+  successfully_delete_profile_ask_remove_notification: "成功刪除設定檔並傳送通知。\n您現在要刪除這則通知嗎？"
+  successfully_delete_profile_ask_send_notification: "設定檔刪除成功\n現在要傳送刪除通知嗎？\n"
+  successfully_enable_profile: 成功啟用設定檔
+  failed_process_enable_notification: 無法處理啟用通知
+  failed_process_disable_notification: 無法處理停用通知
+  select_remove_notification_type: "處理後刪除以下類型的通知："
+  process_all_notification_result: "{total} 已處理\n{success} 成功\n{fail} 失敗"
+  remove_notification_confirm: 您確定要移除這則通知嗎?
+  select_batch_remove_notification_type: 選擇要刪除的通知類型
+  batch_remove_notification_result: "{total} 已處理\n{success} 成功\n{fail} 失敗"
+  ci_no_data: "這份憑證的相關資訊尚未收錄。\n如果你有關於這張憑證的任何資訊，\n歡迎回報至 <euicc-dev-manual@septs.pw>\n謝謝您"
+  process_notification_ask_remove_notification: "已成功處理通知。\n您現在要刪除這則通知嗎?"
+  aid_length_illegal: 客製化AID長度必須是32個字元!
+  aid_not_hex: 只允許十六進制字元!
+  confirm_code_required: "此設定檔需要確認碼才能下載。\n請手動填寫確認碼。"
+  lpac_error: 請查看日誌了解詳情
+  select_item: 請選擇一個項目。
+  select_card_reader: 請選擇一個讀卡機。
+  refresh_required: 請重新整理新再繼續。
+  failed_to_decode_euiccinfo2: "晶片資訊: 無法解碼 EUICCInfo2 資訊"
+  qr_code_format_error: 無法從二維碼解碼 LPA 啟動碼
+
+thanks_to: "# 銘謝\n\n[lpac](https://github.com/estkme-group/lpac) 基於C語言的 eUICC 本機設定檔助理\n\n[eUICC Manual](https://euicc-manual.osmocom.org) eUICC 開發者手冊\n\n[fyne](https://github.com/fyne-io/fyne) Material Design 圖形化工具包"
+about: "# EasyLPAC\n\nlpac 圖形化前端\n\n[Github](https://github.com/creamlike1024/EasyLPAC) 專案 "
