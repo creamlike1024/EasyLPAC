@@ -40,8 +40,8 @@ func runLpac(args ...string) (json.RawMessage, error) {
 	cmd.Dir = ConfigInstance.LpacDir
 
 	cmd.Env = []string{
-		fmt.Sprintf("LPAC_APDU=pcsc"),
-		fmt.Sprintf("LPAC_HTTP=curl"),
+		"LPAC_APDU=pcsc",
+		"LPAC_HTTP=curl",
 		fmt.Sprintf("DRIVER_IFID=%s", ConfigInstance.DriverIFID),
 		fmt.Sprintf("LPAC_CUSTOM_ISD_R_AID=%s", ConfigInstance.LpacAID),
 	}

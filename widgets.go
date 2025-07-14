@@ -3,6 +3,9 @@ package main
 import (
 	"errors"
 	"fmt"
+	"strings"
+	"time"
+
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/container"
 	"fyne.io/fyne/v2/dialog"
@@ -11,8 +14,6 @@ import (
 	"fyne.io/fyne/v2/widget"
 	"github.com/fullpipe/icu-mf/mf"
 	"golang.org/x/net/publicsuffix"
-	"strings"
-	"time"
 )
 
 var StatusProcessBar *widget.ProgressBarInfinite
@@ -190,7 +191,7 @@ func downloadButtonFunc() {
 		ShowSelectCardReaderDialog()
 		return
 	}
-	if RefreshNeeded == true {
+	if RefreshNeeded {
 		ShowRefreshNeededDialog()
 		return
 	}
@@ -371,10 +372,8 @@ func switchStateButtonFunc() {
 					switch notification.ProfileManagementOperation {
 					case "enable":
 						dialogText += TR.Trans("message.failed_process_enable_notification") + "\n"
-						break
 					case "disable":
 						dialogText += TR.Trans("message.failed_process_disable_notification") + "\n"
-						break
 					}
 				}
 			}
