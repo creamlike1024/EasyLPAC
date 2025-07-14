@@ -2,6 +2,7 @@ package main
 
 import (
 	_ "embed"
+
 	"fyne.io/fyne/v2"
 )
 
@@ -19,6 +20,12 @@ var notoSansJP []byte
 
 //go:embed assets/NotoSansJP-Bold.ttf
 var notoSansJPBold []byte
+
+//go:embed assets/NotoSansTC.ttf
+var notoSansTC []byte
+
+//go:embed assets/NotoSansTC-Bold.ttf
+var notoSansTCBold []byte
 
 var resourceDroidSansFallback = &fyne.StaticResource{
 	StaticName:    "DroidSansFallback.ttf",
@@ -43,4 +50,14 @@ var resourceNotoSansJP = &fyne.StaticResource{
 var resourceNotoSansJPBold = &fyne.StaticResource{
 	StaticName:    "NotoSansJP-Bold.ttf",
 	StaticContent: notoSansJPBold,
+}
+
+var resourceNotoSansTC= &fyne.StaticResource{
+	StaticName:    "NotoSansTC.ttf",
+	StaticContent: notoSansTC,
+}
+
+var resourceNotoSansTCBold = &fyne.StaticResource{
+	StaticName:    "NotoSansTC-Bold.ttf",
+	StaticContent: notoSansTCBold,
 }
