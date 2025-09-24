@@ -10,6 +10,7 @@ import (
 //go:embed i18n/*.yaml
 var i18nDir embed.FS
 var TR mf.Translator
+var LanguageTag string
 
 func detectSystemLanguate() string {
 	tag, err := locale.Detect()
@@ -19,13 +20,13 @@ func detectSystemLanguate() string {
 	return tag.String()
 }
 
-func init() {
+func InitI18n() {
 	bundle, err := mf.NewBundle(
 		mf.WithDefaultLangFallback(language.English),
 		mf.WithYamlProvider(i18nDir))
 	if err != nil {
 		panic(err)
 	}
-	TR = bundle.Translator(detectSystemLanguate())
-
+	LanguageTag = detectSystemLanguate()
+	TR = bundle.Translator(LanguageTag)
 }

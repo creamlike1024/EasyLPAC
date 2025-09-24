@@ -55,7 +55,7 @@ func (p *EUMProduct) Test(eid string) bool {
 
 var EUMRegistry []*EUMIdentifier
 
-func init() {
+func InitEumRegistry() {
 	if err := json.Unmarshal(eumRegistryBundle, &EUMRegistry); err != nil {
 		panic(err)
 	}

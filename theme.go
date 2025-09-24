@@ -32,9 +32,23 @@ func (MyTheme) Font(s fyne.TextStyle) fyne.Resource {
 		return resourceDroidSansMono
 	}
 	if s.Bold {
-		return resourceDroidSansBold
+		switch LanguageTag {
+			case "ja-JP":
+				return resourceNotoSansJPBold
+			case "zh-TW":
+				return resourceNotoSansTCBold
+			default:
+				return resourceDroidSansBold
+		}
 	}
-	return resourceDroidSansFallback
+	switch LanguageTag {
+		case "ja-JP":
+			return resourceNotoSansJP
+		case "zh-TW":
+			return resourceNotoSansTC
+		default:
+			return resourceDroidSansFallback
+	}
 }
 
 func (MyTheme) Icon(n fyne.ThemeIconName) fyne.Resource {

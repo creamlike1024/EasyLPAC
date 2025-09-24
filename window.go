@@ -350,7 +350,7 @@ func InitDownloadDialog() dialog.Dialog {
 					pullInfo, confirmCodeNeeded, err = DecodeLpaActivationCode(CompleteActivationCode(string(result)))
 				default:
 					// Unreachable, should not be here.
-					panic(nil)
+					panic("unexpected clipboard format")
 				}
 				if err != nil {
 					dialog.ShowError(err, WMain)

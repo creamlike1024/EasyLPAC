@@ -2,11 +2,12 @@ package main
 
 import (
 	"fmt"
+	"os"
+	"path/filepath"
+
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/app"
 	"fyne.io/fyne/v2/dialog"
-	"os"
-	"path/filepath"
 )
 
 const Version = "development"
@@ -15,6 +16,9 @@ const EUICCDataVersion = "unknown"
 var App fyne.App
 
 func init() {
+	InitCiRegistry()
+	InitEumRegistry()
+	InitI18n()
 	App = app.New()
 	App.Settings().SetTheme(&MyTheme{})
 
@@ -45,7 +49,7 @@ func main() {
 
 	_, err = os.Stat(filepath.Join(ConfigInstance.LpacDir, ConfigInstance.EXEName))
 	if err != nil {
-		d := dialog.NewError(fmt.Errorf(" "+TR.Trans("message.lpac_not_found")), WMain)
+		d := dialog.NewError(fmt.Errorf(" %s",TR.Trans("message.lpac_not_found")), WMain)
 		d.SetOnClosed(func() {
 			os.Exit(127)
 		})
