@@ -97,7 +97,7 @@ dialog:
   batch_remove_notification: 一括で通知を削除
   batch_remove_notification_finished: 操作が完了しました
   ci_no_data: データなし
-  ci: Certificate Issuer
+  ci: 証明書の発行者
   process_notification_remove_notification: 通知を削除
   confirm_code_required: 確認コードが必要
   select_qrcode: QR コード画像を選択してください
