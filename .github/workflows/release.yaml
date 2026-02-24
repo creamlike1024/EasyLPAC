@@ -19,7 +19,7 @@ jobs:
             label: 'windows'
           - os: macos-latest
             label: 'macos-arm'
-          - os: macos-13
+          - os: macos-15-intel
             label: 'macos-x86'
 
     runs-on: ${{ matrix.os }}
