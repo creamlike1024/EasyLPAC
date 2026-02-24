@@ -3,14 +3,16 @@ package main
 import (
 	"encoding/json"
 	"fmt"
-	"fyne.io/fyne/v2/dialog"
-	"fyne.io/fyne/v2/theme"
-	"fyne.io/fyne/v2/widget"
 	"math"
 	"os/exec"
 	"runtime"
 	"sort"
 	"strings"
+
+	fyne "fyne.io/fyne/v2"
+	"fyne.io/fyne/v2/dialog"
+	"fyne.io/fyne/v2/theme"
+	"fyne.io/fyne/v2/widget"
 )
 
 const StatusProcess = 1
@@ -35,10 +37,12 @@ func RefreshProfile() error {
 		return err
 	}
 	// 刷新 List
-	ProfileList.Refresh()
-	ProfileList.UnselectAll()
-	SwitchStateButton.SetText(TR.Trans("label.switch_state_button_enable"))
-	SwitchStateButton.SetIcon(theme.ConfirmIcon())
+	fyne.Do(func() {
+		ProfileList.Refresh()
+		ProfileList.UnselectAll()
+		SwitchStateButton.SetText(TR.Trans("label.switch_state_button_enable"))
+		SwitchStateButton.SetIcon(theme.ConfirmIcon())
+	})
 	return nil
 }
 
@@ -52,8 +56,10 @@ func RefreshNotification() error {
 		return Notifications[i].SeqNumber < Notifications[j].SeqNumber
 	})
 	// 刷新 List
-	NotificationList.Refresh()
-	NotificationList.UnselectAll()
+	fyne.Do(func() {
+		NotificationList.Refresh()
+		NotificationList.UnselectAll()
+	})
 	return nil
 }
 
@@ -77,35 +83,37 @@ func RefreshChipInfo() error {
 		return TR.Trans("label.not_set")
 	}
 
-	EidLabel.SetText(fmt.Sprintf(TR.Trans("label.info_eid")+" %s", ChipInfo.EidValue))
-	DefaultDpAddressLabel.SetText(fmt.Sprintf(TR.Trans("label.default_smdp_address")+"  %s", convertToString(ChipInfo.EuiccConfiguredAddresses.DefaultDpAddress)))
-	RootDsAddressLabel.SetText(fmt.Sprintf(TR.Trans("label.root_smds_address")+"  %s", convertToString(ChipInfo.EuiccConfiguredAddresses.RootDsAddress)))
-	// eUICC Manufacturer Label
-	if eum := GetEUM(ChipInfo.EidValue); eum != nil {
-		manufacturer := fmt.Sprint(eum.Manufacturer, " ", CountryCodeToEmoji(eum.Country))
-		if productName := eum.ProductName(ChipInfo.EidValue); productName != "" {
-			manufacturer = fmt.Sprint(productName, " (", manufacturer, ")")
+	fyne.Do(func() {
+		EidLabel.SetText(fmt.Sprintf(TR.Trans("label.info_eid")+" %s", ChipInfo.EidValue))
+		DefaultDpAddressLabel.SetText(fmt.Sprintf(TR.Trans("label.default_smdp_address")+"  %s", convertToString(ChipInfo.EuiccConfiguredAddresses.DefaultDpAddress)))
+		RootDsAddressLabel.SetText(fmt.Sprintf(TR.Trans("label.root_smds_address")+"  %s", convertToString(ChipInfo.EuiccConfiguredAddresses.RootDsAddress)))
+		// eUICC Manufacturer Label
+		if eum := GetEUM(ChipInfo.EidValue); eum != nil {
+			manufacturer := fmt.Sprint(eum.Manufacturer, " ", CountryCodeToEmoji(eum.Country))
+			if productName := eum.ProductName(ChipInfo.EidValue); productName != "" {
+				manufacturer = fmt.Sprint(productName, " (", manufacturer, ")")
+			}
+			EUICCManufacturerLabel.SetText(TR.Trans("label.manufacturer") + " " + manufacturer)
+		} else {
+			EUICCManufacturerLabel.SetText(TR.Trans("label.manufacturer_unknown"))
 		}
-		EUICCManufacturerLabel.SetText(TR.Trans("label.manufacturer") + " " + manufacturer)
-	} else {
-		EUICCManufacturerLabel.SetText(TR.Trans("label.manufacturer_unknown"))
-	}
-	// EUICCInfo2 entry
-	bytes, err := json.MarshalIndent(ChipInfo.EUICCInfo2, "", "  ")
-	if err != nil {
-		ShowLpacErrDialog(fmt.Errorf(TR.Trans("message.failed_to_decode_euiccinfo2")+"\n%s", err))
-	}
-	EuiccInfo2Entry.SetText(string(bytes))
-	// 计算剩余空间
-	freeSpace := float64(ChipInfo.EUICCInfo2.ExtCardResource.FreeNonVolatileMemory) / 1024
-	FreeSpaceLabel.SetText(fmt.Sprintf(TR.Trans("label.free_space")+" %.2f KiB", math.Round(freeSpace*100)/100))
+		// EUICCInfo2 entry
+		bytes, err := json.MarshalIndent(ChipInfo.EUICCInfo2, "", "  ")
+		if err != nil {
+			ShowLpacErrDialog(fmt.Errorf(TR.Trans("message.failed_to_decode_euiccinfo2")+"\n%s", err))
+		}
+		EuiccInfo2Entry.SetText(string(bytes))
+		// 计算剩余空间
+		freeSpace := float64(ChipInfo.EUICCInfo2.ExtCardResource.FreeNonVolatileMemory) / 1024
+		FreeSpaceLabel.SetText(fmt.Sprintf(TR.Trans("label.free_space")+" %.2f KiB", math.Round(freeSpace*100)/100))
 
-	CopyEidButton.Show()
-	SetDefaultSmdpButton.Show()
-	EuiccInfo2Entry.Show()
-	ViewCertInfoButton.Show()
-	EUICCManufacturerLabel.Show()
-	CopyEuiccInfo2Button.Show()
+		CopyEidButton.Show()
+		SetDefaultSmdpButton.Show()
+		EuiccInfo2Entry.Show()
+		ViewCertInfoButton.Show()
+		EUICCManufacturerLabel.Show()
+		CopyEuiccInfo2Button.Show()
+	})
 	return nil
 }
 
@@ -182,18 +190,18 @@ func Refresh() {
 func UpdateStatusBarListener() {
 	for {
 		status := <-StatusChan
-		switch status {
-		case StatusProcess:
-			StatusLabel.SetText(TR.Trans("label.status_processing"))
-			StatusProcessBar.Start()
-			StatusProcessBar.Show()
-			continue
-		case StatusReady:
-			StatusLabel.SetText(TR.Trans("label.status_ready"))
-			StatusProcessBar.Stop()
-			StatusProcessBar.Hide()
-			continue
-		}
+		fyne.Do(func() {
+			switch status {
+			case StatusProcess:
+				StatusLabel.SetText(TR.Trans("label.status_processing"))
+				StatusProcessBar.Start()
+				StatusProcessBar.Show()
+			case StatusReady:
+				StatusLabel.SetText(TR.Trans("label.status_ready"))
+				StatusProcessBar.Stop()
+				StatusProcessBar.Hide()
+			}
+		})
 	}
 }
 
@@ -208,23 +216,25 @@ func LockButtonListener() {
 	}
 	for {
 		lock := <-LockButtonChan
-		if lock {
-			for _, button := range buttons {
-				button.Disable()
+		fyne.Do(func() {
+			if lock {
+				for _, button := range buttons {
+					button.Disable()
+				}
+				for _, check := range checks {
+					check.Disable()
+				}
+				ApduDriverSelect.Disable()
+			} else {
+				for _, button := range buttons {
+					button.Enable()
+				}
+				for _, check := range checks {
+					check.Enable()
+				}
+				ApduDriverSelect.Enable()
 			}
-			for _, check := range checks {
-				check.Disable()
-			}
-			ApduDriverSelect.Disable()
-		} else {
-			for _, button := range buttons {
-				button.Enable()
-			}
-			for _, check := range checks {
-				check.Enable()
-			}
-			ApduDriverSelect.Enable()
-		}
+		})
 	}
 }
 

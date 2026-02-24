@@ -6,7 +6,7 @@ import (
 	"strings"
 	"time"
 
-	"fyne.io/fyne/v2"
+	fyne "fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/container"
 	"fyne.io/fyne/v2/dialog"
 	"fyne.io/fyne/v2/layout"
@@ -449,52 +449,58 @@ func processAllNotificationButtonFunc() {
 			config["delete"] = b
 		},
 	}
-	dialog.ShowCustomConfirm(TR.Trans("dialog.process_all_notification"),
-		TR.Trans("dialog.ok"),
-		TR.Trans("dialog.cancel"),
-		container.NewVBox(
-			&widget.Label{Text: TR.Trans("message.select_remove_notification_type")},
-			enableCheck,
-			disableCheck,
-			installCheck,
-			deleteCheck,
-		),
-		func(b bool) {
-			if b {
-				total := len(Notifications)
-				var count int
-				for _, notification := range Notifications {
-					switch notification.ProfileManagementOperation {
-					case "enable":
-						if err := LpacNotificationProcess(notification.SeqNumber, config["enable"]); err != nil {
-							count++
+	fyne.Do(func() {
+		dialog.ShowCustomConfirm(TR.Trans("dialog.process_all_notification"),
+			TR.Trans("dialog.ok"),
+			TR.Trans("dialog.cancel"),
+			container.NewVBox(
+				&widget.Label{Text: TR.Trans("message.select_remove_notification_type")},
+				enableCheck,
+				disableCheck,
+				installCheck,
+				deleteCheck,
+			),
+			func(b bool) {
+				if b {
+					go func() {
+						total := len(Notifications)
+						var count int
+						for _, notification := range Notifications {
+							switch notification.ProfileManagementOperation {
+							case "enable":
+								if err := LpacNotificationProcess(notification.SeqNumber, config["enable"]); err != nil {
+									count++
+								}
+							case "disable":
+								if err := LpacNotificationProcess(notification.SeqNumber, config["disable"]); err != nil {
+									count++
+								}
+							case "install":
+								if err := LpacNotificationProcess(notification.SeqNumber, config["install"]); err != nil {
+									count++
+								}
+							case "delete":
+								if err := LpacNotificationProcess(notification.SeqNumber, config["delete"]); err != nil {
+									count++
+								}
+							}
 						}
-					case "disable":
-						if err := LpacNotificationProcess(notification.SeqNumber, config["disable"]); err != nil {
-							count++
+						if err := RefreshNotification(); err != nil {
+							ShowLpacErrDialog(err)
 						}
-					case "install":
-						if err := LpacNotificationProcess(notification.SeqNumber, config["install"]); err != nil {
-							count++
-						}
-					case "delete":
-						if err := LpacNotificationProcess(notification.SeqNumber, config["delete"]); err != nil {
-							count++
-						}
-					}
+						fyne.Do(func() {
+							dialog.ShowCustom(TR.Trans("dialog.process_all_notification_finished"),
+								"OK",
+								&widget.Label{Text: TR.Trans("message.process_all_notification_result",
+									mf.Arg("total", total),
+									mf.Arg("success", total-count),
+									mf.Arg("fail", count))},
+								WMain)
+						})
+					}()
 				}
-				if err := RefreshNotification(); err != nil {
-					ShowLpacErrDialog(err)
-				}
-				dialog.ShowCustom(TR.Trans("dialog.process_all_notification_finished"),
-					"OK",
-					&widget.Label{Text: TR.Trans("message.process_all_notification_result",
-						mf.Arg("total", total),
-						mf.Arg("success", total-count),
-						mf.Arg("fail", count))},
-					WMain)
-			}
-		}, WMain)
+			}, WMain)
+	})
 }
 
 func removeNotificationButtonFunc() {
@@ -577,55 +583,61 @@ func batchRemoveNotificationButtonFunc() {
 			config["delete"] = b
 		},
 	}
-	dialog.ShowCustomConfirm(TR.Trans("dialog.batch_remove_notification"),
-		TR.Trans("dialog.confirm"),
-		TR.Trans("dialog.cancel"),
-		container.NewVBox(
-			&widget.Label{Text: TR.Trans("message.select_batch_remove_notification_type")},
-			enableCheck,
-			disableCheck,
-			installCheck,
-			deleteCheck),
-		func(b bool) {
-			if b {
-				var failedCount int
-				var total int
-				for _, notification := range Notifications {
-					switch notification.ProfileManagementOperation {
-					case "enable":
-						if err := LpacNotificationRemove(notification.SeqNumber); err != nil {
-							failedCount++
+	fyne.Do(func() {
+		dialog.ShowCustomConfirm(TR.Trans("dialog.batch_remove_notification"),
+			TR.Trans("dialog.confirm"),
+			TR.Trans("dialog.cancel"),
+			container.NewVBox(
+				&widget.Label{Text: TR.Trans("message.select_batch_remove_notification_type")},
+				enableCheck,
+				disableCheck,
+				installCheck,
+				deleteCheck),
+			func(b bool) {
+				if b {
+					go func() {
+						var failedCount int
+						var total int
+						for _, notification := range Notifications {
+							switch notification.ProfileManagementOperation {
+							case "enable":
+								if err := LpacNotificationRemove(notification.SeqNumber); err != nil {
+									failedCount++
+								}
+								total++
+							case "disable":
+								if err := LpacNotificationProcess(notification.SeqNumber, config["disable"]); err != nil {
+									failedCount++
+								}
+								total++
+							case "install":
+								if err := LpacNotificationProcess(notification.SeqNumber, config["install"]); err != nil {
+									failedCount++
+								}
+								total++
+							case "delete":
+								if err := LpacNotificationProcess(notification.SeqNumber, config["delete"]); err == nil {
+									failedCount++
+								}
+								total++
+							}
 						}
-						total++
-					case "disable":
-						if err := LpacNotificationProcess(notification.SeqNumber, config["disable"]); err != nil {
-							failedCount++
+						if err := RefreshNotification(); err != nil {
+							ShowLpacErrDialog(err)
 						}
-						total++
-					case "install":
-						if err := LpacNotificationProcess(notification.SeqNumber, config["install"]); err != nil {
-							failedCount++
-						}
-						total++
-					case "delete":
-						if err := LpacNotificationProcess(notification.SeqNumber, config["delete"]); err == nil {
-							failedCount++
-						}
-						total++
-					}
+						fyne.Do(func() {
+							dialog.ShowCustom(TR.Trans("dialog.batch_remove_notification_finished"),
+								TR.Trans("dialog.ok"),
+								&widget.Label{Text: TR.Trans("message.batch_remove_notification_result",
+									mf.Arg("total", total),
+									mf.Arg("success", total-failedCount),
+									mf.Arg("fail", failedCount))},
+								WMain)
+						})
+					}()
 				}
-				if err := RefreshNotification(); err != nil {
-					ShowLpacErrDialog(err)
-				}
-				dialog.ShowCustom(TR.Trans("dialog.batch_remove_notification_finished"),
-					TR.Trans("dialog.ok"),
-					&widget.Label{Text: TR.Trans("message.batch_remove_notification_result",
-						mf.Arg("total", total),
-						mf.Arg("success", total-failedCount),
-						mf.Arg("fail", failedCount))},
-					WMain)
-			}
-		}, WMain)
+			}, WMain)
+	})
 }
 
 func copyEidButtonFunc() {
