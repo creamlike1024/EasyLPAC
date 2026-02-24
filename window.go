@@ -426,7 +426,7 @@ func InitSetDefaultSmdpDialog() dialog.Dialog {
 }
 
 func ShowLpacErrDialog(err error) {
-	go func() {
+	fyne.Do(func() {
 		l := &widget.Label{Text: fmt.Sprintf("%v", err)}
 		content := container.NewVBox(
 			container.NewCenter(container.NewHBox(
@@ -435,24 +435,24 @@ func ShowLpacErrDialog(err error) {
 			container.NewCenter(l),
 			container.NewCenter(widget.NewLabel(TR.Trans("message.lpac_error"))))
 		dialog.ShowCustom(TR.Trans("dialog.error"), TR.Trans("dialog.ok"), content, WMain)
-	}()
+	})
 }
 
 func ShowSelectItemDialog() {
-	go func() {
+	fyne.Do(func() {
 		d := dialog.NewInformation(TR.Trans("dialog.info"), TR.Trans("message.select_item"), WMain)
 		d.Show()
-	}()
+	})
 }
 
 func ShowSelectCardReaderDialog() {
-	go func() {
+	fyne.Do(func() {
 		dialog.ShowInformation(TR.Trans("dialog.info"), TR.Trans("message.select_card_reader"), WMain)
-	}()
+	})
 }
 
 func ShowRefreshNeededDialog() {
-	go func() {
+	fyne.Do(func() {
 		dialog.ShowInformation(TR.Trans("dialog.info"), TR.Trans("message.refresh_required")+"\n", WMain)
-	}()
+	})
 }
