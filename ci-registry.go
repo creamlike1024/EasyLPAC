@@ -1,4 +1,3 @@
-//go:generate curl -o ci-registry.json https://euicc-manual.osmocom.org/docs/pki/ci/manifest.json
 package main
 
 import (

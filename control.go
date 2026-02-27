@@ -90,9 +90,9 @@ func RefreshChipInfo() error {
 		// eUICC Manufacturer Label
 		if eum := GetEUM(ChipInfo.EidValue); eum != nil {
 			manufacturer := fmt.Sprint(eum.Manufacturer, " ", CountryCodeToEmoji(eum.Country))
-			if productName := eum.ProductName(ChipInfo.EidValue); productName != "" {
-				manufacturer = fmt.Sprint(productName, " (", manufacturer, ")")
-			}
+			// if productName := eum.ProductName(ChipInfo.EidValue); productName != "" {
+			// 	manufacturer = fmt.Sprint(productName, " (", manufacturer, ")")
+			// }
 			EUICCManufacturerLabel.SetText(TR.Trans("label.manufacturer") + " " + manufacturer)
 		} else {
 			EUICCManufacturerLabel.SetText(TR.Trans("label.manufacturer_unknown"))

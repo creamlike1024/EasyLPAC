@@ -1,1 +1,77 @@
-[]
+[
+  {
+    "eum": "89049032",
+    "country": "DE",
+    "manufacturer": "G+D"
+  },
+  {
+    "eum": "89049038",
+    "country": "DE",
+    "manufacturer": "G+D"
+  },
+  {
+    "eum": "89033023",
+    "country": "FR",
+    "manufacturer": "Thales"
+  },
+  {
+    "eum": "89033024",
+    "country": "FR",
+    "manufacturer": "IDEMIA"
+  },
+  {
+    "eum": "89043051",
+    "country": "AT",
+    "manufacturer": "NXP"
+  },
+  {
+    "eum": "89043052",
+    "country": "AT",
+    "manufacturer": "NXP"
+  },
+  {
+    "eum": "89044045",
+    "country": "GB",
+    "manufacturer": "Kigen"
+  },
+  {
+    "eum": "89041030",
+    "country": "CH",
+    "manufacturer": "ST"
+  },
+  {
+    "eum": "89034011",
+    "country": "ES",
+    "manufacturer": "Valid"
+  },
+  {
+    "eum": "35840574",
+    "country": "CN",
+    "manufacturer": "Watchdata"
+  },
+  {
+    "eum": "89086030",
+    "country": "CN",
+    "manufacturer": "ECP"
+  },
+  {
+    "eum": "89086001",
+    "country": "CN",
+    "manufacturer": "Hengbao Co. Ltd."
+  },
+  {
+    "eum": "89086029",
+    "country": "CN",
+    "manufacturer": "Tianyu Information"
+  },
+  {
+    "eum": "35060000",
+    "country": "CN",
+    "manufacturer": "HED"
+  },
+  {
+    "eum": "89044047",
+    "country": "GB",
+    "manufacturer": "Truphone"
+  }
+]

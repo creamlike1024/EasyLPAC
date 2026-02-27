@@ -11,7 +11,7 @@ import (
 )
 
 const Version = "development"
-const EUICCDataVersion = "unknown"
+const EUICCDataVersion = "20260227"
 
 var App fyne.App
 
@@ -49,7 +49,7 @@ func main() {
 
 	_, err = os.Stat(filepath.Join(ConfigInstance.LpacDir, ConfigInstance.EXEName))
 	if err != nil {
-		d := dialog.NewError(fmt.Errorf(" %s",TR.Trans("message.lpac_not_found")), WMain)
+		d := dialog.NewError(fmt.Errorf(" %s", TR.Trans("message.lpac_not_found")), WMain)
 		d.SetOnClosed(func() {
 			os.Exit(127)
 		})

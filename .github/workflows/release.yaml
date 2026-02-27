@@ -34,13 +34,10 @@ jobs:
       - name: Modify version number
         run: |
           VERSION=$(grep 'Version' FyneApp.toml | sed 's/Version = "\(.*\)"/\1/' | xargs)
-          DATE=$(TZ=Asia/Shanghai date +"%Y-%m-%d")
           if [[ "$RUNNER_OS" == "macOS" ]]; then
             sed -i '' "s/const Version = \"development\"/const Version = \"$VERSION\"/" main.go
-            sed -i '' "s/const EUICCDataVersion = \"unknown\"/const EUICCDataVersion = \"$DATE\"/" main.go
           else
             sed -i "s/const Version = \"development\"/const Version = \"$VERSION\"/" main.go
-            sed -i "s/const EUICCDataVersion = \"unknown\"/const EUICCDataVersion = \"$DATE\"/" main.go
           fi
         shell: bash
 
@@ -66,7 +63,6 @@ jobs:
         if: runner.os == 'Linux'
         run: |
           go install fyne.io/fyne/v2/cmd/fyne@latest
-          go generate
           go build -ldflags="-s -w"
           wget $LPAC_REPO/releases/download/$LPAC_VERSION_IN_URL/lpac-linux-x86_64.zip -O lpac.zip
           unzip lpac.zip && rm lpac.zip
@@ -79,7 +75,6 @@ jobs:
         if: runner.os == 'Windows'
         run: |
           go install fyne.io/fyne/v2/cmd/fyne@latest
-          go generate
           fyne package --icon assets/icon64.png
           mkdir easylpac && cp EasyLPAC.exe easylpac && cd easylpac
           wget $LPAC_REPO/releases/download/$LPAC_VERSION_IN_URL/lpac-windows-x86_64-mingw.zip -O lpac.zip
@@ -95,7 +90,6 @@ jobs:
         if: matrix.label == 'macos-arm'
         run: |
           go install fyne.io/fyne/v2/cmd/fyne@latest
-          go generate
           fyne package --icon assets/icon128.png --release
           cd EasyLPAC.app/Contents/MacOS
           wget $LPAC_REPO/releases/download/$LPAC_VERSION_IN_URL/lpac-darwin-universal.zip -O lpac.zip
@@ -110,7 +104,6 @@ jobs:
         if: matrix.label == 'macos-x86'
         run: |
           go install fyne.io/fyne/v2/cmd/fyne@latest
-          go generate
           fyne package --icon assets/icon128.png --release
           cd EasyLPAC.app/Contents/MacOS
           wget $LPAC_REPO/releases/download/$LPAC_VERSION_IN_URL/lpac-darwin-universal.zip -O lpac.zip
