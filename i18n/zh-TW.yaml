@@ -24,8 +24,8 @@ label:
   batch_remove_notification_button: 大量移除
   open_log_button: 開啟日誌
   refresh_button: 重新整理
-  profile_mask_check: 隱藏敏感資訊
-  notification_mask_check: 隱藏敏感資訊
+  profile_mask_check: 隱藏機敏資訊
+  notification_mask_check: 隱藏機敏資訊
   copy_eid_button: 複製
   copy_eid_button_copied: 已複製!
   view_cert_info_button: 憑證頒發機構
@@ -59,7 +59,7 @@ label:
   auto_process_notification_check: 自動處理通知
   version: "版本:"
   euicc_data: "eUICC 資料:"
-  smdp_entry_placeholder: 留空則使用預設 SM-DP+
+  smdp_entry_placeholder: 留白則使用預設 SM-DP+
   match_id_entry_placeholder: 授權碼 可選
   confirm_code_entry_placeholder: 可選
   imei_entry_placeholder: 傳送至 SM-DP+ 的 IMEI. 可選
@@ -69,9 +69,9 @@ label:
   imei: IMEI
   select_qrcode_button: 掃描圖片檔
   paste_from_clipboard_button: "從剪貼簿貼上QRcode或 LPA:1 啟動碼"
-  set_nickname_entry_placeholder: 留空則移除暱稱
+  set_nickname_entry_placeholder: 留白則移除暱稱
   set_nickname_form: 設定暱稱
-  set_default_smdp_entry_placeholder: 留空則移除預設 SM-DP+ 設定
+  set_default_smdp_entry_placeholder: 留白則移除預設 SM-DP+ 設定
   default_smdp: 預設 SM-DP+
   set_default_smdp_form: 設定預設 SM-DP+
   not_set: <未設定>
@@ -124,7 +124,7 @@ message:
   remove_notification_confirm: 您確定要移除這則通知嗎?
   select_batch_remove_notification_type: 選擇要刪除的通知類型
   batch_remove_notification_result: "{total} 已處理\n{success} 成功\n{fail} 失敗"
-  ci_no_data: "這份憑證的相關資訊尚未收錄。\n如果你有關於這張憑證的任何資訊，\n歡迎回報至 <euicc-dev-manual@septs.pw>\n謝謝您"
+  ci_no_data: "這份憑證的相關資訊尚未收錄。\n如果你有關於這張憑證的任何資訊，\n歡迎回報至 <euicc-dev-manual@septs.pw>\n感謝您"
   process_notification_ask_remove_notification: "已成功處理通知。\n您現在要刪除這則通知嗎?"
   aid_length_illegal: 客製化AID長度必須是32個字元!
   aid_not_hex: 只接受十六進制字元!
@@ -134,7 +134,7 @@ message:
   select_card_reader: 請選擇一個讀卡機。
   refresh_required: 請重新整理新再繼續。
   failed_to_decode_euiccinfo2: "晶片資訊: 無法解碼 EUICCInfo2 資訊"
-  qr_code_format_error: 無法從二維碼解碼 LPA 啟動碼
+  qr_code_format_error: 無法從 QR code 解碼 LPA 啟動碼
 
 thanks_to: "# 銘謝\n\n[lpac](https://github.com/estkme-group/lpac) 基於C語言的 eUICC 本機設定檔助理\n\n[eUICC Manual](https://euicc-manual.osmocom.org) eUICC 開發者手冊\n\n[fyne](https://github.com/fyne-io/fyne) Material Design 圖形化工具包"
 about: "# EasyLPAC\n\nlpac 圖形化前端\n\n[Github](https://github.com/creamlike1024/EasyLPAC) 專案 "
