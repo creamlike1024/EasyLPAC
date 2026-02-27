@@ -1,0 +1,136 @@
+tab_bar:
+  profile: 配置文件
+  notification: 通知
+  chip_info: 芯片信息
+  settings: 设置
+  about: 关于
+
+label:
+  lpac_version: "lpac版本："
+  lpac_version_unknown: "lpac版本：未知"
+  menu_copy: 复制
+  status_ready: 准备就绪
+  status_processing: 处理中...
+  download_profile_button: 下载
+  set_nickname_button: 昵称
+  delete_profile_button: 删除
+  switch_state_button_enable: 启用
+  switch_state_button_disable: 禁用
+  process_notification_button: 处理
+  process_all_notification_button: 全部处理
+  remove_notification_button: 移除
+  batch_remove_notification_button: 批量移除
+  open_log_button: 查看日志
+  refresh_button: 刷新
+  profile_mask_check: 隐藏
+  notification_mask_check: 隐藏
+  copy_eid_button: 复制
+  copy_eid_button_copied: 已复制！
+  view_cert_info_button: 证书颁发者
+  copy_euicc_info2_button: 复制eUICCInfo2
+  copy_euicc_info2_button_copied: 已复制eUICCInfo2！
+  info_iccid: "ICCID："
+  info_provider: "运营商："
+  info_nickname: "昵称："
+  info_seq: "序列号："
+  info_address: "地址："
+  info_operation: "操作："
+  notification_operation_enable: 启用
+  notification_operation_disable: 禁用
+  notification_operation_install: 安装
+  notification_operation_delete: 删除
+  ci_name_unknown: 未知
+  ci_info_keyid: "密钥ID："
+  cert_data_button: 证书信息
+  no_iccid: 无ICCID！
+  deleted_profile: "？已删除配置文件"
+  aid_valid: 有效
+  aid_default_button: 默认
+  aid_5ber_button: 5ber
+  lpac_isdr_aid: lpac ISD-R AID
+  lpac_debug_output: lpac调试输出
+  enable_env_LIBEUICC_DEBUG_HTTP_check: 启用环境变量LIBEUICC_DEBUG_HTTP
+  enable_env_LIBEUICC_DEBUG_APDU_check: 启用环境变量LIBEUICC_DEBUG_APDU
+  easylpac_settings: EasyLPAC设置
+  auto_process_notification_check: 自动处理通知
+  version: "版本："
+  euicc_data: "eUICC数据："
+  smdp_entry_placeholder: 留空则使用默认SM-DP+
+  match_id_entry_placeholder: 激活码（可选）
+  confirm_code_entry_placeholder: 确认码（可选）
+  imei_entry_placeholder: 发送至SM-DP+的IMEI（可选）
+  smdp: SM-DP+
+  match_id: 匹配ID
+  confirm_code: 确认码
+  imei: IMEI
+  select_qrcode_button: 扫描图片文件
+  paste_from_clipboard_button: "从剪贴板粘贴QR码或LPA:1激活码"
+  set_nickname_entry_placeholder: 留空则移除昵称
+  set_nickname_form: 设置昵称
+  set_default_smdp_entry_placeholder: 留空则移除默认SM-DP+设置
+  default_smdp: 默认SM-DP+
+  set_default_smdp_form: 设置默认SM-DP+
+  not_set: <未设置>
+  info_eid: "EID："
+  default_smdp_address: "默认SM-DP+地址："
+  root_smds_address: "根SM-DS地址："
+  manufacturer: "制造商："
+  manufacturer_unknown: "制造商：未知"
+  free_space: "可用空间："
+  card_reader: "读卡器："
+
+dialog:
+  hint: 提示
+  confirm: 确认
+  cancel: 取消
+  ok: 确定
+  not_now: 暂不
+  submit: 提交
+  delete_profile_remove_notification: 移除通知
+  delete_profile_successfully: 删除成功
+  process_all_notification: 处理所有通知
+  process_all_notification_finished: 操作完成
+  batch_remove_notification: 批量移除通知
+  batch_remove_notification_finished: 操作完成
+  ci_no_data: 无数据
+  ci: 证书颁发者
+  process_notification_remove_notification: 移除通知
+  confirm_code_required: 需要确认码
+  select_qrcode: 选择QR码图片文件
+  image_desc: 图片
+  all_files_desc: 所有文件
+  lpac_error: lpac错误
+  error: 错误
+  info: 信息
+
+message:
+  lpac_not_found: 未找到lpac
+  disable_profile_before_delete: 删除前请先禁用该配置文件
+  delete_profile_confirm: 确定要删除此配置文件吗？
+  notification_not_found: 未找到通知
+  profile_not_found: 未找到配置文件
+  successfully_delete_profile_failed_send_notification: "成功删除配置文件但发送通知失败\n请尝试手动发送删除通知"
+  successfully_delete_profile_ask_remove_notification: "成功删除配置文件并发送通知\n是否现在移除删除通知？"
+  successfully_delete_profile_ask_send_notification: "配置文件已成功删除\n现在发送删除通知吗？\n"
+  successfully_enable_profile: 成功启用配置文件
+  failed_process_enable_notification: 处理启用通知失败
+  failed_process_disable_notification: 处理禁用通知失败
+  select_remove_notification_type: "处理后移除以下通知类型："
+  process_all_notification_result: "共处理{total}条\n成功{success}条\n失败{fail}条"
+  remove_notification_confirm: 确定要移除此通知吗？
+  select_batch_remove_notification_type: 选择要移除的通知类型
+  batch_remove_notification_result: "共处理{total}条\n成功{success}条\n失败{fail}条"
+  ci_no_data: "此证书信息未收录。\n如果您有关于此证书的任何信息，\n请发送至<euicc-dev-manual@septs.pw>\n感谢您的帮助"
+  process_notification_ask_remove_notification: "已成功处理通知。\n是否现在移除此通知？"
+  aid_length_illegal: 自定义AID必须为32个字符！
+  aid_not_hex: 只允许十六进制字符！
+  confirm_code_required: "此配置文件需要确认码才能下载。\n请手动填写确认码。"
+  lpac_error: 请查看日志获取详细信息
+  select_item: 请选择项目
+  select_card_reader: 请选择读卡器
+  refresh_required: 请先刷新再继续操作
+  failed_to_decode_euiccinfo2: "芯片信息：解码EUICCInfo2失败"
+
+thanks_to: "# 致谢\n\n[lpac](https://github.com/estkme-group/lpac) 基于C语言的eUICC LPA实现\n\n[eUICC Manual](https://euicc-manual.osmocom.org) eUICC开发者手册\n\n[fyne](https://github.com/fyne-io/fyne) Material Design GUI工具包"
+
+about: "# 关于EasyLPAC\n\nlpac图形界面前端\n\n[Github仓库](https://github.com/creamlike1024/EasyLPAC) "
