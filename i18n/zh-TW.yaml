@@ -124,7 +124,7 @@ message:
   remove_notification_confirm: 您確定要移除這則通知嗎?
   select_batch_remove_notification_type: 選擇要刪除的通知類型
   batch_remove_notification_result: "{total} 已處理\n{success} 成功\n{fail} 失敗"
-  ci_no_data: "這份憑證的相關資訊尚未收錄。\n如果你有關於這張憑證的任何資訊，\n歡迎回報至 <euicc-dev-manual@septs.pw>\n感謝您"
+  ci_no_data: "這份憑證的相關資訊尚未收錄。"
   process_notification_ask_remove_notification: "已成功處理通知。\n您現在要刪除這則通知嗎?"
   aid_length_illegal: 客製化AID長度必須是32個字元!
   aid_not_hex: 只接受十六進制字元!

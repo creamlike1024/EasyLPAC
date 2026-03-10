@@ -1,12 +1,12 @@
 # EasyLPAC
-**Language:** [日本語](./README_ja-JP.md)
+**Language:** [日本語](./README_ja-JP.md) | [正體中文](./README_zh-TW.md)
 
 [lpac](https://github.com/estkme-group/lpac) GUI Frontend
 
 Download: [GitHub Release](https://github.com/creamlike1024/EasyLPAC/releases/latest)
 
 Arch Linux: ![AUR package](https://img.shields.io/aur/version/easylpac) [AUR - easylpac](https://aur.archlinux.org/packages/easylpac)
- thanks to [@1ridic](https://github.com/1ridic)
+ thanks to [@1ridic](https://github.com/1ridic, [root-core](https://github.com/Root-Core))
 
 NixOS: [NUR](https://github.com/nix-community/NUR#readme) package https://github.com/nix-community/nur-combined/blob/master/repos/linyinfeng/pkgs/easylpac/default.nix
 
@@ -15,7 +15,7 @@ openSUSE: https://software.opensuse.org/package/easylpac ([OBS](https://build.op
 System requirements:
 - Windows 10+ (last version that supports Windows 7 was [0.7.7.2](https://github.com/creamlike1024/EasyLPAC/releases/tag/0.7.7.2))
 - latest macOS
-- Linux: `pcscd`, `pcsclite`, `libcurl`(for lpac) and `gtk3dialog` (for EasyLPAC). I'm not sure about dependencies.
+- Linux: `pcscd`/`pcsclite`, `libcurl`(for lpac) and `gtk3dialog` (for EasyLPAC).
 
 Currently, only APDUINTERFACE for pcsc and HTTPINTERFACE for curl are supported.
 
@@ -23,15 +23,11 @@ Currently, only APDUINTERFACE for pcsc and HTTPINTERFACE for curl are supported.
 
 Connect your card reader before running.
 
-**[estk.me User](https://www.estk.me/)**: If you are using the ACR38U card reader included with estk card and are currently using **macOS 14 Sonoma**, please install the [card reader driver](https://www.acs.com.hk/en/driver/228/acr38u-nd-pocketmate-smart-card-reader-micro-usb/) first
-
 ## Linux
 
 lpac binary search order: First, search in the same directory as EasyLPAC. If not found, use `/usr/bin/lpac`
 
 `EasyLPAC-linux-x86_64-with-lpac.tar.gz` contain prebuilt lpac binary, if you can't run it, you need to install `lpac` by package manager or [compile lpac](https://github.com/estkme-group/lpac?tab=readme-ov-file#compile) by yourself.
-
-Note: Reading LPA activation code and QRCode from clipboard not working in Wayland
 
 ## Auto process notification
 EasyLPAC will process notification for any operation and remove it after successfully processing by default.

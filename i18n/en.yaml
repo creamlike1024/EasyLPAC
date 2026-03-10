@@ -124,7 +124,7 @@ message:
   remove_notification_confirm: Are you sure you want to remove this notification?
   select_batch_remove_notification_type: Select the notification type to remove
   batch_remove_notification_result: "{total} processed\n{success} succeed\n{fail} failed"
-  ci_no_data: "The information of this certificate is not included.\nIf you have any information about this certificate,\nyou can report it to <euicc-dev-manual@septs.pw>\nThank you"
+  ci_no_data: "The information of this certificate is not included."
   process_notification_ask_remove_notification: "Successfully processed notification.\nDo you want to remove this notification now?"
   aid_length_illegal: The custom AID must be 32 characters long!
   aid_not_hex: Only hex characters are allowed!

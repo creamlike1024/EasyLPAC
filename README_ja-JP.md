@@ -1,12 +1,12 @@
 # EasyLPAC
-**Language:** [English](./README.md)
+**Language:** [English](./README.md) | [正體中文](./README_zh-TW.md)
 
 [lpac](https://github.com/estkme-group/lpac) の GUI フロントエンド
 
 ダウンロード: [GitHub リリース](https://github.com/creamlike1024/EasyLPAC/releases/latest)
 
 Arch Linux: ![AUR パッケージ](https://img.shields.io/aur/version/easylpac) [AUR - easylpac](https://aur.archlinux.org/packages/easylpac)
- [@1ridic](https://github.com/1ridic) に感謝します。
+ [@1ridic](https://github.com/1ridic)、[root-core](https://github.com/Root-Core) に感謝します。
 
 NixOS: [NUR](https://github.com/nix-community/NUR#readme) パッケージ https://github.com/nix-community/nur-combined/blob/master/repos/linyinfeng/pkgs/easylpac/default.nix
 
@@ -15,7 +15,7 @@ openSUSE: https://software.opensuse.org/package/easylpac ([OBS](https://build.op
 システム要件:
 - Windows10 以降
 - 最新の macOS
-- Linux: `pcscd`、 `pcsclite`、 `libcurl`(lpac 用) と `gtk3dialog` (EasyLPAC 用)。 依存関係についてはよく理解してません。
+- Linux: `pcscd`/`pcsclite`、`libcurl`(lpac 用) と `gtk3dialog` (EasyLPAC 用)。
 
 現在、pcsc の APDUINTERFACE と curl の HTTPINTERFACE のみがサポートされています。
 
@@ -23,16 +23,12 @@ openSUSE: https://software.opensuse.org/package/easylpac ([OBS](https://build.op
 
 実行する前にカードリーダーを接続してください。
 
-[eSTK.me のユーザー](https://www.estk.me/): eSTK.me カードに付属の ACR38U カードリーダーと **macOS 14 Sonoma** を使用している場合は[カードリーダードライバー](https://www.acs.com.hk/en/driver/228/acr38u-nd-pocketmate-smart-card-reader-micro-usb/)をインストールしてください。
-
 ## Linux
 
 lpac バイナリの検索順序: 始めに EasyLPAC を同じディレクトリを検索します。<br>
 見つからない場合は、`/usr/bin/lpac` を使用します。
 
 `EasyLPAC-linux-x86_64-with-lpac.tar.gz` には、ビルド済みの lpac バイナリが含まれています。実行できない場合は、パッケージマネージャーで `lpac` をインストールするか自分で [lpac をコンパイル](https://github.com/estkme-group/lpac?tab=readme-ov-file#compile)する必要があります。
-
-注意: Wayland では、クリップボードからの LPA アクティベーションコードと QR コードの読み取りは機能しません。
 
 ## 通知を自動で処理
 EasyLPAC は既定ですべての通知の操作を処理し、正常に処理した後に通知を削除します。

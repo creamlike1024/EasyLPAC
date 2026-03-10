@@ -6,7 +6,7 @@
 下載: [GitHub Release](https://github.com/creamlike1024/EasyLPAC/releases/latest)
 
 Arch Linux: ![AUR package](https://img.shields.io/aur/version/easylpac) [AUR - easylpac](https://aur.archlinux.org/packages/easylpac)
- 感謝 [@1ridic](https://github.com/1ridic)
+ 感謝 [@1ridic](https://github.com/1ridic), [root-core](https://github.com/Root-Core)
 
 NixOS: [NUR](https://github.com/nix-community/NUR#readme) 軟體套件 https://github.com/nix-community/nur-combined/blob/master/repos/linyinfeng/pkgs/easylpac/default.nix
 
@@ -15,7 +15,7 @@ openSUSE: https://software.opensuse.org/package/easylpac ([OBS](https://build.op
 系統需求:
 - Windows 10以上 (最後一個支援 Windows 7 的版本是 [0.7.7.2](https://github.com/creamlike1024/EasyLPAC/releases/tag/0.7.7.2))
 - 最新版的 macOS
-- Linux: `pcscd`, `pcsclite`, `libcurl`(適用於 lpac) 和 `gtk3dialog` (適用於 EasyLPAC). 我不確定是否存在相依性。
+- Linux: `pcscd`/`pcsclite`, `libcurl`(適用於 lpac) 和 `gtk3dialog` (適用於 EasyLPAC).
 
 目前僅支援 pcsc 的 APDUINTERFACE 和 curl 的 HTTPINTERFACE。
 
@@ -23,15 +23,11 @@ openSUSE: https://software.opensuse.org/package/easylpac ([OBS](https://build.op
 
 執行前先連接您的讀卡機。
 
-**[estk.me 使用者](https://www.estk.me/)**: 如果您使用的是 estk 卡隨附的 ACR38U 讀卡機，而系統是 **macOS 14 Sonoma**, 請先安裝 [讀卡機驅動程式](https://www.acs.com.hk/en/driver/228/acr38u-nd-pocketmate-smart-card-reader-micro-usb/)
-
 ## Linux
 
 lpac 可執行檔搜尋順序: 首先，在 EasyLPAC 所在的目錄下搜尋。 如果找不到，則使用 `/usr/bin/lpac`
 
 `EasyLPAC-linux-x86_64-with-lpac.tar.gz` 包含預先編譯的 lpac 可執行檔，如果無法執行，則需要透過套件管理器安裝 `lpac` 或自行 [編譯 lpac](https://github.com/estkme-group/lpac?tab=readme-ov-file#compile) 。
-
-注意：在 Wayland 中無法從剪貼簿讀取 LPA 啟動碼和 QRcode
 
 ## 自動處理通知
 EasyLPAC 預設會處理任何操作的通知，並在處理成功後自動刪除。
