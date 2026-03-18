@@ -6,7 +6,7 @@
 Download: [GitHub Release](https://github.com/creamlike1024/EasyLPAC/releases/latest)
 
 Arch Linux: ![AUR package](https://img.shields.io/aur/version/easylpac) [AUR - easylpac](https://aur.archlinux.org/packages/easylpac)
- thanks to [@1ridic](https://github.com/1ridic, [root-core](https://github.com/Root-Core))
+ thanks to [1ridic](https://github.com/1ridic), [root-core](https://github.com/Root-Core)
 
 NixOS: [NUR](https://github.com/nix-community/NUR#readme) package https://github.com/nix-community/nur-combined/blob/master/repos/linyinfeng/pkgs/easylpac/default.nix
 
