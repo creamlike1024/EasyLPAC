@@ -37,20 +37,38 @@ func InitMainWindow() fyne.Window {
 	spacer = canvas.NewRectangle(color.Transparent)
 	spacer.SetMinSize(fyne.NewSize(1, 1))
 
+	PcscContainer = container.NewHBox(
+		widget.NewLabel(TR.Trans("label.card_reader")),
+		container.NewGridWrap(fyne.Size{
+			Width:  280,
+			Height: ApduDriverSelect.MinSize().Height,
+		}, ApduDriverSelect),
+		ApduDriverRefreshButton,
+	)
+
+	MbimDeviceContainer = container.NewHBox(
+		widget.NewLabel(TR.Trans("label.mbim_device")),
+		container.NewGridWrap(fyne.Size{
+			Width:  280,
+			Height: MbimDeviceEntry.MinSize().Height,
+		}, MbimDeviceEntry),
+	)
+	MbimDeviceContainer.Hide()
+
 	topToolBar := container.NewBorder(
 		layout.NewSpacer(),
 		nil,
 		container.New(layout.NewHBoxLayout(), OpenLogButton, spacer, RefreshButton, spacer),
 		FreeSpaceLabel,
-		container.NewBorder(
-			nil,
-			nil,
-			widget.NewLabel(TR.Trans("label.card_reader")),
-			nil,
-			container.NewHBox(container.NewGridWrap(fyne.Size{
-				Width:  280,
-				Height: ApduDriverSelect.MinSize().Height,
-			}, ApduDriverSelect), ApduDriverRefreshButton)),
+		container.NewHBox(
+			widget.NewLabel(TR.Trans("label.apdu_backend")),
+			container.NewGridWrap(fyne.Size{
+				Width:  80,
+				Height: ApduBackendSelect.MinSize().Height,
+			}, ApduBackendSelect),
+			PcscContainer,
+			MbimDeviceContainer,
+		),
 	)
 
 	profileTabContent := container.NewBorder(
@@ -448,6 +466,12 @@ func ShowSelectItemDialog() {
 func ShowSelectCardReaderDialog() {
 	fyne.Do(func() {
 		dialog.ShowInformation(TR.Trans("dialog.info"), TR.Trans("message.select_card_reader"), WMain)
+	})
+}
+
+func ShowSelectMbimDeviceDialog() {
+	fyne.Do(func() {
+		dialog.ShowInformation(TR.Trans("dialog.info"), TR.Trans("message.enter_mbim_device"), WMain)
 	})
 }
 

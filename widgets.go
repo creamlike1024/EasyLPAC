@@ -49,6 +49,11 @@ var CopyEuiccInfo2Button *widget.Button
 var ApduDriverSelect *widget.Select
 var ApduDriverRefreshButton *widget.Button
 
+var ApduBackendSelect *widget.Select
+var MbimDeviceEntry *widget.Entry
+var MbimDeviceContainer *fyne.Container
+var PcscContainer *fyne.Container
+
 var Tabs *container.AppTabs
 var ProfileTab *container.TabItem
 var NotificationTab *container.TabItem
@@ -184,11 +189,48 @@ func InitWidgets() {
 	ApduDriverRefreshButton = &widget.Button{OnTapped: func() { go RefreshApduDriver() },
 		Icon: theme.SearchReplaceIcon()}
 	LpacVersionLabel = &widget.Label{}
+
+	MbimDeviceEntry = &widget.Entry{
+		Text:        ConfigInstance.MbimDevice,
+		PlaceHolder: "/dev/cdc-wdm0",
+		OnChanged: func(s string) {
+			ConfigInstance.MbimDevice = s
+			if s != "" {
+				RefreshNeeded = true
+			}
+		},
+	}
+
+	ApduBackendSelect = widget.NewSelect([]string{"PC/SC", "MBIM"}, func(s string) {
+		switch s {
+		case "PC/SC":
+			ConfigInstance.ApduBackend = "pcsc"
+			ConfigInstance.DriverIFID = ""
+			if MbimDeviceContainer != nil {
+				MbimDeviceContainer.Hide()
+			}
+			if PcscContainer != nil {
+				PcscContainer.Show()
+			}
+			ApduDriverSelect.ClearSelected()
+		case "MBIM":
+			ConfigInstance.ApduBackend = "mbim"
+			ConfigInstance.DriverIFID = "mbim"
+			if PcscContainer != nil {
+				PcscContainer.Hide()
+			}
+			if MbimDeviceContainer != nil {
+				MbimDeviceContainer.Show()
+			}
+		}
+		RefreshNeeded = true
+	})
+	ApduBackendSelect.SetSelected("PC/SC")
 }
 
 func downloadButtonFunc() {
-	if ConfigInstance.DriverIFID == "" {
-		ShowSelectCardReaderDialog()
+	if !isApduConfigured() {
+		showApduNotConfiguredDialog()
 		return
 	}
 	if RefreshNeeded {
@@ -199,8 +241,8 @@ func downloadButtonFunc() {
 }
 
 func setNicknameButtonFunc() {
-	if ConfigInstance.DriverIFID == "" {
-		ShowSelectCardReaderDialog()
+	if !isApduConfigured() {
+		showApduNotConfiguredDialog()
 		return
 	}
 	if RefreshNeeded {
@@ -215,8 +257,8 @@ func setNicknameButtonFunc() {
 }
 
 func deleteProfileButtonFunc() {
-	if ConfigInstance.DriverIFID == "" {
-		ShowSelectCardReaderDialog()
+	if !isApduConfigured() {
+		showApduNotConfiguredDialog()
 		return
 	}
 	if RefreshNeeded {
@@ -332,8 +374,8 @@ func deleteProfileButtonFunc() {
 }
 
 func switchStateButtonFunc() {
-	if ConfigInstance.DriverIFID == "" {
-		ShowSelectCardReaderDialog()
+	if !isApduConfigured() {
+		showApduNotConfiguredDialog()
 		return
 	}
 	if RefreshNeeded {
@@ -390,8 +432,8 @@ func switchStateButtonFunc() {
 }
 
 func processNotificationButtonFunc() {
-	if ConfigInstance.DriverIFID == "" {
-		ShowSelectCardReaderDialog()
+	if !isApduConfigured() {
+		showApduNotConfiguredDialog()
 		return
 	}
 	if RefreshNeeded {
@@ -407,8 +449,8 @@ func processNotificationButtonFunc() {
 }
 
 func processAllNotificationButtonFunc() {
-	if ConfigInstance.DriverIFID == "" {
-		ShowSelectCardReaderDialog()
+	if !isApduConfigured() {
+		showApduNotConfiguredDialog()
 		return
 	}
 	if RefreshNeeded {
@@ -504,8 +546,8 @@ func processAllNotificationButtonFunc() {
 }
 
 func removeNotificationButtonFunc() {
-	if ConfigInstance.DriverIFID == "" {
-		ShowSelectCardReaderDialog()
+	if !isApduConfigured() {
+		showApduNotConfiguredDialog()
 		return
 	}
 	if RefreshNeeded {
@@ -541,8 +583,8 @@ func removeNotificationButtonFunc() {
 }
 
 func batchRemoveNotificationButtonFunc() {
-	if ConfigInstance.DriverIFID == "" {
-		ShowSelectCardReaderDialog()
+	if !isApduConfigured() {
+		showApduNotConfiguredDialog()
 		return
 	}
 	if RefreshNeeded {
@@ -655,8 +697,8 @@ func copyEuiccInfo2ButtonFunc() {
 }
 
 func setDefaultSmdpButtonFunc() {
-	if ConfigInstance.DriverIFID == "" {
-		ShowSelectCardReaderDialog()
+	if !isApduConfigured() {
+		showApduNotConfiguredDialog()
 		return
 	}
 	if RefreshNeeded {
@@ -1022,4 +1064,21 @@ func sliceContains[T comparable](slice []T, element T) bool {
 		}
 	}
 	return false
+}
+
+func isApduConfigured() bool {
+	if ConfigInstance.ApduBackend == "pcsc" {
+		return ConfigInstance.DriverIFID != ""
+	} else if ConfigInstance.ApduBackend == "mbim" {
+		return ConfigInstance.MbimDevice != ""
+	}
+	return false
+}
+
+func showApduNotConfiguredDialog() {
+	if ConfigInstance.ApduBackend == "pcsc" {
+		ShowSelectCardReaderDialog()
+	} else if ConfigInstance.ApduBackend == "mbim" {
+		ShowSelectMbimDeviceDialog()
+	}
 }

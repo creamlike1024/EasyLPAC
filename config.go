@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"os"
+	"os/exec"
 	"path/filepath"
 	"runtime"
 	"time"
@@ -24,6 +25,8 @@ type Config struct {
 	LogFilename string
 	LogFile     *os.File
 	AutoMode    bool
+	ApduBackend string // "pcsc" or "mbim"
+	MbimDevice  string // MBIM device path, e.g., "/dev/wwan0mbim0"
 }
 
 var ConfigInstance Config
@@ -49,7 +52,12 @@ func LoadConfig() error {
 		ConfigInstance.LogDir = filepath.Join("/tmp", "EasyLPAC-log")
 		_, err = os.Stat(filepath.Join(ConfigInstance.LpacDir, ConfigInstance.EXEName))
 		if err != nil {
-			ConfigInstance.LpacDir = "/usr/bin"
+			// Try to find lpac in PATH
+			if lpacPath, pathErr := exec.LookPath("lpac"); pathErr == nil {
+				ConfigInstance.LpacDir = filepath.Dir(lpacPath)
+			} else {
+				ConfigInstance.LpacDir = "/usr/bin"
+			}
 		}
 	default:
 		ConfigInstance.EXEName = "lpac"
@@ -57,6 +65,12 @@ func LoadConfig() error {
 	}
 	ConfigInstance.AutoMode = true
 	ConfigInstance.LpacAID = AID_DEFAULT
+	ConfigInstance.ApduBackend = "pcsc"
+	if mbimDevice := os.Getenv("LPAC_APDU_MBIM_DEVICE"); mbimDevice != "" {
+		ConfigInstance.MbimDevice = mbimDevice
+	} else {
+		ConfigInstance.MbimDevice = "/dev/cdc-wdm0"
+	}
 
 	ConfigInstance.LogFilename = fmt.Sprintf("lpac-%s.txt", time.Now().Format("20060102-150405"))
 	return nil

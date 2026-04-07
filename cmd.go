@@ -40,10 +40,14 @@ func runLpac(args ...string) (json.RawMessage, error) {
 	cmd.Dir = ConfigInstance.LpacDir
 
 	cmd.Env = []string{
-		"LPAC_APDU=pcsc",
+		fmt.Sprintf("LPAC_APDU=%s", ConfigInstance.ApduBackend),
 		"LPAC_HTTP=curl",
-		fmt.Sprintf("DRIVER_IFID=%s", ConfigInstance.DriverIFID),
 		fmt.Sprintf("LPAC_CUSTOM_ISD_R_AID=%s", ConfigInstance.LpacAID),
+	}
+	if ConfigInstance.ApduBackend == "pcsc" {
+		cmd.Env = append(cmd.Env, fmt.Sprintf("DRIVER_IFID=%s", ConfigInstance.DriverIFID))
+	} else if ConfigInstance.ApduBackend == "mbim" {
+		cmd.Env = append(cmd.Env, fmt.Sprintf("LPAC_APDU_MBIM_DEVICE=%s", ConfigInstance.MbimDevice))
 	}
 	if ConfigInstance.DebugHTTP {
 		cmd.Env = append(cmd.Env, "LIBEUICC_DEBUG_HTTP=1")

@@ -162,8 +162,12 @@ func OpenProgram(name string) error {
 }
 
 func Refresh() {
-	if ConfigInstance.DriverIFID == "" {
+	if ConfigInstance.ApduBackend == "pcsc" && ConfigInstance.DriverIFID == "" {
 		ShowSelectCardReaderDialog()
+		return
+	}
+	if ConfigInstance.ApduBackend == "mbim" && ConfigInstance.MbimDevice == "" {
+		ShowSelectMbimDeviceDialog()
 		return
 	}
 	err := RefreshProfile()
