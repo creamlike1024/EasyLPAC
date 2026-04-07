@@ -84,6 +84,9 @@ label:
   card_reader: "Card Reader:"
   apdu_backend: "Backend:"
   mbim_device: "MBIM Device:"
+  device: "Device:"
+  uim_slot: "Slot:"
+  no_config_needed: "(no configuration needed)"
 
 dialog:
   hint: Hint
@@ -135,6 +138,8 @@ message:
   select_item: Please select a item.
   select_card_reader: Please select a card reader.
   enter_mbim_device: Please enter an MBIM device path.
+  select_backend: Please select an APDU backend.
+  enter_device_path: Please enter a device path.
   refresh_required: Please refresh before proceeding.
   failed_to_decode_euiccinfo2: "chip Info: failed to decode EUICCInfo2"
   qr_code_format_error: failed to decode LPA Activation Code from QR Code

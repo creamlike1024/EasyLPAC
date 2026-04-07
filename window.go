@@ -24,7 +24,7 @@ var spacer *canvas.Rectangle
 func InitMainWindow() fyne.Window {
 	w := App.NewWindow("EasyLPAC")
 	w.Resize(fyne.Size{
-		Width:  850,
+		Width:  950,
 		Height: 545,
 	})
 	w.SetMaster()
@@ -37,24 +37,6 @@ func InitMainWindow() fyne.Window {
 	spacer = canvas.NewRectangle(color.Transparent)
 	spacer.SetMinSize(fyne.NewSize(1, 1))
 
-	PcscContainer = container.NewHBox(
-		widget.NewLabel(TR.Trans("label.card_reader")),
-		container.NewGridWrap(fyne.Size{
-			Width:  280,
-			Height: ApduDriverSelect.MinSize().Height,
-		}, ApduDriverSelect),
-		ApduDriverRefreshButton,
-	)
-
-	MbimDeviceContainer = container.NewHBox(
-		widget.NewLabel(TR.Trans("label.mbim_device")),
-		container.NewGridWrap(fyne.Size{
-			Width:  280,
-			Height: MbimDeviceEntry.MinSize().Height,
-		}, MbimDeviceEntry),
-	)
-	MbimDeviceContainer.Hide()
-
 	topToolBar := container.NewBorder(
 		layout.NewSpacer(),
 		nil,
@@ -63,11 +45,10 @@ func InitMainWindow() fyne.Window {
 		container.NewHBox(
 			widget.NewLabel(TR.Trans("label.apdu_backend")),
 			container.NewGridWrap(fyne.Size{
-				Width:  80,
+				Width:  100,
 				Height: ApduBackendSelect.MinSize().Height,
 			}, ApduBackendSelect),
-			PcscContainer,
-			MbimDeviceContainer,
+			DriverConfigContainer,
 		),
 	)
 
@@ -78,7 +59,6 @@ func InitMainWindow() fyne.Window {
 			nil,
 			nil,
 			container.NewHBox(ProfileMaskCheck, DownloadButton,
-				// spacer, DiscoveryButton,
 				spacer, SetNicknameButton,
 				spacer, SwitchStateButton,
 				spacer, DeleteProfileButton),
@@ -143,7 +123,6 @@ func InitMainWindow() fyne.Window {
 		if val != nil {
 			aidEntryHint.SetText(val.Error())
 		} else {
-			// Use last known good value only
 			ConfigInstance.LpacAID = s
 			aidEntryHint.SetText(TR.Trans("label.aid_valid"))
 		}
@@ -279,7 +258,6 @@ func InitDownloadDialog() dialog.Dialog {
 			}()
 		},
 	}
-	// 回调函数需要操作这两个 Button，预先声明
 	var selectQRCodeButton *widget.Button
 	var pasteFromClipboardButton *widget.Button
 	disableButtons := func() {
@@ -367,7 +345,6 @@ func InitDownloadDialog() dialog.Dialog {
 				case clipboard.FmtText:
 					pullInfo, confirmCodeNeeded, err = DecodeLpaActivationCode(CompleteActivationCode(string(result)))
 				default:
-					// Unreachable, should not be here.
 					panic("unexpected clipboard format")
 				}
 				if err != nil {
@@ -469,9 +446,15 @@ func ShowSelectCardReaderDialog() {
 	})
 }
 
-func ShowSelectMbimDeviceDialog() {
+func ShowSelectBackendDialog() {
 	fyne.Do(func() {
-		dialog.ShowInformation(TR.Trans("dialog.info"), TR.Trans("message.enter_mbim_device"), WMain)
+		dialog.ShowInformation(TR.Trans("dialog.info"), TR.Trans("message.select_backend"), WMain)
+	})
+}
+
+func ShowEnterDevicePathDialog() {
+	fyne.Do(func() {
+		dialog.ShowInformation(TR.Trans("dialog.info"), TR.Trans("message.enter_device_path"), WMain)
 	})
 }
 

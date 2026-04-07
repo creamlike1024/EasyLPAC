@@ -84,6 +84,9 @@ label:
   card_reader: "カードリーダー:"
   apdu_backend: "バックエンド:"
   mbim_device: "MBIM デバイス:"
+  device: "デバイス:"
+  uim_slot: "スロット:"
+  no_config_needed: "(設定不要)"
 
 dialog:
   hint: ヒント
@@ -135,6 +138,8 @@ message:
   select_item: 項目を選択してください。
   select_card_reader: カードリーダーを選択してください。
   enter_mbim_device: MBIM デバイスパスを入力してください。
+  select_backend: APDU バックエンドを選択してください。
+  enter_device_path: デバイスパスを入力してください。
   refresh_required: 続行する前に更新してください。
   failed_to_decode_euiccinfo2: "チップ情報: EUICCInfo2 のデコードに失敗しました"
   qr_code_format_error: QR コードから LPA アクティベーションコードのデコードに失敗しました

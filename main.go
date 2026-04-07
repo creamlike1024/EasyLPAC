@@ -60,9 +60,13 @@ func main() {
 		} else {
 			LpacVersionLabel.SetText(TR.Trans("label.lpac_version") + " " + version)
 		}
-		RefreshApduDriver()
-		if ApduDrivers != nil {
-			ApduDriverSelect.SetSelectedIndex(0)
+		// Discover available APDU drivers
+		if err2 := DiscoverDrivers(); err2 != nil {
+			d := dialog.NewError(fmt.Errorf("Failed to discover drivers: %v", err2), WMain)
+			d.Show()
+		} else {
+			PopulateBackendSelect()
+			updateDriverConfigUI()
 		}
 	}
 
