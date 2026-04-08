@@ -163,13 +163,14 @@ func LoadConfig() error {
 	ConfigInstance.DriverConfigs = make(map[string]DriverConfig)
 
 	// Initialize configs for all known drivers
+	// Only use env variables, not defaults - defaults are shown as placeholders
 	initDriverConfig("pcsc", os.Getenv("LPAC_APDU_PCSC_DRV_IFID"), 0)
-	initDriverConfig("at", getEnvOrDefault("LPAC_APDU_AT_DEVICE", GetDefaultDevicePath("at")), 0)
-	initDriverConfig("at_csim", getEnvOrDefault("LPAC_APDU_AT_DEVICE", GetDefaultDevicePath("at_csim")), 0)
-	initDriverConfig("mbim", getEnvOrDefault("LPAC_APDU_MBIM_DEVICE", GetDefaultDevicePath("mbim")), getEnvIntOrDefault("LPAC_APDU_MBIM_UIM_SLOT", 1))
-	initDriverConfig("qmi", getEnvOrDefault("LPAC_APDU_QMI_DEVICE", GetDefaultDevicePath("qmi")), getEnvIntOrDefault("LPAC_APDU_QMI_UIM_SLOT", 1))
-	initDriverConfig("qmi_qrtr", getEnvOrDefault("LPAC_APDU_QMI_DEVICE", GetDefaultDevicePath("qmi_qrtr")), getEnvIntOrDefault("LPAC_APDU_QMI_UIM_SLOT", 1))
-	initDriverConfig("uqmi", getEnvOrDefault("LPAC_APDU_QMI_DEVICE", GetDefaultDevicePath("uqmi")), getEnvIntOrDefault("LPAC_APDU_QMI_UIM_SLOT", 1))
+	initDriverConfig("at", os.Getenv("LPAC_APDU_AT_DEVICE"), 0)
+	initDriverConfig("at_csim", os.Getenv("LPAC_APDU_AT_DEVICE"), 0)
+	initDriverConfig("mbim", os.Getenv("LPAC_APDU_MBIM_DEVICE"), getEnvIntOrDefault("LPAC_APDU_MBIM_UIM_SLOT", 1))
+	initDriverConfig("qmi", os.Getenv("LPAC_APDU_QMI_DEVICE"), getEnvIntOrDefault("LPAC_APDU_QMI_UIM_SLOT", 1))
+	initDriverConfig("qmi_qrtr", os.Getenv("LPAC_APDU_QMI_DEVICE"), getEnvIntOrDefault("LPAC_APDU_QMI_UIM_SLOT", 1))
+	initDriverConfig("uqmi", os.Getenv("LPAC_APDU_QMI_DEVICE"), getEnvIntOrDefault("LPAC_APDU_QMI_UIM_SLOT", 1))
 	initDriverConfig("gbinder", "", 0)
 	initDriverConfig("gbinder_hidl", "", 0)
 

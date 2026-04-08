@@ -39,17 +39,14 @@ func runLpacRaw(env []string, args ...string) (json.RawMessage, string, error) {
 	scanner := bufio.NewScanner(&stdout)
 	for scanner.Scan() {
 		var resp struct {
-			Type    string `json:"type"`
-			Payload struct {
-				Env  string          `json:"env"`
-				Data json.RawMessage `json:"data"`
-			} `json:"payload"`
+			Type    string          `json:"type"`
+			Payload json.RawMessage `json:"payload"`
 		}
 		if err := json.Unmarshal(scanner.Bytes(), &resp); err != nil {
 			continue
 		}
 		if resp.Type == "driver" {
-			return resp.Payload.Data, resp.Payload.Env, nil
+			return resp.Payload, "", nil
 		}
 	}
 
@@ -156,10 +153,26 @@ func runLpac(args ...string) (json.RawMessage, error) {
 				}
 				return wrappedText.String()
 			}
-			return nil, fmt.Errorf("Function: %s\nData: %s", resp.Payload.Message, wrapText(dataString, 90))
+			// Build error message with stderr first if available
+			stderrStr := strings.TrimSpace(stderr.String())
+			var errMsg string
+			if stderrStr != "" {
+				errMsg = fmt.Sprintf("%s\n\nFunction: %s\nData: %s", stderrStr, resp.Payload.Message, wrapText(dataString, 90))
+			} else {
+				errMsg = fmt.Sprintf("Function: %s\nData: %s", resp.Payload.Message, wrapText(dataString, 90))
+			}
+			return nil, errors.New(errMsg)
 		}
 	}
 	if err := scanner.Err(); err != nil {
+		return nil, err
+	}
+	// Check if command failed with stderr but no JSON error response
+	if err != nil {
+		stderrStr := strings.TrimSpace(stderr.String())
+		if stderrStr != "" {
+			return nil, errors.New(stderrStr)
+		}
 		return nil, err
 	}
 	return resp.Payload.Data, nil
@@ -190,24 +203,32 @@ func buildDriverEnv() []string {
 		if config.DriverIFID != "" {
 			env = append(env, fmt.Sprintf("LPAC_APDU_PCSC_DRV_IFID=%s", config.DriverIFID))
 		}
-		if config.DevicePath != "" {
-			env = append(env, fmt.Sprintf("LPAC_APDU_AT_DEVICE=%s", config.DevicePath))
+		devicePath := config.DevicePath
+		if devicePath == "" {
+			devicePath = GetDefaultDevicePath("at")
 		}
+		env = append(env, fmt.Sprintf("LPAC_APDU_AT_DEVICE=%s", devicePath))
 	case "at_csim":
-		if config.DevicePath != "" {
-			env = append(env, fmt.Sprintf("LPAC_APDU_AT_DEVICE=%s", config.DevicePath))
+		devicePath := config.DevicePath
+		if devicePath == "" {
+			devicePath = GetDefaultDevicePath("at_csim")
 		}
+		env = append(env, fmt.Sprintf("LPAC_APDU_AT_DEVICE=%s", devicePath))
 	case "mbim":
-		if config.DevicePath != "" {
-			env = append(env, fmt.Sprintf("LPAC_APDU_MBIM_DEVICE=%s", config.DevicePath))
+		devicePath := config.DevicePath
+		if devicePath == "" {
+			devicePath = GetDefaultDevicePath("mbim")
 		}
+		env = append(env, fmt.Sprintf("LPAC_APDU_MBIM_DEVICE=%s", devicePath))
 		if config.UimSlot > 0 {
 			env = append(env, fmt.Sprintf("LPAC_APDU_MBIM_UIM_SLOT=%d", config.UimSlot))
 		}
 	case "qmi", "qmi_qrtr", "uqmi":
-		if config.DevicePath != "" {
-			env = append(env, fmt.Sprintf("LPAC_APDU_QMI_DEVICE=%s", config.DevicePath))
+		devicePath := config.DevicePath
+		if devicePath == "" {
+			devicePath = GetDefaultDevicePath(driver)
 		}
+		env = append(env, fmt.Sprintf("LPAC_APDU_QMI_DEVICE=%s", devicePath))
 		if config.UimSlot > 0 {
 			env = append(env, fmt.Sprintf("LPAC_APDU_QMI_UIM_SLOT=%d", config.UimSlot))
 		}
@@ -228,11 +249,14 @@ func LpacDriverList() ([]string, error) {
 		return nil, err
 	}
 
-	var drivers []string
-	if err = json.Unmarshal(data, &drivers); err != nil {
+	var payload struct {
+		LpacApdu []string `json:"LPAC_APDU"`
+		LpacHttp []string `json:"LPAC_HTTP"`
+	}
+	if err = json.Unmarshal(data, &payload); err != nil {
 		return nil, err
 	}
-	return drivers, nil
+	return payload.LpacApdu, nil
 }
 
 // LpacDriverApduList lists available devices for the current APDU driver
@@ -260,11 +284,14 @@ func LpacDriverApduListForDriver(driver string) ([]*ApduDriver, error) {
 		return nil, err
 	}
 
-	var apduDrivers []*ApduDriver
-	if err = json.Unmarshal(data, &apduDrivers); err != nil {
+	var payload struct {
+		Env  string        `json:"env"`
+		Data []*ApduDriver `json:"data"`
+	}
+	if err = json.Unmarshal(data, &payload); err != nil {
 		return nil, err
 	}
-	return apduDrivers, nil
+	return payload.Data, nil
 }
 
 func LpacChipInfo() (*EuiccInfo, error) {

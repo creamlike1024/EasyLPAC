@@ -195,9 +195,16 @@ func InitWidgets() {
 	}
 	UimSlotEntry = &widget.Entry{
 		OnChanged: func(s string) {
-			onUimSlotChanged(s)
+			// Filter to numeric only and enforce minimum of 1
+			filtered := filterNumeric(s)
+			if filtered != s {
+				UimSlotEntry.SetText(filtered)
+				return
+			}
+			onUimSlotChanged(filtered)
 		},
 	}
+	UimSlotEntry.SetText("1")
 
 	// Initialize backend selector (will be populated after driver discovery)
 	ApduBackendSelect = widget.NewSelect([]string{}, func(s string) {
@@ -253,11 +260,34 @@ func onUimSlotChanged(slotStr string) {
 	if config == nil {
 		return
 	}
+	if slotStr == "" {
+		config.UimSlot = 1
+		SetCurrentDriverConfig(*config)
+		RefreshNeeded = true
+		return
+	}
 	if slot, err := strconv.Atoi(slotStr); err == nil && slot > 0 {
 		config.UimSlot = slot
 		SetCurrentDriverConfig(*config)
 		RefreshNeeded = true
 	}
+}
+
+// filterNumeric filters a string to only contain digits, returns "1" if empty or zero
+func filterNumeric(s string) string {
+	var result strings.Builder
+	for _, r := range s {
+		if r >= '0' && r <= '9' {
+			result.WriteRune(r)
+		}
+	}
+	filtered := result.String()
+	// Remove leading zeros but keep at least one digit
+	filtered = strings.TrimLeft(filtered, "0")
+	if filtered == "" {
+		return "1"
+	}
+	return filtered
 }
 
 // updateDriverConfigUI updates the driver config UI based on selected backend
@@ -310,9 +340,11 @@ func updateDriverConfigUI() {
 		// Auto-refresh device list
 		go RefreshDeviceList()
 	} else if DriversWithDevicePath[driver] {
-		// Show device path entry
-		if config != nil {
+		// Show device path entry - only set text if explicitly configured
+		if config != nil && config.DevicePath != "" {
 			DeviceEntry.SetText(config.DevicePath)
+		} else {
+			DeviceEntry.SetText("")
 		}
 		DeviceEntry.SetPlaceHolder(GetDefaultDevicePath(driver))
 
