@@ -17,7 +17,7 @@ openSUSE: https://software.opensuse.org/package/easylpac ([OBS](https://build.op
 - 最新の macOS
 - Linux: `pcscd`/`pcsclite`、`libcurl`(lpac 用) と `gtk3dialog` (EasyLPAC 用)。
 
-現在、pcsc の APDUINTERFACE と curl の HTTPINTERFACE のみがサポートされています。
+現在、curl の HTTPINTERFACE と様々な APDU バックエンド (pcsc、AT、MBIM、QMI など、動的検出を介して) がサポートされています。
 
 # 使い方
 
@@ -25,8 +25,8 @@ openSUSE: https://software.opensuse.org/package/easylpac ([OBS](https://build.op
 
 ## Linux
 
-lpac バイナリの検索順序: 始めに EasyLPAC を同じディレクトリを検索します。<br>
-見つからない場合は、`/usr/bin/lpac` を使用します。
+lpac バイナリの検索順序: 始めに EasyLPAC と同じディレクトリを検索します。<br>
+見つからない場合はシステムの `PATH` を検索し、それでも見つからない場合は `/usr/bin/lpac` を使用します。
 
 `EasyLPAC-linux-x86_64-with-lpac.tar.gz` には、ビルド済みの lpac バイナリが含まれています。実行できない場合は、パッケージマネージャーで `lpac` をインストールするか自分で [lpac をコンパイル](https://github.com/estkme-group/lpac?tab=readme-ov-file#compile)する必要があります。
 

@@ -17,7 +17,7 @@ System requirements:
 - latest macOS
 - Linux: `pcscd`/`pcsclite`, `libcurl`(for lpac) and `gtk3dialog` (for EasyLPAC).
 
-Currently, only APDUINTERFACE for pcsc and HTTPINTERFACE for curl are supported.
+Currently, HTTPINTERFACE for curl and various APDU backends (pcsc, AT, MBIM, QMI, etc., via dynamic discovery) are supported.
 
 # Usage
 
@@ -25,7 +25,7 @@ Connect your card reader before running.
 
 ## Linux
 
-lpac binary search order: First, search in the same directory as EasyLPAC. If not found, use `/usr/bin/lpac`
+lpac binary search order: First, search in the same directory as EasyLPAC. If not found, search in system `PATH`. If still not found, fallback to `/usr/bin/lpac`
 
 `EasyLPAC-linux-x86_64-with-lpac.tar.gz` contain prebuilt lpac binary, if you can't run it, you need to install `lpac` by package manager or [compile lpac](https://github.com/estkme-group/lpac?tab=readme-ov-file#compile) by yourself.
 
