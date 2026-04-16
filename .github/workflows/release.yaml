@@ -24,8 +24,8 @@ jobs:
 
     runs-on: ${{ matrix.os }}
     env:
-      LPAC_VERSION: v2.2.1
-      LPAC_VERSION_IN_URL: v2.2.1
+      LPAC_VERSION: v2.3.0
+      LPAC_VERSION_IN_URL: v2.3.0
       LPAC_REPO: https://github.com/estkme-group/lpac
     steps:
       - name: Checkout repo
