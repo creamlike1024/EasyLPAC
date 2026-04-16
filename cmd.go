@@ -181,9 +181,12 @@ func runLpac(args ...string) (json.RawMessage, error) {
 // buildDriverEnv builds environment variables for the current driver
 func buildDriverEnv() []string {
 	env := []string{
-		fmt.Sprintf("LPAC_APDU=%s", ConfigInstance.ApduBackend),
 		"LPAC_HTTP=curl",
 		fmt.Sprintf("LPAC_CUSTOM_ISD_R_AID=%s", ConfigInstance.LpacAID),
+	}
+
+	if ConfigInstance.ApduBackend != "" {
+		env = append(env, fmt.Sprintf("LPAC_APDU=%s", ConfigInstance.ApduBackend))
 	}
 
 	config := GetCurrentDriverConfig()
