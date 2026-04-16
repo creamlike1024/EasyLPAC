@@ -201,11 +201,14 @@ func buildDriverEnv() []string {
 	case "pcsc":
 		if config.DriverIFID != "" {
 			env = append(env, fmt.Sprintf("LPAC_APDU_PCSC_DRV_IFID=%s", config.DriverIFID))
+			// lpac 2.x has a bug: LPAC_APDU_PCSC_DRV_NAME is only checked when IFID is set
+			// but doesn't match, and calling strstr with a NULL name causes a segfault.
+			// Setting NAME alongside IFID prevents the null dereference on non-matching readers.
+			if config.DriverName != "" {
+				env = append(env, fmt.Sprintf("LPAC_APDU_PCSC_DRV_NAME=%s", config.DriverName))
+			}
 		}
 	case "at":
-		if config.DriverIFID != "" {
-			env = append(env, fmt.Sprintf("LPAC_APDU_PCSC_DRV_IFID=%s", config.DriverIFID))
-		}
 		devicePath := config.DevicePath
 		if devicePath == "" {
 			devicePath = GetDefaultDevicePath("at")

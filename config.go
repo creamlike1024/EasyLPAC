@@ -19,7 +19,8 @@ const AID_XESIM = "A0000005591010FFFFFFFF8900000177"
 type DriverConfig struct {
 	DevicePath string // Device path (for at, mbim, qmi drivers)
 	UimSlot    int    // UIM slot number (for mbim, qmi drivers)
-	DriverIFID string // Driver interface ID (for pcsc, at drivers with enumeration)
+	DriverIFID string // Driver interface ID / index (for pcsc driver enumeration)
+	DriverName string // Human-readable reader name (for pcsc, to work around lpac name-filter bug)
 }
 
 type Config struct {
