@@ -24,7 +24,7 @@ var spacer *canvas.Rectangle
 func InitMainWindow() fyne.Window {
 	w := App.NewWindow("EasyLPAC")
 	w.Resize(fyne.Size{
-		Width:  850,
+		Width:  950,
 		Height: 545,
 	})
 	w.SetMaster()
@@ -42,15 +42,14 @@ func InitMainWindow() fyne.Window {
 		nil,
 		container.New(layout.NewHBoxLayout(), OpenLogButton, spacer, RefreshButton, spacer),
 		FreeSpaceLabel,
-		container.NewBorder(
-			nil,
-			nil,
-			widget.NewLabel(TR.Trans("label.card_reader")),
-			nil,
-			container.NewHBox(container.NewGridWrap(fyne.Size{
-				Width:  280,
-				Height: ApduDriverSelect.MinSize().Height,
-			}, ApduDriverSelect), ApduDriverRefreshButton)),
+		container.NewHBox(
+			widget.NewLabel(TR.Trans("label.apdu_backend")),
+			container.NewGridWrap(fyne.Size{
+				Width:  100,
+				Height: ApduBackendSelect.MinSize().Height,
+			}, ApduBackendSelect),
+			DriverConfigContainer,
+		),
 	)
 
 	profileTabContent := container.NewBorder(
@@ -60,7 +59,6 @@ func InitMainWindow() fyne.Window {
 			nil,
 			nil,
 			container.NewHBox(ProfileMaskCheck, DownloadButton,
-				// spacer, DiscoveryButton,
 				spacer, SetNicknameButton,
 				spacer, SwitchStateButton,
 				spacer, DeleteProfileButton),
@@ -125,7 +123,6 @@ func InitMainWindow() fyne.Window {
 		if val != nil {
 			aidEntryHint.SetText(val.Error())
 		} else {
-			// Use last known good value only
 			ConfigInstance.LpacAID = s
 			aidEntryHint.SetText(TR.Trans("label.aid_valid"))
 		}
@@ -261,7 +258,6 @@ func InitDownloadDialog() dialog.Dialog {
 			}()
 		},
 	}
-	// 回调函数需要操作这两个 Button，预先声明
 	var selectQRCodeButton *widget.Button
 	var pasteFromClipboardButton *widget.Button
 	disableButtons := func() {
@@ -349,7 +345,6 @@ func InitDownloadDialog() dialog.Dialog {
 				case clipboard.FmtText:
 					pullInfo, confirmCodeNeeded, err = DecodeLpaActivationCode(CompleteActivationCode(string(result)))
 				default:
-					// Unreachable, should not be here.
 					panic("unexpected clipboard format")
 				}
 				if err != nil {
@@ -448,6 +443,18 @@ func ShowSelectItemDialog() {
 func ShowSelectCardReaderDialog() {
 	fyne.Do(func() {
 		dialog.ShowInformation(TR.Trans("dialog.info"), TR.Trans("message.select_card_reader"), WMain)
+	})
+}
+
+func ShowSelectBackendDialog() {
+	fyne.Do(func() {
+		dialog.ShowInformation(TR.Trans("dialog.info"), TR.Trans("message.select_backend"), WMain)
+	})
+}
+
+func ShowEnterDevicePathDialog() {
+	fyne.Do(func() {
+		dialog.ShowInformation(TR.Trans("dialog.info"), TR.Trans("message.enter_device_path"), WMain)
 	})
 }
 

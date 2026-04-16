@@ -7,7 +7,6 @@ import (
 	"os/exec"
 	"runtime"
 	"sort"
-	"strings"
 
 	fyne "fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/dialog"
@@ -36,7 +35,6 @@ func RefreshProfile() error {
 	if err != nil {
 		return err
 	}
-	// 刷新 List
 	fyne.Do(func() {
 		ProfileList.Refresh()
 		ProfileList.UnselectAll()
@@ -55,7 +53,6 @@ func RefreshNotification() error {
 	sort.Slice(Notifications, func(i, j int) bool {
 		return Notifications[i].SeqNumber < Notifications[j].SeqNumber
 	})
-	// 刷新 List
 	fyne.Do(func() {
 		NotificationList.Refresh()
 		NotificationList.UnselectAll()
@@ -87,20 +84,17 @@ func RefreshChipInfo() error {
 		EidLabel.SetText(fmt.Sprintf(TR.Trans("label.info_eid")+" %s", ChipInfo.EidValue))
 		DefaultDpAddressLabel.SetText(fmt.Sprintf(TR.Trans("label.default_smdp_address")+"  %s", convertToString(ChipInfo.EuiccConfiguredAddresses.DefaultDpAddress)))
 		RootDsAddressLabel.SetText(fmt.Sprintf(TR.Trans("label.root_smds_address")+"  %s", convertToString(ChipInfo.EuiccConfiguredAddresses.RootDsAddress)))
-		// eUICC Manufacturer Label
 		if eum := GetEUM(ChipInfo.EidValue); eum != nil {
 			manufacturer := fmt.Sprint(eum.Manufacturer, " ", CountryCodeToEmoji(eum.Country))
 			EUICCManufacturerLabel.SetText(TR.Trans("label.manufacturer") + " " + manufacturer)
 		} else {
 			EUICCManufacturerLabel.SetText(TR.Trans("label.manufacturer_unknown"))
 		}
-		// EUICCInfo2 entry
 		bytes, err := json.MarshalIndent(ChipInfo.EUICCInfo2, "", "  ")
 		if err != nil {
 			ShowLpacErrDialog(fmt.Errorf(TR.Trans("message.failed_to_decode_euiccinfo2")+"\n%s", err))
 		}
 		EuiccInfo2Entry.SetText(string(bytes))
-		// 计算剩余空间
 		freeSpace := float64(ChipInfo.EUICCInfo2.ExtCardResource.FreeNonVolatileMemory) / 1024
 		FreeSpaceLabel.SetText(fmt.Sprintf(TR.Trans("label.free_space")+" %.2f KiB", math.Round(freeSpace*100)/100))
 
@@ -114,28 +108,14 @@ func RefreshChipInfo() error {
 	return nil
 }
 
-func RefreshApduDriver() {
+// DiscoverDrivers queries available APDU drivers from lpac
+func DiscoverDrivers() error {
 	var err error
-	ApduDrivers, err = LpacDriverApduList()
+	AvailableDrivers, err = LpacDriverList()
 	if err != nil {
-		ShowLpacErrDialog(err)
+		return err
 	}
-	var options []string
-	for _, d := range ApduDrivers {
-		// exclude YubiKey and CanoKey
-		if strings.Contains(d.Name, "canokeys.org") || strings.Contains(d.Name, "YubiKey") {
-			continue
-		}
-		// Workaround: lpac shows an empty driver when no card reader inserted under macOS
-		if d.Name == "" {
-			continue
-		}
-		options = append(options, d.Name)
-	}
-	ApduDriverSelect.SetOptions(options)
-	ApduDriverSelect.ClearSelected()
-	ConfigInstance.DriverIFID = ""
-	ApduDriverSelect.Refresh()
+	return nil
 }
 
 func OpenLog() {
@@ -162,8 +142,8 @@ func OpenProgram(name string) error {
 }
 
 func Refresh() {
-	if ConfigInstance.DriverIFID == "" {
-		ShowSelectCardReaderDialog()
+	if !isApduConfigured() {
+		showApduNotConfiguredDialog()
 		return
 	}
 	err := RefreshProfile()
@@ -206,7 +186,7 @@ func LockButtonListener() {
 	buttons := []*widget.Button{
 		RefreshButton, DownloadButton, SetNicknameButton, SwitchStateButton, DeleteProfileButton,
 		ProcessNotificationButton, ProcessAllNotificationButton, RemoveNotificationButton, BatchRemoveNotificationButton,
-		SetDefaultSmdpButton, ApduDriverRefreshButton,
+		SetDefaultSmdpButton, DeviceSelectRefresh,
 	}
 	checks := []*widget.Check{
 		ProfileMaskCheck, NotificationMaskCheck,
@@ -216,36 +196,51 @@ func LockButtonListener() {
 		fyne.Do(func() {
 			if lock {
 				for _, button := range buttons {
-					button.Disable()
+					if button != nil {
+						button.Disable()
+					}
 				}
 				for _, check := range checks {
-					check.Disable()
+					if check != nil {
+						check.Disable()
+					}
 				}
-				ApduDriverSelect.Disable()
+				if ApduBackendSelect != nil {
+					ApduBackendSelect.Disable()
+				}
+				if DeviceSelect != nil {
+					DeviceSelect.Disable()
+				}
+				if DeviceEntry != nil {
+					DeviceEntry.Disable()
+				}
+				if UimSlotEntry != nil {
+					UimSlotEntry.Disable()
+				}
 			} else {
 				for _, button := range buttons {
-					button.Enable()
+					if button != nil {
+						button.Enable()
+					}
 				}
 				for _, check := range checks {
-					check.Enable()
+					if check != nil {
+						check.Enable()
+					}
 				}
-				ApduDriverSelect.Enable()
+				if ApduBackendSelect != nil {
+					ApduBackendSelect.Enable()
+				}
+				if DeviceSelect != nil {
+					DeviceSelect.Enable()
+				}
+				if DeviceEntry != nil {
+					DeviceEntry.Enable()
+				}
+				if UimSlotEntry != nil {
+					UimSlotEntry.Enable()
+				}
 			}
 		})
-	}
-}
-
-func SetDriverIFID(name string) {
-	for _, d := range ApduDrivers {
-		if name == d.Name {
-			// 未选择过读卡器
-			if ConfigInstance.DriverIFID == "" {
-				ConfigInstance.DriverIFID = d.Env
-			} else {
-				// 选择过读卡器，要求刷新
-				ConfigInstance.DriverIFID = d.Env
-				RefreshNeeded = true
-			}
-		}
 	}
 }

@@ -16,6 +16,43 @@ import (
 	"github.com/mattn/go-runewidth"
 )
 
+// runLpacRaw runs lpac with custom environment, used for driver discovery
+func runLpacRaw(env []string, args ...string) (json.RawMessage, string, error) {
+	lpacPath := filepath.Join(ConfigInstance.LpacDir, ConfigInstance.EXEName)
+
+	cmd := exec.Command(lpacPath, args...)
+	HideCmdWindow(cmd)
+	cmd.Dir = ConfigInstance.LpacDir
+	cmd.Env = env
+
+	var stdout bytes.Buffer
+	var stderr bytes.Buffer
+	cmd.Stdout = &stdout
+	cmd.Stderr = &stderr
+
+	err := cmd.Run()
+	if err != nil && len(bytes.TrimSpace(stderr.Bytes())) != 0 {
+		return nil, "", errors.New(stderr.String())
+	}
+
+	// Parse the response - look for "driver" type for driver commands
+	scanner := bufio.NewScanner(&stdout)
+	for scanner.Scan() {
+		var resp struct {
+			Type    string          `json:"type"`
+			Payload json.RawMessage `json:"payload"`
+		}
+		if err := json.Unmarshal(scanner.Bytes(), &resp); err != nil {
+			continue
+		}
+		if resp.Type == "driver" {
+			return resp.Payload, "", nil
+		}
+	}
+
+	return nil, "", errors.New("no driver response found")
+}
+
 func runLpac(args ...string) (json.RawMessage, error) {
 	StatusChan <- StatusProcess
 	LockButtonChan <- true
@@ -39,12 +76,8 @@ func runLpac(args ...string) (json.RawMessage, error) {
 
 	cmd.Dir = ConfigInstance.LpacDir
 
-	cmd.Env = []string{
-		"LPAC_APDU=pcsc",
-		"LPAC_HTTP=curl",
-		fmt.Sprintf("DRIVER_IFID=%s", ConfigInstance.DriverIFID),
-		fmt.Sprintf("LPAC_CUSTOM_ISD_R_AID=%s", ConfigInstance.LpacAID),
-	}
+	cmd.Env = buildDriverEnv()
+
 	if ConfigInstance.DebugHTTP {
 		cmd.Env = append(cmd.Env, "LIBEUICC_DEBUG_HTTP=1")
 	}
@@ -120,13 +153,145 @@ func runLpac(args ...string) (json.RawMessage, error) {
 				}
 				return wrappedText.String()
 			}
-			return nil, fmt.Errorf("Function: %s\nData: %s", resp.Payload.Message, wrapText(dataString, 90))
+			// Build error message with stderr first if available
+			stderrStr := strings.TrimSpace(stderr.String())
+			var errMsg string
+			if stderrStr != "" {
+				errMsg = fmt.Sprintf("%s\n\nFunction: %s\nData: %s", stderrStr, resp.Payload.Message, wrapText(dataString, 90))
+			} else {
+				errMsg = fmt.Sprintf("Function: %s\nData: %s", resp.Payload.Message, wrapText(dataString, 90))
+			}
+			return nil, errors.New(errMsg)
 		}
 	}
 	if err := scanner.Err(); err != nil {
 		return nil, err
 	}
+	// Check if command failed with stderr but no JSON error response
+	if err != nil {
+		stderrStr := strings.TrimSpace(stderr.String())
+		if stderrStr != "" {
+			return nil, errors.New(stderrStr)
+		}
+		return nil, err
+	}
 	return resp.Payload.Data, nil
+}
+
+// buildDriverEnv builds environment variables for the current driver
+func buildDriverEnv() []string {
+	env := []string{
+		fmt.Sprintf("LPAC_APDU=%s", ConfigInstance.ApduBackend),
+		"LPAC_HTTP=curl",
+		fmt.Sprintf("LPAC_CUSTOM_ISD_R_AID=%s", ConfigInstance.LpacAID),
+	}
+
+	config := GetCurrentDriverConfig()
+	if config == nil {
+		return env
+	}
+
+	driver := ConfigInstance.ApduBackend
+
+	// Add driver-specific environment variables
+	switch driver {
+	case "pcsc":
+		if config.DriverIFID != "" {
+			env = append(env, fmt.Sprintf("LPAC_APDU_PCSC_DRV_IFID=%s", config.DriverIFID))
+		}
+	case "at":
+		if config.DriverIFID != "" {
+			env = append(env, fmt.Sprintf("LPAC_APDU_PCSC_DRV_IFID=%s", config.DriverIFID))
+		}
+		devicePath := config.DevicePath
+		if devicePath == "" {
+			devicePath = GetDefaultDevicePath("at")
+		}
+		env = append(env, fmt.Sprintf("LPAC_APDU_AT_DEVICE=%s", devicePath))
+	case "at_csim":
+		devicePath := config.DevicePath
+		if devicePath == "" {
+			devicePath = GetDefaultDevicePath("at_csim")
+		}
+		env = append(env, fmt.Sprintf("LPAC_APDU_AT_DEVICE=%s", devicePath))
+	case "mbim":
+		devicePath := config.DevicePath
+		if devicePath == "" {
+			devicePath = GetDefaultDevicePath("mbim")
+		}
+		env = append(env, fmt.Sprintf("LPAC_APDU_MBIM_DEVICE=%s", devicePath))
+		if config.UimSlot > 0 {
+			env = append(env, fmt.Sprintf("LPAC_APDU_MBIM_UIM_SLOT=%d", config.UimSlot))
+		}
+	case "qmi", "qmi_qrtr", "uqmi":
+		devicePath := config.DevicePath
+		if devicePath == "" {
+			devicePath = GetDefaultDevicePath(driver)
+		}
+		env = append(env, fmt.Sprintf("LPAC_APDU_QMI_DEVICE=%s", devicePath))
+		if config.UimSlot > 0 {
+			env = append(env, fmt.Sprintf("LPAC_APDU_QMI_UIM_SLOT=%d", config.UimSlot))
+		}
+	}
+	// gbinder and gbinder_hidl need no additional env vars
+
+	return env
+}
+
+// LpacDriverList queries available APDU drivers
+func LpacDriverList() ([]string, error) {
+	env := []string{
+		"LPAC_HTTP=curl",
+	}
+
+	data, _, err := runLpacRaw(env, "driver", "list")
+	if err != nil {
+		return nil, err
+	}
+
+	var payload struct {
+		LpacApdu []string `json:"LPAC_APDU"`
+		LpacHttp []string `json:"LPAC_HTTP"`
+	}
+	if err = json.Unmarshal(data, &payload); err != nil {
+		return nil, err
+	}
+	return payload.LpacApdu, nil
+}
+
+// LpacDriverApduList lists available devices for the current APDU driver
+func LpacDriverApduList() ([]*ApduDriver, error) {
+	payload, err := runLpac("driver", "apdu", "list")
+	if err != nil {
+		return nil, err
+	}
+	var apduDrivers []*ApduDriver
+	if err = json.Unmarshal(payload, &apduDrivers); err != nil {
+		return nil, err
+	}
+	return apduDrivers, nil
+}
+
+// LpacDriverApduListForDriver lists available devices for a specific APDU driver
+func LpacDriverApduListForDriver(driver string) ([]*ApduDriver, error) {
+	env := []string{
+		fmt.Sprintf("LPAC_APDU=%s", driver),
+		"LPAC_HTTP=curl",
+	}
+
+	data, _, err := runLpacRaw(env, "driver", "apdu", "list")
+	if err != nil {
+		return nil, err
+	}
+
+	var payload struct {
+		Env  string        `json:"env"`
+		Data []*ApduDriver `json:"data"`
+	}
+	if err = json.Unmarshal(data, &payload); err != nil {
+		return nil, err
+	}
+	return payload.Data, nil
 }
 
 func LpacChipInfo() (*EuiccInfo, error) {
@@ -264,18 +429,6 @@ func LpacNotificationRemove(seq int) error {
 		return err
 	}
 	return nil
-}
-
-func LpacDriverApduList() ([]*ApduDriver, error) {
-	payload, err := runLpac("driver", "apdu", "list")
-	if err != nil {
-		return nil, err
-	}
-	var apduDrivers []*ApduDriver
-	if err = json.Unmarshal(payload, &apduDrivers); err != nil {
-		return nil, err
-	}
-	return apduDrivers, nil
 }
 
 func LpacChipDefaultSmdp(smdp string) error {

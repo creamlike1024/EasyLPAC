@@ -82,6 +82,11 @@ label:
   manufacturer_unknown: "製造商: 未知"
   free_space: "可用空間:"
   card_reader: "讀卡機:"
+  apdu_backend: "後端:"
+  mbim_device: "MBIM 裝置:"
+  device: "裝置:"
+  uim_slot: "卡槽:"
+  no_config_needed: "(無需配置)"
 
 dialog:
   hint: 提示
@@ -132,6 +137,9 @@ message:
   lpac_error: 請查看日誌了解詳情
   select_item: 請選擇一個項目。
   select_card_reader: 請選擇一個讀卡機。
+  enter_mbim_device: 請輸入 MBIM 裝置路徑。
+  select_backend: 請選擇 APDU 後端。
+  enter_device_path: 請輸入裝置路徑。
   refresh_required: 請重新整理新再繼續。
   failed_to_decode_euiccinfo2: "晶片資訊: 無法解碼 EUICCInfo2 資訊"
   qr_code_format_error: 無法從 QR code 解碼 LPA 啟動碼

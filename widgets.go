@@ -3,6 +3,7 @@ package main
 import (
 	"errors"
 	"fmt"
+	"strconv"
 	"strings"
 	"time"
 
@@ -46,8 +47,15 @@ var ViewCertInfoButton *widget.Button
 var EUICCManufacturerLabel *widget.Label
 var CopyEuiccInfo2Button *widget.Button
 
-var ApduDriverSelect *widget.Select
-var ApduDriverRefreshButton *widget.Button
+// Driver selection widgets
+var ApduBackendSelect *widget.Select
+var DriverConfigContainer *fyne.Container
+
+// Driver-specific config widgets (created dynamically)
+var DeviceSelect *widget.Select       // For drivers with enumeration (pcsc, at)
+var DeviceSelectRefresh *widget.Button
+var DeviceEntry *widget.Entry         // For drivers with device path (mbim, qmi, at_csim)
+var UimSlotEntry *widget.Entry        // For drivers with UIM slot (mbim, qmi)
 
 var Tabs *container.AppTabs
 var ProfileTab *container.TabItem
@@ -80,8 +88,8 @@ func (entry *ReadOnlyEntry) TappedSecondary(ev *fyne.PointEvent) {
 
 func NewReadOnlyEntry() *ReadOnlyEntry {
 	entry := &ReadOnlyEntry{}
-	entry.ExtendBaseWidget(entry) // 确保自定义的 widget 被正确地初始化
-	entry.MultiLine = true        // 支持多行文本
+	entry.ExtendBaseWidget(entry)
+	entry.MultiLine = true
 	entry.TextStyle = fyne.TextStyle{Monospace: true}
 	entry.Wrapping = fyne.TextWrapOff
 	return entry
@@ -140,22 +148,12 @@ func InitWidgets() {
 		Icon:     theme.ViewRefreshIcon()}
 
 	ProfileMaskCheck = widget.NewCheck(TR.Trans("label.profile_mask_check"), func(b bool) {
-		if b {
-			ProfileMaskNeeded = true
-			ProfileList.Refresh()
-		} else {
-			ProfileMaskNeeded = false
-			ProfileList.Refresh()
-		}
+		ProfileMaskNeeded = b
+		ProfileList.Refresh()
 	})
 	NotificationMaskCheck = widget.NewCheck(TR.Trans("label.notification_mask_check"), func(b bool) {
-		if b {
-			NotificationMaskNeeded = true
-			NotificationList.Refresh()
-		} else {
-			NotificationMaskNeeded = false
-			NotificationList.Refresh()
-		}
+		NotificationMaskNeeded = b
+		NotificationList.Refresh()
 	})
 
 	EidLabel = widget.NewLabel("")
@@ -180,15 +178,313 @@ func InitWidgets() {
 		OnTapped: func() { go copyEuiccInfo2ButtonFunc() },
 		Icon:     theme.ContentCopyIcon()}
 	CopyEuiccInfo2Button.Hide()
-	ApduDriverSelect = widget.NewSelect([]string{}, func(s string) { SetDriverIFID(s) })
-	ApduDriverRefreshButton = &widget.Button{OnTapped: func() { go RefreshApduDriver() },
-		Icon: theme.SearchReplaceIcon()}
 	LpacVersionLabel = &widget.Label{}
+
+	// Initialize driver config widgets
+	DeviceSelect = widget.NewSelect([]string{}, func(s string) {
+		onDeviceSelected(s)
+	})
+	DeviceSelectRefresh = &widget.Button{
+		OnTapped: func() { go RefreshDeviceList() },
+		Icon:     theme.SearchReplaceIcon(),
+	}
+	DeviceEntry = &widget.Entry{
+		OnChanged: func(s string) {
+			onDevicePathChanged(s)
+		},
+	}
+	UimSlotEntry = &widget.Entry{
+		OnChanged: func(s string) {
+			// Filter to numeric only and enforce minimum of 1
+			filtered := filterNumeric(s)
+			if filtered != s {
+				UimSlotEntry.SetText(filtered)
+				return
+			}
+			onUimSlotChanged(filtered)
+		},
+	}
+	UimSlotEntry.SetText("1")
+
+	// Initialize backend selector (will be populated after driver discovery)
+	ApduBackendSelect = widget.NewSelect([]string{}, func(s string) {
+		onBackendSelected(s)
+	})
+
+	// Container for driver-specific config (populated dynamically)
+	DriverConfigContainer = container.NewHBox()
+}
+
+// onBackendSelected handles backend driver selection
+func onBackendSelected(driverName string) {
+	ConfigInstance.ApduBackend = driverName
+	RefreshNeeded = true
+	updateDriverConfigUI()
+}
+
+// onDeviceSelected handles device selection from dropdown (pcsc, at)
+func onDeviceSelected(deviceName string) {
+	if deviceName == "" {
+		return
+	}
+	config := GetCurrentDriverConfig()
+	if config == nil {
+		return
+	}
+
+	// Find the env value for this device name
+	for _, d := range ApduDrivers {
+		if d.Name == deviceName {
+			config.DriverIFID = d.Env
+			SetCurrentDriverConfig(*config)
+			RefreshNeeded = true
+			return
+		}
+	}
+}
+
+// onDevicePathChanged handles device path entry changes
+func onDevicePathChanged(path string) {
+	config := GetCurrentDriverConfig()
+	if config == nil {
+		return
+	}
+	config.DevicePath = path
+	SetCurrentDriverConfig(*config)
+	RefreshNeeded = true
+}
+
+// onUimSlotChanged handles UIM slot entry changes
+func onUimSlotChanged(slotStr string) {
+	config := GetCurrentDriverConfig()
+	if config == nil {
+		return
+	}
+	if slotStr == "" {
+		config.UimSlot = 1
+		SetCurrentDriverConfig(*config)
+		RefreshNeeded = true
+		return
+	}
+	if slot, err := strconv.Atoi(slotStr); err == nil && slot > 0 {
+		config.UimSlot = slot
+		SetCurrentDriverConfig(*config)
+		RefreshNeeded = true
+	}
+}
+
+// filterNumeric filters a string to only contain digits, returns "1" if empty or zero
+func filterNumeric(s string) string {
+	var result strings.Builder
+	for _, r := range s {
+		if r >= '0' && r <= '9' {
+			result.WriteRune(r)
+		}
+	}
+	filtered := result.String()
+	// Remove leading zeros but keep at least one digit
+	filtered = strings.TrimLeft(filtered, "0")
+	if filtered == "" {
+		return "1"
+	}
+	return filtered
+}
+
+// updateDriverConfigUI updates the driver config UI based on selected backend
+func updateDriverConfigUI() {
+	if DriverConfigContainer == nil {
+		return
+	}
+
+	driver := ConfigInstance.ApduBackend
+	config := GetCurrentDriverConfig()
+
+	// Clear current config UI
+	DriverConfigContainer.Objects = nil
+
+	// Skip unknown drivers
+	if !IsKnownDriver(driver) {
+		DriverConfigContainer.Refresh()
+		return
+	}
+
+	if DriversNoConfig[driver] {
+		// No config needed for gbinder, gbinder_hidl
+		DriverConfigContainer.Objects = []fyne.CanvasObject{
+			widget.NewLabel(TR.Trans("label.no_config_needed")),
+		}
+		DriverConfigContainer.Refresh()
+		return
+	}
+
+	if DriversWithEnumeration[driver] {
+		// Show device dropdown with refresh button
+		DeviceSelect.ClearSelected()
+		DeviceSelect.SetOptions([]string{})
+		if config != nil && config.DriverIFID != "" {
+			// Try to find and select the current device
+			for _, d := range ApduDrivers {
+				if d.Env == config.DriverIFID {
+					DeviceSelect.SetSelected(d.Name)
+					break
+				}
+			}
+		}
+
+		DriverConfigContainer.Objects = []fyne.CanvasObject{
+			widget.NewLabel(TR.Trans("label.device")),
+			container.NewGridWrap(fyne.Size{Width: 280, Height: DeviceSelect.MinSize().Height}, DeviceSelect),
+			DeviceSelectRefresh,
+		}
+
+		// Auto-refresh device list
+		go RefreshDeviceList()
+	} else if DriversWithDevicePath[driver] {
+		// Show device path entry - only set text if explicitly configured
+		if config != nil && config.DevicePath != "" {
+			DeviceEntry.SetText(config.DevicePath)
+		} else {
+			DeviceEntry.SetText("")
+		}
+		DeviceEntry.SetPlaceHolder(GetDefaultDevicePath(driver))
+
+		objects := []fyne.CanvasObject{
+			widget.NewLabel(TR.Trans("label.device")),
+			container.NewGridWrap(fyne.Size{Width: 200, Height: DeviceEntry.MinSize().Height}, DeviceEntry),
+		}
+
+		// Add UIM slot for drivers that need it
+		if DriversWithUimSlot[driver] {
+			if config != nil && config.UimSlot > 0 {
+				UimSlotEntry.SetText(strconv.Itoa(config.UimSlot))
+			} else {
+				UimSlotEntry.SetText("1")
+			}
+			UimSlotEntry.SetPlaceHolder("1")
+			objects = append(objects,
+				widget.NewLabel(TR.Trans("label.uim_slot")),
+				container.NewGridWrap(fyne.Size{Width: 50, Height: UimSlotEntry.MinSize().Height}, UimSlotEntry),
+			)
+		}
+		DriverConfigContainer.Objects = objects
+	}
+
+	DriverConfigContainer.Refresh()
+}
+
+// PopulateBackendSelect populates the backend selector with available drivers
+func PopulateBackendSelect() {
+	var options []string
+	for _, driver := range AvailableDrivers {
+		// Skip unknown drivers
+		if !IsKnownDriver(driver) {
+			continue
+		}
+		options = append(options, driver)
+	}
+	ApduBackendSelect.SetOptions(options)
+
+	// Select first available driver if none selected
+	if ConfigInstance.ApduBackend == "" && len(options) > 0 {
+		// Prefer pcsc if available
+		for _, opt := range options {
+			if opt == "pcsc" {
+				ApduBackendSelect.SetSelected("pcsc")
+				return
+			}
+		}
+		ApduBackendSelect.SetSelected(options[0])
+	} else if ConfigInstance.ApduBackend != "" {
+		ApduBackendSelect.SetSelected(ConfigInstance.ApduBackend)
+	}
+}
+
+// RefreshDeviceList refreshes the device list for drivers with enumeration
+func RefreshDeviceList() {
+	driver := ConfigInstance.ApduBackend
+	if !DriversWithEnumeration[driver] {
+		return
+	}
+
+	var err error
+	ApduDrivers, err = LpacDriverApduListForDriver(driver)
+	if err != nil {
+		ShowLpacErrDialog(err)
+		return
+	}
+
+	var options []string
+	for _, d := range ApduDrivers {
+		// Exclude YubiKey and CanoKey
+		if strings.Contains(d.Name, "canokeys.org") || strings.Contains(d.Name, "YubiKey") {
+			continue
+		}
+		// Workaround: lpac shows an empty driver when no card reader inserted under macOS
+		if d.Name == "" {
+			continue
+		}
+		options = append(options, d.Name)
+	}
+
+	fyne.Do(func() {
+		DeviceSelect.SetOptions(options)
+		DeviceSelect.ClearSelected()
+
+		// Clear the driver IFID since list changed
+		config := GetCurrentDriverConfig()
+		if config != nil {
+			config.DriverIFID = ""
+			SetCurrentDriverConfig(*config)
+		}
+		DeviceSelect.Refresh()
+	})
+}
+
+// isApduConfigured checks if the current driver is properly configured
+func isApduConfigured() bool {
+	driver := ConfigInstance.ApduBackend
+	if driver == "" {
+		return false
+	}
+
+	config := GetCurrentDriverConfig()
+	if config == nil {
+		return false
+	}
+
+	if DriversNoConfig[driver] {
+		return true
+	}
+
+	if DriversWithEnumeration[driver] {
+		return config.DriverIFID != ""
+	}
+
+	if DriversWithDevicePath[driver] {
+		return config.DevicePath != ""
+	}
+
+	return false
+}
+
+// showApduNotConfiguredDialog shows appropriate dialog based on driver type
+func showApduNotConfiguredDialog() {
+	driver := ConfigInstance.ApduBackend
+	if driver == "" {
+		ShowSelectBackendDialog()
+		return
+	}
+
+	if DriversWithEnumeration[driver] {
+		ShowSelectCardReaderDialog()
+	} else if DriversWithDevicePath[driver] {
+		ShowEnterDevicePathDialog()
+	}
 }
 
 func downloadButtonFunc() {
-	if ConfigInstance.DriverIFID == "" {
-		ShowSelectCardReaderDialog()
+	if !isApduConfigured() {
+		showApduNotConfiguredDialog()
 		return
 	}
 	if RefreshNeeded {
@@ -199,8 +495,8 @@ func downloadButtonFunc() {
 }
 
 func setNicknameButtonFunc() {
-	if ConfigInstance.DriverIFID == "" {
-		ShowSelectCardReaderDialog()
+	if !isApduConfigured() {
+		showApduNotConfiguredDialog()
 		return
 	}
 	if RefreshNeeded {
@@ -215,8 +511,8 @@ func setNicknameButtonFunc() {
 }
 
 func deleteProfileButtonFunc() {
-	if ConfigInstance.DriverIFID == "" {
-		ShowSelectCardReaderDialog()
+	if !isApduConfigured() {
+		showApduNotConfiguredDialog()
 		return
 	}
 	if RefreshNeeded {
@@ -263,12 +559,9 @@ func deleteProfileButtonFunc() {
 							return
 						}
 						if ConfigInstance.AutoMode {
-							// 默认保留 delete 通知
 							if err2 := LpacNotificationProcess(deleteNotification.SeqNumber, false); err2 != nil {
 								dialog.ShowError(errors.New(TR.Trans("message.successfully_delete_profile_failed_send_notification")), WMain)
 							} else {
-								// Ask to remove delete notification
-								// fixme 和手动操作通知模式重构
 								var d *dialog.CustomDialog
 								notNowButton := &widget.Button{
 									Text: "Not Now",
@@ -332,8 +625,8 @@ func deleteProfileButtonFunc() {
 }
 
 func switchStateButtonFunc() {
-	if ConfigInstance.DriverIFID == "" {
-		ShowSelectCardReaderDialog()
+	if !isApduConfigured() {
+		showApduNotConfiguredDialog()
 		return
 	}
 	if RefreshNeeded {
@@ -357,10 +650,6 @@ func switchStateButtonFunc() {
 		notificationsOrigin := Notifications
 		Refresh()
 		switchNotifications := findNewNotifications(notificationsOrigin, Notifications)
-		// 考虑两种情况
-		// 所有 Profile 禁用的情况下，启用 Profile 产生一个 enable 通知
-		// 有一个 Profile 已启用，启用另外一个，产生一个 disable 和一个 enable 通知
-		// 禁用 Profile，产生一个 disable 通知
 		if switchNotifications == nil || len(switchNotifications) > 2 {
 			dialog.ShowError(errors.New(TR.Trans("message.notification_not_found")), WMain)
 		} else {
@@ -390,8 +679,8 @@ func switchStateButtonFunc() {
 }
 
 func processNotificationButtonFunc() {
-	if ConfigInstance.DriverIFID == "" {
-		ShowSelectCardReaderDialog()
+	if !isApduConfigured() {
+		showApduNotConfiguredDialog()
 		return
 	}
 	if RefreshNeeded {
@@ -407,8 +696,8 @@ func processNotificationButtonFunc() {
 }
 
 func processAllNotificationButtonFunc() {
-	if ConfigInstance.DriverIFID == "" {
-		ShowSelectCardReaderDialog()
+	if !isApduConfigured() {
+		showApduNotConfiguredDialog()
 		return
 	}
 	if RefreshNeeded {
@@ -504,8 +793,8 @@ func processAllNotificationButtonFunc() {
 }
 
 func removeNotificationButtonFunc() {
-	if ConfigInstance.DriverIFID == "" {
-		ShowSelectCardReaderDialog()
+	if !isApduConfigured() {
+		showApduNotConfiguredDialog()
 		return
 	}
 	if RefreshNeeded {
@@ -541,8 +830,8 @@ func removeNotificationButtonFunc() {
 }
 
 func batchRemoveNotificationButtonFunc() {
-	if ConfigInstance.DriverIFID == "" {
-		ShowSelectCardReaderDialog()
+	if !isApduConfigured() {
+		showApduNotConfiguredDialog()
 		return
 	}
 	if RefreshNeeded {
@@ -655,8 +944,8 @@ func copyEuiccInfo2ButtonFunc() {
 }
 
 func setDefaultSmdpButtonFunc() {
-	if ConfigInstance.DriverIFID == "" {
-		ShowSelectCardReaderDialog()
+	if !isApduConfigured() {
+		showApduNotConfiguredDialog()
 		return
 	}
 	if RefreshNeeded {
@@ -674,11 +963,7 @@ func viewCertInfoButtonFunc() {
 		KeyID   string
 	}
 	var ciWidgetEls []ciWidgetEl
-	// ChipInfo 中 signing 和 verification 同时存在则有效
 	for _, keyId := range ChipInfo.EUICCInfo2.EuiccCiPKIDListForSigning {
-		// if !slices.Contains(ChipInfo.EUICCInfo2.EuiccCiPKIDListForVerification, keyId) {
-		// 	continue
-		// }
 		if !sliceContains(ChipInfo.EUICCInfo2.EuiccCiPKIDListForVerification, keyId) {
 			continue
 		}
@@ -821,11 +1106,9 @@ func initNotificationList() *widget.List {
 		suffix, _ := publicsuffix.PublicSuffix(fqdn)
 		parts := strings.Split(fqdn, ".")
 		suffixParts := strings.Split(suffix, ".")
-		// 如果域名部分少于后缀部分，说明域名不合法或者是一个裸域名，直接返回掩码后的顶级域名
 		if len(parts) <= len(suffixParts) {
 			return strings.Repeat("x", len(parts[0])) + "." + suffix
 		}
-		// 掩盖除了后缀之外的所有部分
 		for x := 0; x < len(parts)-len(suffixParts); x++ {
 			parts[x] = strings.Repeat("x", len(parts[x]))
 		}
@@ -864,16 +1147,12 @@ func initNotificationList() *widget.List {
 				}
 				notificationAddress = maskFQDNExceptPublicSuffix(Notifications[i].NotificationAddress)
 			}
-			// ICCID
 			if iccid == "" {
 				iccid = TR.Trans("label.no_iccid")
 			}
 			iccidLabel.SetText(fmt.Sprint("(", iccid, ")"))
-			// Notification Address
 			notificationAddressLabel.SetText(notificationAddress)
-			// Seq number
 			seqLabel.SetText(fmt.Sprint(TR.Trans("label.info_seq")+" ", Notifications[i].SeqNumber))
-			// Operation
 			switch Notifications[i].ProfileManagementOperation {
 			case "enable":
 				operationLabel.SetText(TR.Trans("label.notification_operation_enable"))
@@ -884,7 +1163,6 @@ func initNotificationList() *widget.List {
 			case "delete":
 				operationLabel.SetText(TR.Trans("label.notification_operation_delete"))
 			}
-			// Provider
 			profile, err := findProfileByIccid(Notifications[i].Iccid)
 			if err != nil {
 				providerLabel.SetText(TR.Trans("label.deleted_profile"))
@@ -927,7 +1205,6 @@ func processNotificationManually(seq int) {
 			}
 		}
 		if notification == nil {
-			// 不应该出现
 			dialog.ShowError(errors.New(TR.Trans("message.notification_not_found")), WMain)
 			return
 		}
