@@ -235,7 +235,16 @@ func onDeviceSelected(deviceName string) {
 	// Find the env value for this device name
 	for _, d := range ApduDrivers {
 		if d.Name == deviceName {
-			config.DriverIFID = d.Env
+			switch ConfigInstance.ApduBackend {
+			case "pcsc":
+				// Env is a reader index; store it alongside the full name.
+				// Both are needed to work around the lpac 2.x name-filter bug.
+				config.DriverIFID = d.Env
+				config.DriverName = d.Name
+			default:
+				// For "at" and any future enumeration drivers, Env is a device path.
+				config.DevicePath = d.Env
+			}
 			SetCurrentDriverConfig(*config)
 			RefreshNeeded = true
 			return
