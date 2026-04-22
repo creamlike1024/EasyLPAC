@@ -8,7 +8,7 @@
 Arch Linux: ![AUR パッケージ](https://img.shields.io/aur/version/easylpac) [AUR - easylpac](https://aur.archlinux.org/packages/easylpac)
  [1ridic](https://github.com/1ridic)、[root-core](https://github.com/Root-Core) に感謝します。
 
-NixOS: [NUR](https://github.com/nix-community/NUR#readme) パッケージ https://github.com/nix-community/nur-combined/blob/master/repos/linyinfeng/pkgs/easylpac/default.nix
+Nix / NixOS: nixpkgs の [easylpac](https://search.nixos.org/packages?channel=unstable&show=easylpac)
 
 openSUSE: https://software.opensuse.org/package/easylpac ([OBS](https://build.opensuse.org/package/show/home:Psheng/EasyLPAC))
 
