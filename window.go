@@ -381,13 +381,15 @@ func InitSetNicknameDialog() dialog.Dialog {
 	}
 	d := dialog.NewForm(TR.Trans("label.set_nickname_form"), TR.Trans("dialog.submit"), TR.Trans("dialog.cancel"), form, func(b bool) {
 		if b {
-			if err := LpacProfileNickname(Profiles[SelectedProfile].Iccid, entry.Text); err != nil {
-				ShowLpacErrDialog(err)
-			}
-			err := RefreshProfile()
-			if err != nil {
-				ShowLpacErrDialog(err)
-			}
+			go func() {
+				if err := LpacProfileNickname(Profiles[SelectedProfile].Iccid, entry.Text); err != nil {
+					ShowLpacErrDialog(err)
+					return
+				}
+				if err := RefreshProfile(); err != nil {
+					ShowLpacErrDialog(err)
+				}
+			}()
 		}
 	}, WMain)
 	d.Resize(fyne.Size{
