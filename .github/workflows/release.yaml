@@ -126,7 +126,7 @@ jobs:
             EasyLPAC-linux-x86_64.tar.gz
 
       - name: Release
-        uses: softprops/action-gh-release@v1
+        uses: softprops/action-gh-release@v3
         if: startsWith(github.ref, 'refs/tags/')
         with:
           files: |
