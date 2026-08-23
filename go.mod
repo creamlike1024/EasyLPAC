@@ -48,7 +48,7 @@ require (
 	github.com/yuin/goldmark v1.8.2 // indirect
 	golang.org/x/exp v0.0.0-20260410095643-746e56fc9e2f // indirect
 	golang.org/x/exp/shiny v0.0.0-20260410095643-746e56fc9e2f // indirect
-	golang.org/x/image v0.39.0 // indirect
+	golang.org/x/image v0.41.0 // indirect
 	golang.org/x/mobile v0.0.0-20260410095206-2cfb76559b7b // indirect
 	golang.org/x/sys v0.45.0 // indirect
 	golang.org/x/xerrors v0.0.0-20240903120638-7835f813f4da // indirect
