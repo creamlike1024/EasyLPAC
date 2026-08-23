@@ -29,7 +29,7 @@ jobs:
       LPAC_REPO: https://github.com/estkme-group/lpac
     steps:
       - name: Checkout repo
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: Modify version number
         run: |
@@ -42,7 +42,7 @@ jobs:
         shell: bash
 
       - name: Setup go
-        uses: actions/setup-go@v5
+        uses: actions/setup-go@v6
         with:
           go-version: '>=1.24'
 
@@ -115,7 +115,7 @@ jobs:
           zip -r EasyLPAC-macOS-x86_64-with-lpac.zip EasyLPAC.app lpac-$LPAC_VERSION-src.zip LICENSE*
 
       - name: Upload Artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: build-artifact-${{ matrix.label }}
           path: |
