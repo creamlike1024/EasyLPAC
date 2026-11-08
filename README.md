@@ -1,73 +1,84 @@
 # EasyLPAC
 **Language:** [日本語](./README_ja-JP.md) | [正體中文](./README_zh-TW.md)
 
-[lpac](https://github.com/estkme-group/lpac) GUI Frontend
+A GUI LPA for managing eSIMs on removable eUICCs.
 
-Download: [GitHub Release](https://github.com/creamlike1024/EasyLPAC/releases/latest)
+> [!IMPORTANT]
+> Starting with 0.9.0, EasyLPAC has been rewritten around **libeuicc**, the protocol library of [lpac](https://github.com/estkme-group/lpac), linked into the app. No external `lpac` executable is used or required.
+>
+> The earlier versions (lpac CLI + Fyne) live on the [`legacy`](https://github.com/creamlike1024/EasyLPAC/tree/legacy) branch, which is no longer maintained.
 
-Arch Linux: ![AUR package](https://img.shields.io/aur/version/easylpac) [AUR - easylpac](https://aur.archlinux.org/packages/easylpac)
- thanks to [1ridic](https://github.com/1ridic), [root-core](https://github.com/Root-Core)
+## Download
 
-Nix / NixOS: [easylpac](https://search.nixos.org/packages?channel=unstable&show=easylpac) in nixpkgs
-
-openSUSE: https://software.opensuse.org/package/easylpac ([OBS](https://build.opensuse.org/package/show/home:Psheng/EasyLPAC))
-
-System requirements:
-- Windows 10+ (last version that supports Windows 7 was [0.7.7.2](https://github.com/creamlike1024/EasyLPAC/releases/tag/0.7.7.2))
-- latest macOS
-- Linux: `pcscd`/`pcsclite`, `libcurl`(for lpac) and `gtk3dialog` (for EasyLPAC).
-
-Currently, HTTPINTERFACE for curl and various APDU backends (pcsc, AT, MBIM, QMI, etc., via dynamic discovery) are supported.
+[GitHub Release](https://github.com/creamlike1024/EasyLPAC/releases/latest):
 
 # Usage
 
-Connect your card reader before running.
+Connect your card reader or modem, open **Settings**, choose the device, and the card is read.
 
-## Linux
+## Notifications
 
-lpac binary search order: First, search in the same directory as EasyLPAC. If not found, search in system `PATH`. If still not found, fallback to `/usr/bin/lpac`
+By default EasyLPAC sends the notification of every operation (install, enable, disable, delete) to the operator's server and removes it once it is sent.
 
-`EasyLPAC-linux-x86_64-with-lpac.tar.gz` contain prebuilt lpac binary, if you can't run it, you need to install `lpac` by package manager or [compile lpac](https://github.com/estkme-group/lpac?tab=readme-ov-file#compile) by yourself.
+You can turn this off with **Send notifications** in Settings. The pending notifications are then listed on the Notifications page.
 
-## Auto process notification
-EasyLPAC will process notification for any operation and remove it after successfully processing by default.
-
-You can go to Settings Tab and uncheck "Auto process notification" to disable this behavior.
-
-However, arbitrary manipulation of notifications does not comply with GSMA specifications, so manual operation is not recommended.
+Handling notifications by hand does not follow the GSMA specifications, so leaving this on is recommended.
 
 # Screenshots
 <p>
-<a href="https://github.com/creamlike1024/EasyLPAC/blob/master/screenshots/chipinfo.png"><img src="https://github.com/creamlike1024/EasyLPAC/blob/master/screenshots/chipinfo.png?raw=true"  height="180px"/></a>
-<a href="https://github.com/creamlike1024/EasyLPAC/blob/master/screenshots/notification.png"><img src="https://github.com/creamlike1024/EasyLPAC/blob/master/screenshots/notification.png?raw=true" height="180px"/></a>
-<a href="https://github.com/creamlike1024/EasyLPAC/blob/master/screenshots/profile.png"><img src="https://github.com/creamlike1024/EasyLPAC/blob/master/screenshots/profile.png?raw=true" height="180px"/></a>
+<a href="./screenshots/profile.png"><img src="./screenshots/profile.png" height="240px"/></a>
+<a href="./screenshots/chipinfo.png"><img src="./screenshots/chipinfo.png" height="240px"/></a>
 </p>
 
-# FAQ
+# Building from source
 
-## lpac error `euicc_init` when using 5ber
+Requirements: Go 1.27.3+, [zig](https://ziglang.org/) (used as the C compiler), CMake, and on Linux the pcsc-lite development files (see [Linux](#linux)).
 
-Go to Settings -> lpac ISD-R AID and click 5ber to set 5ber's custom AID, then retry
+```sh
+git clone --recursive https://github.com/creamlike1024/EasyLPAC.git
+cd EasyLPAC
+./scripts/build-app.sh          # output in build/<os>-<arch>/
+```
 
-## macOS `SCardTransmit() failed: 80100016`
+lpac is a git submodule at `third_party/lpac`. If you cloned without `--recursive`, run `git submodule update --init` first.
 
-If you are using macOS Sonoma, you may encounter this error: `SCardTransmit() failed: 80100016`
+## Linux
 
-This is because there is a bug in Apple's USB CCID Card Reader Driver, you can try installing the macOS driver provided by your card reader manufacturer, Or you can solve it by reading the following article:
+**Note: The build steps on Linux have not been tested.**
 
-- [Apple's own CCID driver in Sonoma](https://blog.apdu.fr/posts/2023/11/apple-own-ccid-driver-in-sonoma/)
-- [macOS Sonoma bug: SCardControl() returns SCARD_E_NOT_TRANSACTED](https://blog.apdu.fr/posts/2023/09/macos-sonoma-bug-scardcontrol-returns-scard_e_not_transacted/)
+EasyLPAC links the system's pcsc-lite dynamically (`libpcsclite.so.1`); it is never bundled. The app then always talks to `pcscd` through the client library of the same pcsc-lite release, whatever version the build machine had. GTK 3 is loaded at run time and needs no development package.
 
-## `SCardEstablishContext() failed: 8010001D`
+Build dependencies:
 
-This indicates that PCSC service is not running. For linux, it's `pcscd` service.
+| Distribution | Packages |
+|---|---|
+| Debian / Ubuntu | `libpcsclite-dev pkg-config cmake` |
+| Fedora | `pcsc-lite-devel pkgconf-pkg-config cmake` |
+| Arch Linux | `pcsclite pkgconf cmake` |
+| openSUSE | `pcsc-lite-devel pkg-config cmake` |
 
-Start `pcscd` on systemd based distribution: `sudo systemctl start pcscd`
+zig does not search the system's library directories, so tell the linker where pcsc-lite is. The binary targets glibc 2.31, while the system's `libpcsclite.so` may have been built against a newer glibc; `--allow-shlib-undefined` accepts that, since the user's own library is the one loaded at run time:
 
-## `SCardListReaders() failed: 8010002E`
+```sh
+export CGO_LDFLAGS="-L$(pkg-config --variable=libdir libpcsclite) -Wl,--allow-shlib-undefined"
+./scripts/build-app.sh
+```
 
-Card reader is not connected.
+Run-time dependencies: GTK 3, pcsc-lite, and the `pcscd` service with a reader driver (`ccid` for most USB readers):
 
-## Other `SCard` error codes
+| Distribution | Packages |
+|---|---|
+| Debian / Ubuntu | `libgtk-3-0 libpcsclite1 pcscd libccid` |
+| Fedora | `gtk3 pcsc-lite pcsc-lite-ccid` |
+| Arch Linux | `gtk3 pcsclite ccid` |
+| openSUSE | `gtk3 pcsc-lite pcsc-ccid` |
 
-For complete explanation list of PCSC error codes, see [pcsc-lite: ErrorCodes](https://pcsclite.apdu.fr/api/group__ErrorCodes.html)
+Start the service with `sudo systemctl enable --now pcscd.socket`.
+
+The `.deb` from the release depends on `libpcsclite1` and `pcscd`. Packagers for other distributions should map these to their own packages, and keep pcsc-lite linked dynamically: a statically linked client may speak a protocol version the system's `pcscd` refuses.
+
+# License
+
+- EasyLPAC: [MIT](./LICENSE)
+- libeuicc (from lpac), statically linked: [LGPL-2.1-only](https://github.com/estkme-group/lpac/blob/main/euicc/LICENSE). Each release ships `EasyLPAC-source.tar.gz`, the complete source including libeuicc and the scripts that build it, so the library can be modified and the app rebuilt.
+- eUICC manufacturer and CI data from the [eUICC Manual](https://euicc-manual.osmocom.org/): CC BY-NC-SA 4.0

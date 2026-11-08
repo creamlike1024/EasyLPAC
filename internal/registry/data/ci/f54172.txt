@@ -1,0 +1,70 @@
+notBefore=2020-04-01 08:27:51Z
+notAfter=2055-04-01 08:27:51Z
+Certificate:
+    Data:
+        Version: 3 (0x2)
+        Serial Number:
+            b8:74:f3:ab:fa:6c:44:d3
+        Signature Algorithm: ecdsa-with-SHA256
+        Issuer:
+            commonName = Test CI
+            organizationalUnitName = TESTCERT
+            organizationName = RSPTEST
+            countryName = IT
+        Validity
+            Not Before: Apr  1 08:27:51 2020 GMT
+            Not After : Apr  1 08:27:51 2055 GMT
+        Subject:
+            commonName = Test CI
+            organizationalUnitName = TESTCERT
+            organizationName = RSPTEST
+            countryName = IT
+        Subject Public Key Info:
+            Public Key Algorithm: id-ecPublicKey
+                Public-Key: (256 bit field, 128 bit security level)
+                pub:
+                    04:94:06:57:a6:73:dc:28:8f:89:d5:2e:a8:a4:77:04:
+                    99:27:91:f9:c3:4b:00:36:e6:33:e2:d0:cb:a9:45:4d:
+                    65:db:32:eb:17:98:17:99:d2:f2:43:88:ee:2b:95:c1:
+                    09:45:46:c9:79:01:ce:ae:ba:96:50:91:9a:2e:20:d2:
+                    29
+                ASN1 OID: prime256v1
+                NIST CURVE: P-256
+        X509v3 extensions:
+            X509v3 Subject Key Identifier: 
+                F5:41:72:BD:F9:8A:95:D6:5C:BE:B8:8A:38:A1:C1:1D:80:0A:85:C3
+            X509v3 Basic Constraints: critical
+                CA:TRUE
+            X509v3 Certificate Policies: critical
+                Policy: 2.23.146.1.2.1.0
+            X509v3 Key Usage: critical
+                Certificate Sign, CRL Sign
+            X509v3 Subject Alternative Name: 
+                Registered ID:2.999.1
+            X509v3 CRL Distribution Points: 
+                Full Name:
+                  URI:http://ci.test.example.com/CRL-A.crl
+
+                Full Name:
+                  URI:http://ci.test.example.com/CRL-B.crl
+
+    Signature Algorithm: ecdsa-with-SHA256
+    Signature Value:
+        30:44:02:20:52:75:6a:af:c2:02:0a:6c:ec:bf:2e:5f:3c:20:89:25:10:ff:29:75:
+        1d:29:8b:d3:b0:15:d9:60:5a:4f:e6:7d:02:20:57:98:28:36:e4:d2:05:dd:d2:e6:
+        c3:c1:b4:55:93:7f:6b:6e:49:3b:60:2f:d1:b6:6c:35:74:89:a9:35:f7:6b
+-----BEGIN CERTIFICATE-----
+MIICUDCCAfegAwIBAgIJALh086v6bETTMAoGCCqGSM49BAMCMEQxEDAOBgNVBAMM
+B1Rlc3QgQ0kxETAPBgNVBAsMCFRFU1RDRVJUMRAwDgYDVQQKDAdSU1BURVNUMQsw
+CQYDVQQGEwJJVDAgFw0yMDA0MDEwODI3NTFaGA8yMDU1MDQwMTA4Mjc1MVowRDEQ
+MA4GA1UEAwwHVGVzdCBDSTERMA8GA1UECwwIVEVTVENFUlQxEDAOBgNVBAoMB1JT
+UFRFU1QxCzAJBgNVBAYTAklUMFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAElAZX
+pnPcKI+J1S6opHcEmSeR+cNLADbmM+LQy6lFTWXbMusXmBeZ0vJDiO4rlcEJRUbJ
+eQHOrrqWUJGaLiDSKaOBzzCBzDAdBgNVHQ4EFgQU9UFyvfmKldZcvriKOKHBHYAK
+hcMwDwYDVR0TAQH/BAUwAwEB/zAXBgNVHSABAf8EDTALMAkGB2eBEgECAQAwDgYD
+VR0PAQH/BAQDAgEGMA4GA1UdEQQHMAWIA4g3ATBhBgNVHR8EWjBYMCqgKKAmhiRo
+dHRwOi8vY2kudGVzdC5leGFtcGxlLmNvbS9DUkwtQS5jcmwwKqAooCaGJGh0dHA6
+Ly9jaS50ZXN0LmV4YW1wbGUuY29tL0NSTC1CLmNybDAKBggqhkjOPQQDAgNHADBE
+AiBSdWqvwgIKbOy/Ll88IIklEP8pdR0pi9OwFdlgWk/mfQIgV5goNuTSBd3S5sPB
+tFWTf2tuSTtgL9G2bDV0iak192s=
+-----END CERTIFICATE-----

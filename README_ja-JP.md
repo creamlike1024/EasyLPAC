@@ -1,74 +1,84 @@
 # EasyLPAC
-**Language:** [English](./README.md) | [正體中文](./README_zh-TW.md)
+**言語:** [English](./README.md) | [正體中文](./README_zh-TW.md)
 
-[lpac](https://github.com/estkme-group/lpac) の GUI フロントエンド
+取り外し可能な eUICC 上の eSIM を管理する GUI の LPA です。
 
-ダウンロード: [GitHub リリース](https://github.com/creamlike1024/EasyLPAC/releases/latest)
+> [!IMPORTANT]
+> 0.9.0 以降、EasyLPAC は [lpac](https://github.com/estkme-group/lpac) のプロトコルライブラリである **libeuicc** をアプリに組み込む形で書き直されました。外部の `lpac` 実行ファイルは使用せず、必要もありません。
+>
+> 以前のバージョン（lpac CLI + Fyne）は [`legacy`](https://github.com/creamlike1024/EasyLPAC/tree/legacy) ブランチに残されており、今後メンテナンスされません。
 
-Arch Linux: ![AUR パッケージ](https://img.shields.io/aur/version/easylpac) [AUR - easylpac](https://aur.archlinux.org/packages/easylpac)
- [1ridic](https://github.com/1ridic)、[root-core](https://github.com/Root-Core) に感謝します。
+## ダウンロード
 
-Nix / NixOS: nixpkgs の [easylpac](https://search.nixos.org/packages?channel=unstable&show=easylpac)
-
-openSUSE: https://software.opensuse.org/package/easylpac ([OBS](https://build.opensuse.org/package/show/home:Psheng/EasyLPAC))
-
-システム要件:
-- Windows10 以降
-- 最新の macOS
-- Linux: `pcscd`/`pcsclite`、`libcurl`(lpac 用) と `gtk3dialog` (EasyLPAC 用)。
-
-現在、curl の HTTPINTERFACE と様々な APDU バックエンド (pcsc、AT、MBIM、QMI など、動的検出を介して) がサポートされています。
+[GitHub Release](https://github.com/creamlike1024/EasyLPAC/releases/latest)：
 
 # 使い方
 
-実行する前にカードリーダーを接続してください。
+カードリーダーまたはモデムを接続し、「設定」でデバイスを選ぶとチップが読み込まれます。
 
-## Linux
+## 通知
 
-lpac バイナリの検索順序: 始めに EasyLPAC と同じディレクトリを検索します。<br>
-見つからない場合はシステムの `PATH` を検索し、それでも見つからない場合は `/usr/bin/lpac` を使用します。
+デフォルトでは、EasyLPAC は各操作（インストール、有効化、無効化、削除）の通知を通信事業者のサーバーへ送信し、送信に成功すると削除します。
 
-`EasyLPAC-linux-x86_64-with-lpac.tar.gz` には、ビルド済みの lpac バイナリが含まれています。実行できない場合は、パッケージマネージャーで `lpac` をインストールするか自分で [lpac をコンパイル](https://github.com/estkme-group/lpac?tab=readme-ov-file#compile)する必要があります。
+「設定」の「通知を送信」でこの動作をオフにできます。オフにすると、未処理の通知は「通知」ページに表示されます。
 
-## 通知を自動で処理
-EasyLPAC は既定ですべての通知の操作を処理し、正常に処理した後に通知を削除します。
-
-この動作を無効化するには、「設定」タブから「通知を自動で処理する」のチェックを外します。
-
-ただし、通知を意図的に操作することは GSMA 仕様に準拠していないため、手動での操作は推奨しません。
+通知を手動で操作することは GSMA の仕様に沿わないため、オンのままにすることをお勧めします。
 
 # スクリーンショット
 <p>
-<a href="https://github.com/creamlike1024/EasyLPAC/blob/master/screenshots/chipinfo.png"><img src="https://github.com/creamlike1024/EasyLPAC/blob/master/screenshots/chipinfo.png?raw=true"  height="180px"/></a>
-<a href="https://github.com/creamlike1024/EasyLPAC/blob/master/screenshots/notification.png"><img src="https://github.com/creamlike1024/EasyLPAC/blob/master/screenshots/notification.png?raw=true" height="180px"/></a>
-<a href="https://github.com/creamlike1024/EasyLPAC/blob/master/screenshots/profile.png"><img src="https://github.com/creamlike1024/EasyLPAC/blob/master/screenshots/profile.png?raw=true" height="180px"/></a>
+<a href="./screenshots/profile.png"><img src="./screenshots/profile.png" height="240px"/></a>
+<a href="./screenshots/chipinfo.png"><img src="./screenshots/chipinfo.png" height="240px"/></a>
 </p>
 
-# FAQ
+# ソースからのビルド
 
-## 5ber 使用時に発生する `euicc_init` の lpac エラー
+必要なもの：Go 1.27.3 以降、[zig](https://ziglang.org/)（C コンパイラとして使用）、CMake、Linux では pcsc-lite の開発ファイル（[Linux](#linux) を参照）。
 
-設定 -> lpac ISD-R AID に移動し、5ber をクリックして 5ber のカスタム AID を設定後に再試行してください。
+```sh
+git clone --recursive https://github.com/creamlike1024/EasyLPAC.git
+cd EasyLPAC
+./scripts/build-app.sh          # 出力先は build/<os>-<arch>/
+```
 
-## macOS で `SCardTransmit() failed: 80100016` が発生する
+lpac は `third_party/lpac` にある git サブモジュールです。`--recursive` を付けずにクローンした場合は、先に `git submodule update --init` を実行してください。
 
-macOS Sonoma を使用している場合にこのエラーが発生する可能性があります: `SCardTransmit() が失敗しました: 80100016`
+## Linux
 
-これは Apple の USB CCID カードリーダードライバーにバグがあるためです。カードリーダーメーカーが提供する macOS ドライバーをインストールしてください。または以下の記事を参照して解決することもできます:
+**注意：Linux でのビルド手順は未検証です。**
 
-- [Apple's own CCID driver in Sonoma](https://blog.apdu.fr/posts/2023/11/apple-own-ccid-driver-in-sonoma/)
-- [macOS Sonoma bug: SCardControl() returns SCARD_E_NOT_TRANSACTED](https://blog.apdu.fr/posts/2023/09/macos-sonoma-bug-scardcontrol-returns-scard_e_not_transacted/)
+EasyLPAC はシステムの pcsc-lite（`libpcsclite.so.1`）に動的リンクし、同梱はしません。そのため、ビルド環境のバージョンにかかわらず、アプリは常に同じ pcsc-lite リリースのクライアントライブラリを通じて `pcscd` と通信します。GTK 3 は実行時に読み込まれるため、開発パッケージは不要です。
 
-## `SCardEstablishContext() failed: 8010001D` が発生する
+ビルドに必要なパッケージ：
 
-これは PCSC サービスが実行されていないことが原因です。Linux の場合は、`pcscd` サービスです。
+| ディストリビューション | パッケージ |
+|---|---|
+| Debian / Ubuntu | `libpcsclite-dev pkg-config cmake` |
+| Fedora | `pcsc-lite-devel pkgconf-pkg-config cmake` |
+| Arch Linux | `pcsclite pkgconf cmake` |
+| openSUSE | `pcsc-lite-devel pkg-config cmake` |
 
-systemd ベースのディストリビューションで `pcscd` を起動します: `sudo systemctl start pcscd`
+zig はシステムのライブラリディレクトリを検索しないため、pcsc-lite の場所をリンカに指定します。バイナリは glibc 2.31 を対象としていますが、システムの `libpcsclite.so` はより新しい glibc でビルドされている場合があります。実行時に読み込まれるのはユーザー自身のライブラリなので、`--allow-shlib-undefined` でこれを許容します：
 
-## `SCardListReaders() failed: 8010002E` が発生する
+```sh
+export CGO_LDFLAGS="-L$(pkg-config --variable=libdir libpcsclite) -Wl,--allow-shlib-undefined"
+./scripts/build-app.sh
+```
 
-カードリーダーが未接続です。
+実行に必要なもの：GTK 3、pcsc-lite、およびカードリーダードライバ（多くの USB リーダーでは `ccid`）を備えた `pcscd` サービス：
 
-## その他の `SCard` エラーコード
+| ディストリビューション | パッケージ |
+|---|---|
+| Debian / Ubuntu | `libgtk-3-0 libpcsclite1 pcscd libccid` |
+| Fedora | `gtk3 pcsc-lite pcsc-lite-ccid` |
+| Arch Linux | `gtk3 pcsclite ccid` |
+| openSUSE | `gtk3 pcsc-lite pcsc-ccid` |
 
-PCSC エラーコードの完全な説明の一覧は [pcsc-lite: ErrorCodes](https://pcsclite.apdu.fr/api/group__ErrorCodes.html) を参照してください。
+サービスは `sudo systemctl enable --now pcscd.socket` で起動します。
+
+リリースの `.deb` は `libpcsclite1` と `pcscd` に依存します。他のディストリビューションのパッケージ作成者は、これらを各ディストリビューションのパッケージに置き換え、pcsc-lite は動的リンクのままにしてください。静的リンクしたクライアントは、システムの `pcscd` が受け付けないプロトコルバージョンを使う可能性があります。
+
+# ライセンス
+
+- EasyLPAC：[MIT](./LICENSE)
+- libeuicc（lpac 由来、静的リンク）：[LGPL-2.1-only](https://github.com/estkme-group/lpac/blob/main/euicc/LICENSE)。各リリースには libeuicc を含む完全なソースコードとビルドスクリプト `EasyLPAC-source.tar.gz` が付属しており、ライブラリを変更してアプリを再ビルドできます。
+- [eUICC Manual](https://euicc-manual.osmocom.org/) の eUICC 製造元および CI データ：CC BY-NC-SA 4.0

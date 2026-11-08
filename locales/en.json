@@ -1,0 +1,507 @@
+{
+  "@@locale": "en",
+  "commonCancel": "Cancel",
+  "commonSave": "Save",
+  "commonClose": "Close",
+  "commonDone": "Done",
+  "commonNotSet": "Not set",
+  "commonOptional": "Optional",
+  "navSectionEuicc": "eUICC",
+  "@navSectionEuicc": {
+    "description": "Sidebar section of the card's pages"
+  },
+  "navSectionApp": "App",
+  "@navSectionApp": {
+    "description": "Sidebar section of the app's pages"
+  },
+  "navEsims": "eSIMs",
+  "navNotifications": "Notifications",
+  "navCard": "Card",
+  "navSettings": "Settings",
+  "navLog": "Log",
+  "navAbout": "About",
+  "navPages": "Pages",
+  "@navPages": {
+    "description": "Accessibility label of the sidebar"
+  },
+  "deviceLabel": "Device: {name}",
+  "@deviceLabel": {
+    "description": "Accessibility label of the device card",
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "deviceNone": "No device",
+  "deviceChooseInSettings": "Choose a reader in Settings",
+  "deviceNotConnected": "Not connected",
+  "deviceWorking": "Working…",
+  "deviceReady": "Ready",
+  "deviceNotFound": "Not found",
+  "deviceError": "Error",
+  "deviceDemo": "DEMO",
+  "@deviceDemo": {
+    "description": "Badge of demo builds"
+  },
+  "actionRefresh": "Refresh (⌘R)",
+  "actionAddEsim": "Add eSIM",
+  "hintChooseReader": "Choose a card reader",
+  "hintChoosePort": "Choose a modem port",
+  "hintChooseBody": "Choose the device your eUICC is in, in Settings.",
+  "hintOpenSettings": "Open Settings",
+  "hintReading": "Reading the card…",
+  "hintReadFailed": "Could not read the card",
+  "hintTryAgain": "Try again",
+  "hintNotRead": "Not read yet",
+  "hintReadCard": "Read card",
+  "taskRefresh": "Reading the card",
+  "taskEnable": "Turning on the eSIM",
+  "taskDisable": "Turning off the eSIM",
+  "taskDelete": "Deleting the eSIM",
+  "taskRename": "Renaming the eSIM",
+  "taskSetDefaultSmdp": "Saving the default SM-DP+",
+  "taskSendNotifications": "Sending notifications",
+  "taskRemoveNotifications": "Removing notifications",
+  "taskDownload": "Adding the eSIM",
+  "taskWithStage": "{task} · {stage}",
+  "@taskWithStage": {
+    "description": "The task pill: the task and its current stage",
+    "placeholders": {
+      "task": {
+        "type": "String"
+      },
+      "stage": {
+        "type": "String"
+      }
+    }
+  },
+  "noticeEnabled": "eSIM turned on",
+  "noticeDisabled": "eSIM turned off",
+  "noticeDeleted": "eSIM deleted",
+  "noticeRenamed": "Nickname saved",
+  "noticeDefaultSmdpSaved": "Default SM-DP+ saved",
+  "noticeWithNotifications": "{done} · {count, plural, one {notification sent} other {# notifications sent}}",
+  "@noticeWithNotifications": {
+    "description": "After a change to an eSIM, with the notifications sent automatically",
+    "placeholders": {
+      "done": {
+        "type": "String"
+      },
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "noticeNotificationsUnsent": "{done} · {count, plural, one {a notification could not be sent; it stays on the card} other {# notifications could not be sent; they stay on the card}}",
+  "@noticeNotificationsUnsent": {
+    "placeholders": {
+      "done": {
+        "type": "String"
+      },
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "noticeCancelled": "{task}: cancelled",
+  "@noticeCancelled": {
+    "placeholders": {
+      "task": {
+        "type": "String"
+      }
+    }
+  },
+  "noticeFailed": "{task}: {error}",
+  "@noticeFailed": {
+    "placeholders": {
+      "task": {
+        "type": "String"
+      },
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "noticeSent": "{count, plural, one {# notification sent} other {# notifications sent}}",
+  "@noticeSent": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "noticeSentPartly": "Sent {sent} of {total}; {error}",
+  "@noticeSentPartly": {
+    "placeholders": {
+      "sent": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      },
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "noticeRemoved": "{count, plural, one {# notification removed} other {# notifications removed}}",
+  "@noticeRemoved": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "noticeServerError": "SM-DP+: {summary} ({codes})",
+  "@noticeServerError": {
+    "description": "An SM-DP+ error: its meaning and its codes",
+    "placeholders": {
+      "summary": {
+        "type": "String"
+      },
+      "codes": {
+        "type": "String"
+      }
+    }
+  },
+  "profilesEmptyTitle": "No eSIMs on this card",
+  "profilesEmptyBody": "Add one with the activation code or QR code your carrier gave you.",
+  "profilesInUse": "In use",
+  "profilesOther": "Other eSIMs",
+  "profileUnnamed": "Unnamed eSIM",
+  "profileActive": "Active",
+  "profileIccid": "ICCID {iccid}",
+  "@profileIccid": {
+    "placeholders": {
+      "iccid": {
+        "type": "String"
+      }
+    }
+  },
+  "profileUse": "Use {name}",
+  "@profileUse": {
+    "description": "Accessibility label of a profile's switch",
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "profileMore": "More for {name}",
+  "@profileMore": {
+    "description": "Accessibility label of a profile's menu button",
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "profileMenuRename": "Rename…",
+  "profileMenuCopyIccid": "Copy ICCID",
+  "profileMenuDelete": "Delete…",
+  "profileDeleteDisabledHint": "Turn the eSIM off before deleting it",
+  "profileRenameTitle": "Rename eSIM",
+  "profileRenameBody": "The nickname is stored on the card.",
+  "profileNickname": "Nickname",
+  "profileDeleteTitle": "Delete “{name}”?",
+  "@profileDeleteTitle": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "profileDeleteTitleUnnamed": "Delete this eSIM?",
+  "profileDeleteBody": "The profile is removed from the card for good. You need a new activation code from the carrier to install it again.",
+  "profileDeleteConfirm": "Delete",
+  "notifEmptyTitle": "No pending notifications",
+  "notifEmptyBody": "Installing, turning on or off and deleting an eSIM leaves a notification for its carrier. They are sent automatically when “Send notifications” is on in Settings.",
+  "notifIntro": "Each one tells a carrier’s server what happened to its eSIM on this card. Sending one removes it from the card.",
+  "notifColumnEvent": "Event",
+  "notifColumnEsim": "eSIM",
+  "notifColumnServer": "Server",
+  "notifSend": "Send",
+  "notifSendKeep": "Send and keep",
+  "notifRemove": "Remove without sending",
+  "notifRemoveAllTitle": "{count, plural, one {Remove # notification without sending it?} other {Remove # notifications without sending them?}}",
+  "@notifRemoveAllTitle": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "notifRemoveAllBody": "Carriers will not learn what happened to their eSIMs on this card. Usually it is better to send them.",
+  "notifRemoveConfirm": "Remove",
+  "notifRemoveAll": "Remove all without sending",
+  "notifSendSelected": "Send {count} selected",
+  "notifSendAll": "Send all",
+  "notifOpInstall": "Installed",
+  "notifOpEnable": "Enabled",
+  "notifOpDisable": "Disabled",
+  "notifOpDelete": "Deleted",
+  "cardEid": "EID",
+  "cardCopyEid": "Copy EID",
+  "cardEidCopied": "EID copied",
+  "cardEidInvalid": "The check digits of this EID do not verify (SGP.29).",
+  "cardFreeSpace": "Free space",
+  "cardRspVersion": "RSP version",
+  "cardServers": "Servers",
+  "cardDefaultSmdp": "Default SM-DP+",
+  "cardRootSmds": "Root SM-DS",
+  "cardChange": "Change…",
+  "cardSmdpBody": "Used when you add an eSIM without an address. Leave empty to clear it.",
+  "cardAddress": "Address",
+  "cardExpandAll": "Expand all",
+  "cardCollapseAll": "Collapse all",
+  "cardCopyJson": "Copy JSON",
+  "cardJsonCopied": "EUICCInfo2 copied as JSON",
+  "cardUnknownIssuer": "unknown issuer",
+  "settingsConnection": "Connection",
+  "settingsConnectThrough": "Connect through",
+  "settingsBackendPcsc": "Card reader (PC/SC)",
+  "settingsBackendAt": "Modem (AT)",
+  "settingsEuicc": "eUICC",
+  "settingsBehavior": "Behavior",
+  "settingsDiagnostics": "Diagnostics",
+  "settingsAutoNotify": "Send notifications",
+  "settingsAutoNotifyBody": "Tell carriers right away when an eSIM is installed, turned on or off, or deleted, then remove the notification.",
+  "settingsManualNotify": "You need to handle notifications yourself. They stay on the card after each change; send them from Notifications so carriers learn what happened to their eSIMs.",
+  "settingsPending": "{count, plural, one {# waiting on the card now.} other {# waiting on the card now.}}",
+  "@settingsPending": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "settingsHideIds": "Obscure identifiers",
+  "settingsHideIdsBody": "Show only the start of EIDs and ICCIDs everywhere, the log and its exports included: for screenshots and sharing.",
+  "settingsLogApdu": "Log APDUs",
+  "settingsLogApduBody": "Write card commands to the log. The log then contains your card’s identifiers.",
+  "settingsLogHttp": "Log HTTP",
+  "settingsLogHttpBody": "Write the exchanges with SM-DP+ servers to the log.",
+  "settingsReader": "Card reader",
+  "settingsNoReader": "No card reader found. Connect one, then look again.",
+  "settingsFindReaders": "Look for readers",
+  "settingsReaderAbsent": "{reader} is not connected.",
+  "@settingsReaderAbsent": {
+    "placeholders": {
+      "reader": {
+        "type": "String"
+      }
+    }
+  },
+  "settingsTerminalCap": "Announce terminal capabilities",
+  "settingsTerminalCapBody": "Some cards need it; turn it off only if reading fails.",
+  "settingsSerialPort": "Serial port",
+  "settingsDetectedPorts": "Detected ports",
+  "settingsPort": "Port",
+  "settingsUse": "Use",
+  "settingsBaud": "Baud rate",
+  "settingsAtRequirement": "The modem must support AT+CCHO, AT+CCHC and AT+CGLA.",
+  "settingsAid": "ISD-R AID",
+  "settingsAidStandard": "Standard (GSMA)",
+  "settingsAidCustom": "Custom…",
+  "settingsAidPlaceholder": "32 hexadecimal digits",
+  "settingsCustomAid": "Custom AID",
+  "settingsApply": "Apply",
+  "settingsAidSaved": "AID saved",
+  "settingsAidInvalid": "The AID is 16 bytes: 32 hexadecimal digits.",
+  "settingsAidNotApplied": "Not applied yet. In use: {aid}",
+  "@settingsAidNotApplied": {
+    "placeholders": {
+      "aid": {
+        "type": "String"
+      }
+    }
+  },
+  "settingsAidHint": "Most cards use the standard AID. Some removable eUICCs answer on their own.",
+  "logHideHint": "EIDs and ICCIDs show in full. To copy or share this log, turn on Obscure identifiers in Settings first.",
+  "logCopy": "Copy log",
+  "logCopied": "Log copied",
+  "logExport": "Export…",
+  "logExportTitle": "Export Log",
+  "logExported": "Log exported",
+  "logExportFailed": "Could not export the log: {error}",
+  "@logExportFailed": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "dlTitle": "Add eSIM",
+  "dlModeCode": "Activation code",
+  "dlCodeHint": "Paste the activation code, or drop the QR code image here.",
+  "dlPaste": "Paste",
+  "dlOpenImage": "Open QR image…",
+  "dlSmdp": "SM-DP+",
+  "dlSmdpAddress": "SM-DP+ address",
+  "dlMatchingId": "Matching ID",
+  "dlConfirmCode": "Confirmation code",
+  "dlConfirmRequired": "Required by this eSIM",
+  "dlAdvanced": "Advanced",
+  "dlImeiPlaceholder": "The IMEI sent to the SM-DP+ (optional)",
+  "dlNotACode": "This is not an eSIM activation code (LPA:1$…)",
+  "dlDownload": "Download",
+  "dlAdding": "Adding eSIM",
+  "dlKeepConnected": "Keep the card connected.",
+  "dlPreviewTitle": "Install this eSIM?",
+  "dlInstall": "Install",
+  "dlDoneTitle": "eSIM added",
+  "dlDoneBody": "{name} is on the card, turned off.",
+  "@dlDoneBody": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "dlDoneBodyUnnamed": "The eSIM is on the card, turned off.",
+  "dlNotifyFailed": "The carrier could not be notified; the notification waits in Notifications.",
+  "dlNotified": "The carrier was notified.",
+  "dlNotifyWaiting": "Its install notification waits in Notifications.",
+  "dlTurnOnNow": "Turn on now",
+  "dlFailedTitle": "The eSIM could not be added",
+  "dlServerSays": "The SM-DP+ server says: {summary}",
+  "@dlServerSays": {
+    "placeholders": {
+      "summary": {
+        "type": "String"
+      }
+    }
+  },
+  "dlErrorCode": "Error code: {codes}",
+  "@dlErrorCode": {
+    "placeholders": {
+      "codes": {
+        "type": "String"
+      }
+    }
+  },
+  "dlUnknownError": "Unknown error",
+  "dlRetry": "Edit and retry",
+  "dlNoQrClipboard": "No QR code found in the image on the clipboard",
+  "dlClipboardEmpty": "The clipboard holds no text or image",
+  "dlChooseImageTitle": "Choose a QR Code Image",
+  "dlImages": "Images",
+  "dlNoQrImage": "No QR code found in the image",
+  "dlDemoCodes": "Demo codes: choose one to fill it in",
+  "@dlDemoCodes": {
+    "description": "Demo builds only"
+  },
+  "stagePrepareCard": "Preparing the card",
+  "stageContactServer": "Contacting the server",
+  "stageCheckServer": "Checking the server",
+  "stageIdentifyCard": "Identifying the card",
+  "stageConfirm": "Confirming the eSIM",
+  "stagePrepareDownload": "Preparing the download",
+  "stageDownload": "Downloading",
+  "stageInstall": "Installing on the card",
+  "stageNotify": "Notifying the carrier",
+  "stageCancel": "Cancelling",
+  "aboutAuthor": "Author: {name}",
+  "@aboutAuthor": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "aboutVersion": "Version: {version}",
+  "@aboutVersion": {
+    "placeholders": {
+      "version": {
+        "type": "String"
+      }
+    }
+  },
+  "aboutComponents": "Components",
+  "aboutLibeuicc": "from lpac {commit}",
+  "@aboutLibeuicc": {
+    "description": "libeuicc's version: the short commit of lpac it is built from",
+    "placeholders": {
+      "commit": {
+        "type": "String",
+        "example": "654215e"
+      }
+    }
+  },
+  "aboutEuiccData": "eUICC data",
+  "aboutInterface": "Interface",
+  "aboutLicense": "License",
+  "aboutLicenseText": "License",
+  "@aboutLicenseText": {
+    "description": "Link to the full text of a license"
+  },
+  "logFileType": "Log file",
+  "@notifSendSelected": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "notifSelectHint": "{key}-click or Shift-click to choose several.",
+  "@notifSelectHint": {
+    "description": "How to choose several notifications; key is ⌘ on macOS, Ctrl elsewhere",
+    "placeholders": {
+      "key": {
+        "type": "String"
+      }
+    }
+  },
+  "profileIccidCopied": "ICCID copied",
+  "cardViewCertificate": "Certificate",
+  "certKeyId": "Key ID {keyId}",
+  "@certKeyId": {
+    "placeholders": {
+      "keyId": {
+        "type": "String"
+      }
+    }
+  },
+  "certIssuedByCi": "The eUICC Manual publishes a certificate this CI issued, not the CI’s own certificate.",
+  "certCopyPem": "Copy PEM",
+  "certPemCopied": "Certificate copied as PEM",
+  "ciCategoryLive": "Live CI",
+  "ciCategoryTest": "Test CI",
+  "ciCategoryChina": "Mainland China CI",
+  "dlUseManual": "Enter details manually",
+  "dlUseCode": "Use an activation code",
+  "hintDeviceGone": "{device} was not found",
+  "@hintDeviceGone": {
+    "placeholders": {
+      "device": {
+        "type": "String"
+      }
+    }
+  },
+  "hintDeviceGoneBody": "Connect it, then look for devices again in Settings.",
+  "settingsChooseReader": "Choose a reader…",
+  "settingsLooking": "Looking for readers…",
+  "settingsFindPorts": "Look for ports",
+  "cardEsimsInstalled": "{count, plural, =0 {No eSIMs installed} one {# eSIM installed} other {# eSIMs installed}}",
+  "@cardEsimsInstalled": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "cardEum": "Manufacturer (EUM)",
+  "@cardEum": {
+    "description": "Tile: the eUICC manufacturer the EID names"
+  },
+  "cardSasSite": "Production site (SAS)",
+  "@cardSasSite": {
+    "description": "Tile: the SAS-accredited site that produced the eUICC"
+  },
+  "cardMakerUnknown": "Unknown",
+  "aboutRepo": "GitHub Repo",
+  "@aboutRepo": {
+    "description": "Link to EasyLPAC's repository on GitHub"
+  }
+}

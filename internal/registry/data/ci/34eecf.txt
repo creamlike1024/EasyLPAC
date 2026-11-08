@@ -1,0 +1,60 @@
+notBefore=2023-05-31 12:50:28Z
+notAfter=2058-05-30 12:50:28Z
+Certificate:
+    Data:
+        Version: 3 (0x2)
+        Serial Number: 0 (0x0)
+        Signature Algorithm: ecdsa-with-SHA256
+        Issuer:
+            commonName = Test CI
+            organizationalUnitName = TESTCERT
+            organizationName = RSPTEST
+            countryName = IT
+        Validity
+            Not Before: May 31 12:50:28 2023 GMT
+            Not After : May 30 12:50:28 2058 GMT
+        Subject:
+            commonName = Test CI
+            organizationalUnitName = TESTCERT
+            organizationName = RSPTEST
+            countryName = IT
+        Subject Public Key Info:
+            Public Key Algorithm: id-ecPublicKey
+                Public-Key: (256 bit field, 128 bit security level)
+                pub:
+                    04:b9:50:5b:89:07:68:c2:52:ac:02:b8:9d:52:a3:18:
+                    88:0a:59:8c:62:72:4f:98:d7:1d:0c:28:ef:c1:b1:bd:
+                    fe:2b:13:1d:9c:03:9b:90:f6:63:2e:8b:0a:94:a0:a7:
+                    1f:66:c7:50:78:6a:47:20:c3:49:cd:98:f7:ec:01:e8:
+                    0e
+                ASN1 OID: prime256v1
+                NIST CURVE: P-256
+        X509v3 extensions:
+            X509v3 Subject Key Identifier: 
+                34:EE:CF:13:15:65:18:D4:8D:30:BD:F0:68:53:40:4D:11:5F:95:5D
+            X509v3 Key Usage: critical
+                Certificate Sign, CRL Sign
+            X509v3 Certificate Policies: critical
+                Policy: 2.23.146.1.2.1.0
+            X509v3 Basic Constraints: critical
+                CA:TRUE
+            X509v3 Subject Alternative Name: 
+                Registered ID:2.999.1
+    Signature Algorithm: ecdsa-with-SHA256
+    Signature Value:
+        30:44:02:20:4b:98:54:1f:9b:c1:d9:f9:67:ab:0b:78:a1:52:d3:b1:67:bc:76:34:
+        dd:0a:83:9b:c5:d8:c5:d8:c3:03:16:6e:02:20:67:78:da:fe:7c:16:1e:a8:3b:a5:
+        41:67:eb:19:71:4b:0d:36:ec:14:11:0d:35:d0:e3:8e:f7:07:80:7a:40:4d
+-----BEGIN CERTIFICATE-----
+MIIB4zCCAYqgAwIBAgIBADAKBggqhkjOPQQDAjBEMRAwDgYDVQQDDAdUZXN0IENJ
+MREwDwYDVQQLDAhURVNUQ0VSVDEQMA4GA1UECgwHUlNQVEVTVDELMAkGA1UEBhMC
+SVQwIBcNMjMwNTMxMTI1MDI4WhgPMjA1ODA1MzAxMjUwMjhaMEQxEDAOBgNVBAMM
+B1Rlc3QgQ0kxETAPBgNVBAsMCFRFU1RDRVJUMRAwDgYDVQQKDAdSU1BURVNUMQsw
+CQYDVQQGEwJJVDBZMBMGByqGSM49AgEGCCqGSM49AwEHA0IABLlQW4kHaMJSrAK4
+nVKjGIgKWYxick+Y1x0MKO/Bsb3+KxMdnAObkPZjLosKlKCnH2bHUHhqRyDDSc2Y
+9+wB6A6jazBpMB0GA1UdDgQWBBQ07s8TFWUY1I0wvfBoU0BNEV+VXTAOBgNVHQ8B
+Af8EBAMCAQYwFwYDVR0gAQH/BA0wCzAJBgdngRIBAgEAMA8GA1UdEwEB/wQFMAMB
+Af8wDgYDVR0RBAcwBYgDiDcBMAoGCCqGSM49BAMCA0cAMEQCIEuYVB+bwdn5Z6sL
+eKFS07FnvHY03QqDm8XYxdjDAxZuAiBneNr+fBYeqDulQWfrGXFLDTbsFBENNdDj
+jvcHgHpATQ==
+-----END CERTIFICATE-----

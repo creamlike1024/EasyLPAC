@@ -1,0 +1,63 @@
+notBefore=2016-11-15 00:00:01Z
+notAfter=2046-11-08 23:59:59Z
+Certificate:
+    Data:
+        Version: 3 (0x2)
+        Serial Number: 1 (0x1)
+        Signature Algorithm: ecdsa-with-SHA256
+        Issuer:
+            countryName = FR
+            organizationName = OBERTHUR TECHNOLOGIES
+            organizationalUnitName = TELECOM
+            commonName = MC4 OT ROOT CI v1
+        Validity
+            Not Before: Nov 15 00:00:01 2016 GMT
+            Not After : Nov  8 23:59:59 2046 GMT
+        Subject:
+            countryName = FR
+            organizationName = OBERTHUR TECHNOLOGIES
+            organizationalUnitName = TELECOM
+            commonName = MC4 OT ROOT CI v1
+        Subject Public Key Info:
+            Public Key Algorithm: id-ecPublicKey
+                Public-Key: (256 bit field, 128 bit security level)
+                pub:
+                    04:1d:bf:c6:6a:3b:77:39:9c:6e:68:34:a4:94:14:04:
+                    0f:89:4e:77:a3:c6:3c:b4:af:b5:f9:0c:f7:9d:ae:6d:
+                    dc:b2:e3:9b:49:c0:07:80:d1:e1:22:8b:40:8b:ac:54:
+                    fa:b5:c7:d7:91:6f:87:ff:99:90:c8:c4:57:68:05:24:
+                    4f
+                ASN1 OID: prime256v1
+                NIST CURVE: P-256
+        X509v3 extensions:
+            X509v3 Authority Key Identifier: 
+                CD:6E:60:B7:2D:7A:06:3C:BC:84:62:5B:91:E8:0F:E3:04:06:E1:3E
+            X509v3 Subject Key Identifier: 
+                CD:6E:60:B7:2D:7A:06:3C:BC:84:62:5B:91:E8:0F:E3:04:06:E1:3E
+            X509v3 Key Usage: critical
+                Certificate Sign, CRL Sign
+            X509v3 Certificate Policies: critical
+                Policy: 2.23.146.1.2.1.0
+            X509v3 Subject Alternative Name: 
+                Registered ID:1.3.6.1.4.1.30703.836685
+            X509v3 Basic Constraints: critical
+                CA:TRUE
+    Signature Algorithm: ecdsa-with-SHA256
+    Signature Value:
+        30:44:02:20:4c:38:35:ce:df:d9:f0:ed:a0:7f:ba:38:df:db:92:77:c3:43:19:93:
+        8a:44:e1:5e:38:69:2e:d4:ab:48:a3:76:02:20:31:1f:18:02:f3:b2:f4:14:39:c7:
+        f1:d2:4d:96:47:46:5f:d7:34:24:8c:7a:a0:b8:5e:22:99:5f:4b:a9:3e:8e
+-----BEGIN CERTIFICATE-----
+MIICOjCCAeGgAwIBAgIBATAKBggqhkjOPQQDAjBbMQswCQYDVQQGEwJGUjEeMBwG
+A1UEChMVT0JFUlRIVVIgVEVDSE5PTE9HSUVTMRAwDgYDVQQLEwdURUxFQ09NMRow
+GAYDVQQDExFNQzQgT1QgUk9PVCBDSSB2MTAeFw0xNjExMTUwMDAwMDFaFw00NjEx
+MDgyMzU5NTlaMFsxCzAJBgNVBAYTAkZSMR4wHAYDVQQKExVPQkVSVEhVUiBURUNI
+Tk9MT0dJRVMxEDAOBgNVBAsTB1RFTEVDT00xGjAYBgNVBAMTEU1DNCBPVCBST09U
+IENJIHYxMFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAEHb/Gajt3OZxuaDSklBQE
+D4lOd6PGPLSvtfkM952ubdyy45tJwAeA0eEii0CLrFT6tcfXkW+H/5mQyMRXaAUk
+T6OBlTCBkjAfBgNVHSMEGDAWgBTNbmC3LXoGPLyEYluR6A/jBAbhPjAdBgNVHQ4E
+FgQUzW5gty16Bjy8hGJbkegP4wQG4T4wDgYDVR0PAQH/BAQDAgAGMBcGA1UdIAEB
+/wQNMAswCQYHZ4ESAQIBADAWBgNVHREEDzANiAsrBgEEAYHvb7OITTAPBgNVHRMB
+Af8EBTADAQH/MAoGCCqGSM49BAMCA0cAMEQCIEw4Nc7f2fDtoH+6ON/bknfDQxmT
+ikThXjhpLtSrSKN2AiAxHxgC87L0FDnH8dJNlkdGX9c0JIx6oLheIplfS6k+jg==
+-----END CERTIFICATE-----

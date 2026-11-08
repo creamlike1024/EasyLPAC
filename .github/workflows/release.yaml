@@ -8,130 +8,128 @@ on:
 permissions:
   contents: write
 
+# Every C build uses zig (scripts/zcc): libeuicc for each target, and cgo.
+# Linux and Windows are cross-compiled on one Ubuntu runner. macOS builds
+# need the macOS SDK (the PCSC, CoreFoundation and Security frameworks and
+# libresolv, which zig does not ship, and which Apple licenses for Apple
+# hardware only), so they run on a macOS runner, still compiled by zig,
+# one package per architecture.
+# The eUICC data embedded is the one committed in internal/registry/data;
+# CI never downloads it (scripts/update-euicc-data.sh is run by hand).
+env:
+  ZIG_VERSION: 0.17.1
+  CGO_ENABLED: '1'
+
 jobs:
-  build:
-    strategy:
-      matrix:
-        include:
-          - os: ubuntu-latest
-            label: 'ubuntu'
-          - os: windows-latest
-            label: 'windows'
-          - os: macos-latest
-            label: 'macos-arm'
-          - os: macos-15-intel
-            label: 'macos-x86'
-
-    runs-on: ${{ matrix.os }}
-    env:
-      LPAC_VERSION: v2.3.0
-      LPAC_VERSION_IN_URL: v2.3.0
-      LPAC_REPO: https://github.com/estkme-group/lpac
+  test:
+    runs-on: ubuntu-26.04
     steps:
-      - name: Checkout repo
-        uses: actions/checkout@v5
-
-      - name: Modify version number
-        run: |
-          VERSION=$(grep 'Version' FyneApp.toml | sed 's/Version = "\(.*\)"/\1/' | xargs)
-          if [[ "$RUNNER_OS" == "macOS" ]]; then
-            sed -i '' "s/const Version = \"development\"/const Version = \"$VERSION\"/" main.go
-          else
-            sed -i "s/const Version = \"development\"/const Version = \"$VERSION\"/" main.go
-          fi
-        shell: bash
-
-      - name: Setup go
-        uses: actions/setup-go@v6
+      - uses: actions/checkout@v7
         with:
-          go-version: '>=1.24'
-
-      - name: Setup toolchain
-        if: runner.os == 'Linux'
+          submodules: true # third_party/lpac
+      - uses: actions/setup-go@v7
+        with:
+          go-version-file: go.mod
+      - uses: mlugg/setup-zig@v2
+        with:
+          version: ${{ env.ZIG_VERSION }}
+      - name: Install build dependencies
         run: |
           sudo apt-get update
-          sudo apt-get install -y build-essential libgl1-mesa-dev xorg-dev libgtk-3-dev
+          sudo apt-get install -y cmake libpcsclite-dev
+      - name: Build libeuicc (linux/amd64)
+        run: ./scripts/build-libeuicc.sh linux/amd64
+      - name: Test
+        env:
+          CC: ${{ github.workspace }}/scripts/zcc
+          # libpcsclite comes from the runner, built against a newer glibc
+          # than the 2.31 the binaries target.
+          CGO_LDFLAGS: -L/usr/lib/x86_64-linux-gnu -Wl,--allow-shlib-undefined
+        run: |
+          go vet ./...
+          go test -race ./...
+          go test -race -tags demo ./cmd/...
 
-      - name: Setup msys2
-        if: runner.os == 'Windows'
-        uses: msys2/setup-msys2@v2
+  build-linux-windows:
+    needs: test
+    runs-on: ubuntu-26.04
+    steps:
+      - uses: actions/checkout@v7
         with:
-          install: git mingw-w64-x86_64-toolchain wget zip unzip
-          path-type: inherit
-
-      - name: Build for Linux
-        if: runner.os == 'Linux'
-        run: |
-          go install fyne.io/fyne/v2/cmd/fyne@latest
-          go build -ldflags="-s -w"
-          wget $LPAC_REPO/releases/download/$LPAC_VERSION_IN_URL/lpac-linux-x86_64.zip -O lpac.zip
-          unzip lpac.zip && rm lpac.zip
-          wget $LPAC_REPO/archive/refs/tags/$LPAC_VERSION_IN_URL.tar.gz -O lpac-$LPAC_VERSION-src.tar.gz
-          chmod +x EasyLPAC lpac
-          tar zcf EasyLPAC-linux-x86_64-with-lpac.tar.gz EasyLPAC lpac lpac-$LPAC_VERSION-src.tar.gz LICENSE LICENSE-lpac
-          tar zcf EasyLPAC-linux-x86_64.tar.gz EasyLPAC lpac-$LPAC_VERSION-src.tar.gz LICENSE LICENSE-lpac
-
-      - name: Build for Windows
-        if: runner.os == 'Windows'
-        run: |
-          go install fyne.io/fyne/v2/cmd/fyne@latest
-          fyne package --icon assets/icon64.png
-          mkdir easylpac && cp EasyLPAC.exe easylpac && cd easylpac
-          wget $LPAC_REPO/releases/download/$LPAC_VERSION_IN_URL/lpac-windows-x86_64-mingw.zip -O lpac.zip
-          unzip lpac.zip && rm lpac.zip
-          rm LICENSE* *.md
-          wget $LPAC_REPO/archive/refs/tags/$LPAC_VERSION_IN_URL.zip -O lpac-$LPAC_VERSION-src.zip
-          wget $LPAC_REPO/raw/main/src/LICENSE -O LICENSE-lpac
-          cp $GITHUB_WORKSPACE/LICENSE ./
-          zip -r $GITHUB_WORKSPACE/EasyLPAC-windows-x86_64-with-lpac.zip ./*
-        shell: msys2 {0}
-
-      - name: Build for macOS ARM
-        if: matrix.label == 'macos-arm'
-        run: |
-          go install fyne.io/fyne/v2/cmd/fyne@latest
-          fyne package --icon assets/icon128.png --release
-          cd EasyLPAC.app/Contents/MacOS
-          wget $LPAC_REPO/releases/download/$LPAC_VERSION_IN_URL/lpac-darwin-universal.zip -O lpac.zip
-          unzip lpac.zip && rm lpac.zip
-          rm LICENSE* *.md
-          cd $GITHUB_WORKSPACE
-          wget $LPAC_REPO/archive/refs/tags/$LPAC_VERSION_IN_URL.zip -O lpac-$LPAC_VERSION-src.zip
-          wget $LPAC_REPO/raw/main/src/LICENSE -O LICENSE-lpac
-          zip -r EasyLPAC-macOS-arm64-with-lpac.zip EasyLPAC.app lpac-$LPAC_VERSION-src.zip LICENSE*
-
-      - name: Build for macOS x86
-        if: matrix.label == 'macos-x86'
-        run: |
-          go install fyne.io/fyne/v2/cmd/fyne@latest
-          fyne package --icon assets/icon128.png --release
-          cd EasyLPAC.app/Contents/MacOS
-          wget $LPAC_REPO/releases/download/$LPAC_VERSION_IN_URL/lpac-darwin-universal.zip -O lpac.zip
-          unzip lpac.zip && rm lpac.zip
-          rm LICENSE* *.md
-          cd $GITHUB_WORKSPACE
-          wget $LPAC_REPO/archive/refs/tags/$LPAC_VERSION_IN_URL.zip -O lpac-$LPAC_VERSION-src.zip
-          wget $LPAC_REPO/raw/main/src/LICENSE -O LICENSE-lpac
-          zip -r EasyLPAC-macOS-x86_64-with-lpac.zip EasyLPAC.app lpac-$LPAC_VERSION-src.zip LICENSE*
-
-      - name: Upload Artifact
-        uses: actions/upload-artifact@v6
+          submodules: true # third_party/lpac
+      - uses: actions/setup-go@v7
         with:
-          name: build-artifact-${{ matrix.label }}
+          go-version-file: go.mod
+      - uses: mlugg/setup-zig@v2
+        with:
+          version: ${{ env.ZIG_VERSION }}
+      - name: Install build dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y cmake libpcsclite-dev nsis
+      - name: Build libeuicc
+        run: |
+          ./scripts/build-libeuicc.sh linux/amd64
+          ./scripts/build-libeuicc.sh windows/amd64
+      - name: Build Linux (amd64)
+        env:
+          CC: ${{ github.workspace }}/scripts/zcc
+          CGO_LDFLAGS: -L/usr/lib/x86_64-linux-gnu -Wl,--allow-shlib-undefined
+        run: go run github.com/egoist/mygo/cmd/mygo@v0.8.3 build -platform linux/amd64
+      - name: Build Windows (amd64)
+        env:
+          CC: ${{ github.workspace }}/scripts/zcc
+        run: go run github.com/egoist/mygo/cmd/mygo@v0.8.3 build -platform windows/amd64
+      - name: Collect licenses and source
+        run: ./scripts/collect-licenses.sh dist
+      - uses: actions/upload-artifact@v7
+        with:
+          name: easylpac-linux-windows
           path: |
-            EasyLPAC-windows-x86_64-with-lpac.zip
-            EasyLPAC-macOS-arm64-with-lpac.zip
-            EasyLPAC-macOS-x86_64-with-lpac.zip
-            EasyLPAC-linux-x86_64-with-lpac.tar.gz
-            EasyLPAC-linux-x86_64.tar.gz
+            build/linux-amd64/*.tar.gz
+            build/linux-amd64/*.deb
+            build/windows-amd64/*-setup-*.exe
+            dist/*
 
-      - name: Release
-        uses: softprops/action-gh-release@v3
-        if: startsWith(github.ref, 'refs/tags/')
+  build-macos:
+    needs: test
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v7
         with:
-          files: |
-            EasyLPAC-windows-x86_64-with-lpac.zip
-            EasyLPAC-macOS-arm64-with-lpac.zip
-            EasyLPAC-macOS-x86_64-with-lpac.zip
-            EasyLPAC-linux-x86_64-with-lpac.tar.gz
-            EasyLPAC-linux-x86_64.tar.gz
+          submodules: true # third_party/lpac
+      - uses: actions/setup-go@v7
+        with:
+          go-version-file: go.mod
+      - uses: mlugg/setup-zig@v2
+        with:
+          version: ${{ env.ZIG_VERSION }}
+      - name: Build libeuicc
+        run: |
+          ./scripts/build-libeuicc.sh darwin/arm64
+          ./scripts/build-libeuicc.sh darwin/amd64
+      # One package per architecture (x86_64 cross-compiled on this arm64
+      # runner): easylpac-<version>-arm64.dmg and easylpac-<version>-amd64.dmg.
+      - name: Build macOS (arm64, amd64)
+        env:
+          CC: ${{ github.workspace }}/scripts/zcc
+        run: go run github.com/egoist/mygo/cmd/mygo@v0.8.3 build -platform darwin/arm64,darwin/amd64
+      - uses: actions/upload-artifact@v7
+        with:
+          name: easylpac-macos
+          path: |
+            build/darwin-arm64/*.dmg
+            build/darwin-amd64/*.dmg
+
+  release:
+    if: startsWith(github.ref, 'refs/tags/')
+    needs: [build-linux-windows, build-macos]
+    runs-on: ubuntu-26.04
+    steps:
+      - uses: actions/download-artifact@v8
+        with:
+          path: artifacts
+          merge-multiple: true
+      - uses: softprops/action-gh-release@v3
+        with:
+          files: artifacts/**/*

@@ -1,0 +1,75 @@
+notBefore=2017-03-06 17:00:00Z
+notAfter=2037-03-06 17:00:00Z
+Certificate:
+    Data:
+        Version: 3 (0x2)
+        Serial Number: 100083 (0x186f3)
+        Signature Algorithm: ecdsa-with-SHA256
+        Issuer:
+            countryName = CN
+            stateOrProvinceName = JILIN
+            localityName = CHANGCHUN
+            organizationalUnitName = CUCA
+            organizationName = CU
+            commonName = China Unicom eSIM Root CA
+        Validity
+            Not Before: Mar  6 17:00:00 2017 GMT
+            Not After : Mar  6 17:00:00 2037 GMT
+        Subject:
+            countryName = CN
+            stateOrProvinceName = JILIN
+            localityName = CHANGCHUN
+            organizationalUnitName = CUCA
+            organizationName = CU
+            commonName = China Unicom eSIM Root CA
+        Subject Public Key Info:
+            Public Key Algorithm: id-ecPublicKey
+                Public-Key: (256 bit field, 128 bit security level)
+                pub:
+                    04:55:02:40:16:81:b4:c1:8e:c8:22:09:db:5f:91:65:
+                    46:58:fa:7d:08:03:88:1a:35:6f:8c:de:ce:d6:9f:3c:
+                    dd:33:49:aa:2f:a3:26:fb:09:10:03:3c:46:6e:2f:47:
+                    d1:17:14:bb:96:14:44:95:fd:88:8f:b0:71:bf:cb:25:
+                    06
+                ASN1 OID: prime256v1
+                NIST CURVE: P-256
+        X509v3 extensions:
+            X509v3 Subject Key Identifier: 
+                16:B5:D1:60:48:E3:EA:02:BD:4B:60:6E:5F:77:A4:BF:20:80:8D:83
+            X509v3 Basic Constraints: critical
+                CA:TRUE
+            X509v3 Certificate Policies: critical
+                Policy: 2.23.146.1.2.1.0
+            X509v3 CRL Distribution Points: 
+                Full Name:
+                  URI:http://esimcrl.uni-ca.com.cn:6666/download/n1.crl
+
+                Full Name:
+                  URI:http://esimcrl.uni-ca.com.cn:6666/download/n2.crl
+
+            X509v3 Subject Alternative Name: 
+                Registered ID:1.3.6.1.4.1.47814.101.2
+            X509v3 Key Usage: critical
+                Certificate Sign, CRL Sign
+    Signature Algorithm: ecdsa-with-SHA256
+    Signature Value:
+        30:46:02:21:00:e8:d0:a4:e0:b0:eb:ae:fa:9b:67:47:79:20:9f:98:f6:cf:76:6f:
+        d6:16:06:1c:b5:79:5d:20:74:ef:96:f2:0b:02:21:00:8d:59:ef:7a:3d:2a:9c:cb:
+        ff:fc:93:e9:cf:c0:ad:a4:cb:dc:83:4c:4e:ba:ee:d3:02:00:13:a2:34:f4:0e:43
+-----BEGIN CERTIFICATE-----
+MIICxTCCAmqgAwIBAgIDAYbzMAoGCCqGSM49BAMCMHExCzAJBgNVBAYTAkNOMQ4w
+DAYDVQQIEwVKSUxJTjESMBAGA1UEBxMJQ0hBTkdDSFVOMQ0wCwYDVQQLEwRDVUNB
+MQswCQYDVQQKEwJDVTEiMCAGA1UEAxMZQ2hpbmEgVW5pY29tIGVTSU0gUm9vdCBD
+QTAeFw0xNzAzMDYxNzAwMDBaFw0zNzAzMDYxNzAwMDBaMHExCzAJBgNVBAYTAkNO
+MQ4wDAYDVQQIEwVKSUxJTjESMBAGA1UEBxMJQ0hBTkdDSFVOMQ0wCwYDVQQLEwRD
+VUNBMQswCQYDVQQKEwJDVTEiMCAGA1UEAxMZQ2hpbmEgVW5pY29tIGVTSU0gUm9v
+dCBDQTBZMBMGByqGSM49AgEGCCqGSM49AwEHA0IABFUCQBaBtMGOyCIJ21+RZUZY
++n0IA4gaNW+M3s7WnzzdM0mqL6Mm+wkQAzxGbi9H0RcUu5YURJX9iI+wcb/LJQaj
+gfAwge0wHQYDVR0OBBYEFBa10WBI4+oCvUtgbl93pL8ggI2DMA8GA1UdEwEB/wQF
+MAMBAf8wFwYDVR0gAQH/BA0wCzAJBgdngRIBAgEAMHsGA1UdHwR0MHIwN6A1oDOG
+MWh0dHA6Ly9lc2ltY3JsLnVuaS1jYS5jb20uY246NjY2Ni9kb3dubG9hZC9uMS5j
+cmwwN6A1oDOGMWh0dHA6Ly9lc2ltY3JsLnVuaS1jYS5jb20uY246NjY2Ni9kb3du
+bG9hZC9uMi5jcmwwFQYDVR0RBA4wDIgKKwYBBAGC9UZlAjAOBgNVHQ8BAf8EBAMC
+AQYwCgYIKoZIzj0EAwIDSQAwRgIhAOjQpOCw6676m2dHeSCfmPbPdm/WFgYctXld
+IHTvlvILAiEAjVnvej0qnMv//JPpz8CtpMvcg0xOuu7TAgATojT0DkM=
+-----END CERTIFICATE-----

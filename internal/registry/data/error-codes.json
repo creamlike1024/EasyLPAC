@@ -1,0 +1,222 @@
+[
+  {
+    "subject-code": "8.1",
+    "reason-code": "4.8",
+    "description": "eUICC does not have sufficient space for this Profile"
+  },
+  {
+    "subject-code": "8.1",
+    "reason-code": "6.1",
+    "description": "eUICC signature is invalid or serverChallenge is invalid"
+  },
+  {
+    "subject-code": "8.1.1",
+    "reason-code": "2.2",
+    "description": "Indicates that the EID is missing in the context of this order (SM-DS address provided or MatchingID value is empty)"
+  },
+  {
+    "subject-code": "8.1.1",
+    "reason-code": "3.1",
+    "description": "Indicates that a different EID is already associated with this ICCID"
+  },
+  {
+    "subject-code": "8.1.1",
+    "reason-code": "3.8",
+    "description": "EID doesn't match the expected value"
+  },
+  {
+    "subject-code": "8.1.2",
+    "reason-code": "6.1",
+    "description": "EUM Certificate is invalid"
+  },
+  {
+    "subject-code": "8.1.2",
+    "reason-code": "6.3",
+    "description": "EUM Certificate has expired"
+  },
+  {
+    "subject-code": "8.1.3",
+    "reason-code": "6.1",
+    "description": "eUICC Certificate is invalid"
+  },
+  {
+    "subject-code": "8.1.3",
+    "reason-code": "6.3",
+    "description": "eUICC Certificate has expired"
+  },
+  {
+    "subject-code": "8.2",
+    "reason-code": "1.2",
+    "description": "Profile has not yet been released"
+  },
+  {
+    "subject-code": "8.2",
+    "reason-code": "3.7",
+    "description": "BPP is not available for a new binding"
+  },
+  {
+    "subject-code": "8.2.1",
+    "reason-code": "1.2",
+    "description": "Indicates that the function caller is not allowed to perform this function on the target Profile"
+  },
+  {
+    "subject-code": "8.2.1",
+    "reason-code": "3.1",
+    "description": "Indicates that a different EID is associated with this ICCID"
+  },
+  {
+    "subject-code": "8.2.1",
+    "reason-code": "3.3",
+    "description": "Indicates that the Profile identified by the provided ICCID is not available"
+  },
+  {
+    "subject-code": "8.2.1",
+    "reason-code": "3.5",
+    "description": "Indicates that the target Profile cannot be released"
+  },
+  {
+    "subject-code": "8.2.1",
+    "reason-code": "3.9",
+    "description": "Indicates that the Profile Type identified by this Profile Type is unknown to the SM-DP+"
+  },
+  {
+    "subject-code": "8.2.5",
+    "reason-code": "1.2",
+    "description": "Indicates that the function caller is not allowed to perform this function on the Profile Type"
+  },
+  {
+    "subject-code": "8.2.5",
+    "reason-code": "3.7",
+    "description": "No more Profile available for the requested Profile Type"
+  },
+  {
+    "subject-code": "8.2.5",
+    "reason-code": "3.8",
+    "description": "Indicates that the Profile Type identified by this Profile Type is not aligned with the Profile Type of Profile identified by the ICCID"
+  },
+  {
+    "subject-code": "8.2.5",
+    "reason-code": "3.9",
+    "description": "Indicates that the Profile Type identified by this Profile Type is unknown to the SM-DP+"
+  },
+  {
+    "subject-code": "8.2.5",
+    "reason-code": "4.3",
+    "description": "No eligible Profile for this eUICC/Device"
+  },
+  {
+    "subject-code": "8.2.6",
+    "reason-code": "3.1",
+    "description": "Indicates that a different MatchingID is associated with this ICCID"
+  },
+  {
+    "subject-code": "8.2.6",
+    "reason-code": "3.3",
+    "description": "Conflicting MatchingID value"
+  },
+  {
+    "subject-code": "8.2.6",
+    "reason-code": "3.8",
+    "description": "MatchingID (AC_Token or EventID) is refused"
+  },
+  {
+    "subject-code": "8.2.7",
+    "reason-code": "2.2",
+    "description": "Confirmation Code is missing"
+  },
+  {
+    "subject-code": "8.2.7",
+    "reason-code": "3.8",
+    "description": "Confirmation Code is refused"
+  },
+  {
+    "subject-code": "8.2.7",
+    "reason-code": "6.4",
+    "description": "The maximum number of retries for the Confirmation Code has been exceeded"
+  },
+  {
+    "subject-code": "8.8",
+    "reason-code": "3.1",
+    "description": "The provided SM-DP+ OID is invalid"
+  },
+  {
+    "subject-code": "8.8.1",
+    "reason-code": "3.8",
+    "description": "Invalid SM-DP+ Address"
+  },
+  {
+    "subject-code": "8.8.2",
+    "reason-code": "3.1",
+    "description": "None of the proposed Public Key Identifiers is supported by the SM-DP+"
+  },
+  {
+    "subject-code": "8.8.3",
+    "reason-code": "3.1",
+    "description": "The Specification Version Number indicated by the eUICC is not supported by the SM-DP+"
+  },
+  {
+    "subject-code": "8.8.4",
+    "reason-code": "3.7",
+    "description": "The SM-DP+ has no CERT.DPauth.ECDSA signed by one of the CI Public Key supported by the eUICC"
+  },
+  {
+    "subject-code": "8.8.5",
+    "reason-code": "4.1",
+    "description": "The Download order has expired"
+  },
+  {
+    "subject-code": "8.8.5",
+    "reason-code": "6.4",
+    "description": "The maximum number of retries for the Profile download order has been exceeded"
+  },
+  {
+    "subject-code": "8.9",
+    "reason-code": "4.2",
+    "description": "Root SM-DS has raised an error"
+  },
+  {
+    "subject-code": "8.9",
+    "reason-code": "5.1",
+    "description": "Root SM-DS was unavailable"
+  },
+  {
+    "subject-code": "8.9.1",
+    "reason-code": "3.8",
+    "description": "Invalid SM-DS Address"
+  },
+  {
+    "subject-code": "8.9.2",
+    "reason-code": "3.1",
+    "description": "None of the proposed Public Key Identifiers is supported by the SM-DS"
+  },
+  {
+    "subject-code": "8.9.3",
+    "reason-code": "3.1",
+    "description": "The Specification Version Number indicated by the eUICC is not supported by the SM-DS"
+  },
+  {
+    "subject-code": "8.9.4",
+    "reason-code": "3.7",
+    "description": "The SM-DS has no CERT.DS.ECDSA signed by one of the GSMA CI Public Key supported by the eUICC"
+  },
+  {
+    "subject-code": "8.9.5",
+    "reason-code": "3.3",
+    "description": "The Event Record already exist in the SM-DS (EventID duplicated)"
+  },
+  {
+    "subject-code": "8.9.5",
+    "reason-code": "3.9",
+    "description": "No Event identified by the Event ID for the EID exists"
+  },
+  {
+    "subject-code": "8.10.1",
+    "reason-code": "3.9",
+    "description": "The RSP session identified by the TransactionID is unknown"
+  },
+  {
+    "subject-code": "8.11.1",
+    "reason-code": "3.9",
+    "description": "Unknown CI Public Key. The CI used by the EUM Certificate is not a trusted root."
+  }
+]

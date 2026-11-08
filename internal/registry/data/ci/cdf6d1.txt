@@ -1,0 +1,67 @@
+notBefore=2017-09-05 02:00:00Z
+notAfter=2052-09-05 02:00:00Z
+Certificate:
+    Data:
+        Version: 3 (0x2)
+        Serial Number: 101268 (0x18b94)
+        Signature Algorithm: ecdsa-with-SHA256
+        Issuer:
+            countryName = CN
+            organizationName = CMCA
+            commonName = CMCA eSIM Root CA_NIST
+        Validity
+            Not Before: Sep  5 02:00:00 2017 GMT
+            Not After : Sep  5 02:00:00 2052 GMT
+        Subject:
+            countryName = CN
+            organizationName = CMCA
+            commonName = CMCA eSIM Root CA_NIST
+        Subject Public Key Info:
+            Public Key Algorithm: id-ecPublicKey
+                Public-Key: (256 bit field, 128 bit security level)
+                pub:
+                    04:32:da:8b:48:ca:0d:5c:f5:a3:41:b4:f6:62:d1:e9:
+                    48:5f:64:63:87:07:8f:2e:34:96:ed:52:86:f5:c9:24:
+                    05:27:89:5b:c9:d2:57:98:81:08:c6:86:ac:3e:7c:20:
+                    64:fa:17:bf:a9:f1:2d:cd:92:21:49:8b:14:8a:7d:77:
+                    a8
+                ASN1 OID: prime256v1
+                NIST CURVE: P-256
+        X509v3 extensions:
+            X509v3 Subject Key Identifier: 
+                CD:F6:D1:C0:A7:B0:7F:98:A8:61:B6:E3:78:B8:2F:64:8D:99:66:3E
+            X509v3 Basic Constraints: critical
+                CA:TRUE
+            X509v3 Certificate Policies: critical
+                Policy: 2.23.146.1.2.1.0
+            X509v3 CRL Distribution Points: 
+                Full Name:
+                  URI:http://221.176.65.55:8081/crldownload/nA.crl
+
+                Full Name:
+                  URI:http://221.176.65.55:8081/crldownload/nB.crl
+
+            X509v3 Subject Alternative Name: 
+                Registered ID:1.3.6.1.4.1.50600.101.1
+            X509v3 Key Usage: critical
+                Certificate Sign, CRL Sign
+    Signature Algorithm: ecdsa-with-SHA256
+    Signature Value:
+        30:44:02:20:48:56:fb:b9:d7:fe:8f:ac:d9:c3:c9:fd:0a:0e:b2:83:17:4d:08:c7:
+        c3:65:0a:c5:7b:c0:6e:b5:32:5b:1f:35:02:20:36:22:1d:c3:8b:0c:9c:ff:85:2f:
+        20:a2:1f:c8:18:f8:39:81:97:00:05:45:02:b4:d1:a5:33:89:0b:06:fb:bf
+-----BEGIN CERTIFICATE-----
+MIICUzCCAfqgAwIBAgIDAYuUMAoGCCqGSM49BAMCMD0xCzAJBgNVBAYTAkNOMQ0w
+CwYDVQQKDARDTUNBMR8wHQYDVQQDDBZDTUNBIGVTSU0gUm9vdCBDQV9OSVNUMCAX
+DTE3MDkwNTAyMDAwMFoYDzIwNTIwOTA1MDIwMDAwWjA9MQswCQYDVQQGEwJDTjEN
+MAsGA1UECgwEQ01DQTEfMB0GA1UEAwwWQ01DQSBlU0lNIFJvb3QgQ0FfTklTVDBZ
+MBMGByqGSM49AgEGCCqGSM49AwEHA0IABDLai0jKDVz1o0G09mLR6UhfZGOHB48u
+NJbtUob1ySQFJ4lbydJXmIEIxoasPnwgZPoXv6nxLc2SIUmLFIp9d6ijgeYwgeMw
+HQYDVR0OBBYEFM320cCnsH+YqGG243i4L2SNmWY+MA8GA1UdEwEB/wQFMAMBAf8w
+FwYDVR0gAQH/BA0wCzAJBgdngRIBAgEAMHEGA1UdHwRqMGgwMqAwoC6GLGh0dHA6
+Ly8yMjEuMTc2LjY1LjU1OjgwODEvY3JsZG93bmxvYWQvbkEuY3JsMDKgMKAuhixo
+dHRwOi8vMjIxLjE3Ni42NS41NTo4MDgxL2NybGRvd25sb2FkL25CLmNybDAVBgNV
+HREEDjAMiAorBgEEAYOLKGUBMA4GA1UdDwEB/wQEAwIBBjAKBggqhkjOPQQDAgNH
+ADBEAiBIVvu51/6PrNnDyf0KDrKDF00Ix8NlCsV7wG61MlsfNQIgNiIdw4sMnP+F
+LyCiH8gY+DmBlwAFRQK00aUziQsG+78=
+-----END CERTIFICATE-----

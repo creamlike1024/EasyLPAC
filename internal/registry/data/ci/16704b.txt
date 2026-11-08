@@ -1,0 +1,68 @@
+notBefore=2016-11-16 16:04:02Z
+notAfter=2051-10-16 16:34:02Z
+Certificate:
+    Data:
+        Version: 3 (0x2)
+        Serial Number:
+            8c:b8:19:3e:cc:e6:71:ec:00:00:00:00:58:2c:8a:7a
+        Signature Algorithm: ecdsa-with-SHA256
+        Issuer:
+            countryName = US
+            organizationName = Entrust, Inc.
+            organizationalUnitName = See www.entrust.net/legal-terms
+            organizationalUnitName = (c) 2016 Entrust, Inc. - for authorized use only
+            commonName = Entrust eSIM Certification Authority
+        Validity
+            Not Before: Nov 16 16:04:02 2016 GMT
+            Not After : Oct 16 16:34:02 2051 GMT
+        Subject:
+            countryName = US
+            organizationName = Entrust, Inc.
+            organizationalUnitName = See www.entrust.net/legal-terms
+            organizationalUnitName = (c) 2016 Entrust, Inc. - for authorized use only
+            commonName = Entrust eSIM Certification Authority
+        Subject Public Key Info:
+            Public Key Algorithm: id-ecPublicKey
+                Public-Key: (256 bit field, 128 bit security level)
+                pub:
+                    04:07:73:c0:61:de:43:55:9b:d9:fe:03:98:74:c1:c9:
+                    1e:7f:21:62:f7:26:e8:10:d5:4d:fd:d3:c6:be:f9:b1:
+                    dd:96:df:93:4c:0e:ca:e1:ce:5c:61:9f:b9:d5:8c:ff:
+                    86:0f:db:69:cc:60:b8:f0:e1:f6:e4:14:2b:a5:a0:dd:
+                    ae
+                ASN1 OID: prime256v1
+                NIST CURVE: P-256
+        X509v3 extensions:
+            X509v3 Basic Constraints: critical
+                CA:TRUE
+            X509v3 Key Usage: critical
+                Certificate Sign, CRL Sign
+            X509v3 Certificate Policies: critical
+                Policy: 2.23.146.1.2.1.0
+            X509v3 Subject Alternative Name: 
+                Registered ID:2.16.840.1.114028.20.10.0
+            X509v3 Subject Key Identifier: 
+                16:70:4B:7F:35:1E:36:07:F1:8C:4B:70:00:5C:3A:00:3D:FD:41:4A
+    Signature Algorithm: ecdsa-with-SHA256
+    Signature Value:
+        30:46:02:21:00:b2:98:d7:32:f6:81:67:20:20:f3:a6:74:00:0b:53:d3:20:51:02:
+        2d:44:c9:a0:1f:37:3f:64:0c:97:80:13:4e:02:21:00:b7:79:f8:fc:01:32:fb:fe:
+        d0:c1:3a:10:0d:cb:77:0a:f0:f4:bf:d4:d2:25:bb:db:ea:30:b0:99:b1:9b:c9:d1
+-----BEGIN CERTIFICATE-----
+MIIC6DCCAo2gAwIBAgIRAIy4GT7M5nHsAAAAAFgsinowCgYIKoZIzj0EAwIwgbkx
+CzAJBgNVBAYTAlVTMRYwFAYDVQQKEw1FbnRydXN0LCBJbmMuMSgwJgYDVQQLEx9T
+ZWUgd3d3LmVudHJ1c3QubmV0L2xlZ2FsLXRlcm1zMTkwNwYDVQQLEzAoYykgMjAx
+NiBFbnRydXN0LCBJbmMuIC0gZm9yIGF1dGhvcml6ZWQgdXNlIG9ubHkxLTArBgNV
+BAMTJEVudHJ1c3QgZVNJTSBDZXJ0aWZpY2F0aW9uIEF1dGhvcml0eTAgFw0xNjEx
+MTYxNjA0MDJaGA8yMDUxMTAxNjE2MzQwMlowgbkxCzAJBgNVBAYTAlVTMRYwFAYD
+VQQKEw1FbnRydXN0LCBJbmMuMSgwJgYDVQQLEx9TZWUgd3d3LmVudHJ1c3QubmV0
+L2xlZ2FsLXRlcm1zMTkwNwYDVQQLEzAoYykgMjAxNiBFbnRydXN0LCBJbmMuIC0g
+Zm9yIGF1dGhvcml6ZWQgdXNlIG9ubHkxLTArBgNVBAMTJEVudHJ1c3QgZVNJTSBD
+ZXJ0aWZpY2F0aW9uIEF1dGhvcml0eTBZMBMGByqGSM49AgEGCCqGSM49AwEHA0IA
+BAdzwGHeQ1Wb2f4DmHTByR5/IWL3JugQ1U3908a++bHdlt+TTA7K4c5cYZ+51Yz/
+hg/bacxguPDh9uQUK6Wg3a6jcjBwMA8GA1UdEwEB/wQFMAMBAf8wDgYDVR0PAQH/
+BAQDAgEGMBcGA1UdIAEB/wQNMAswCQYHZ4ESAQIBADAVBgNVHREEDjAMiApghkgB
+hvpsFAoAMB0GA1UdDgQWBBQWcEt/NR42B/GMS3AAXDoAPf1BSjAKBggqhkjOPQQD
+AgNJADBGAiEAspjXMvaBZyAg86Z0AAtT0yBRAi1EyaAfNz9kDJeAE04CIQC3efj8
+ATL7/tDBOhANy3cK8PS/1NIlu9vqMLCZsZvJ0Q==
+-----END CERTIFICATE-----

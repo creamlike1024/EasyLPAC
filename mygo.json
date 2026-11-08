@@ -1,0 +1,18 @@
+{
+  "name": "EasyLPAC",
+  "slug": "easylpac",
+  "identifier": "github.creamlike1024.EasyLPAC",
+  "version": "0.9.0",
+  "license": "MIT",
+  "icon": "assets/icon.png",
+  "main": "./cmd/easylpac",
+  "out": "build",
+  "i18n": {
+    "dir": "locales",
+    "source": "en"
+  },
+  "linux": {
+    "depends": ["libpcsclite1", "pcscd"],
+    "webview": false
+  }
+}

@@ -1,0 +1,59 @@
+notBefore=2024-01-16 23:17:39Z
+notAfter=2059-01-07 23:17:38Z
+Certificate:
+    Data:
+        Version: 3 (0x2)
+        Serial Number:
+            4a:90:52:08:20:d8:3c:e1:06:fc:81:47:50:22:a9:67:6a:48:01:03
+        Signature Algorithm: ecdsa-with-SHA256
+        Issuer:
+            countryName = CH
+            organizationName = OISTE Foundation
+            commonName = OISTE GSMA CI G1
+        Validity
+            Not Before: Jan 16 23:17:39 2024 GMT
+            Not After : Jan  7 23:17:38 2059 GMT
+        Subject:
+            countryName = CH
+            organizationName = OISTE Foundation
+            commonName = OISTE GSMA CI G1
+        Subject Public Key Info:
+            Public Key Algorithm: id-ecPublicKey
+                Public-Key: (256 bit field, 128 bit security level)
+                pub:
+                    04:bd:9d:ec:dc:f1:42:e0:d8:2b:09:c0:8c:98:72:7a:
+                    0c:9e:ba:bb:30:07:b8:b7:2f:8c:99:ce:9f:e4:ed:04:
+                    d4:e1:4b:b6:07:2c:3c:87:09:ad:af:ec:3f:b3:4c:ff:
+                    97:4e:d8:2a:81:c2:e8:07:9e:86:85:af:44:41:04:38:
+                    c4
+                ASN1 OID: prime256v1
+                NIST CURVE: P-256
+        X509v3 extensions:
+            X509v3 Basic Constraints: critical
+                CA:TRUE
+            X509v3 Subject Alternative Name: 
+                Registered ID:2.16.756.5.14
+            X509v3 Certificate Policies: critical
+                Policy: 2.23.146.1.2.1.0
+            X509v3 Subject Key Identifier: 
+                4C:27:96:7A:D2:0C:14:B3:91:E9:60:1E:41:E6:04:AD:57:C0:22:2F
+            X509v3 Key Usage: critical
+                Certificate Sign, CRL Sign
+    Signature Algorithm: ecdsa-with-SHA256
+    Signature Value:
+        30:45:02:20:55:73:2c:13:8f:4d:7b:8c:aa:40:43:e8:30:cb:83:2a:2b:68:50:bf:
+        3b:de:ea:59:2f:42:48:12:3f:ac:a4:1f:02:21:00:8d:0a:17:00:83:8e:73:db:99:
+        c2:6c:1b:8d:61:52:b5:8d:95:ff:88:72:b3:2f:16:e6:22:8b:40:da:b0:13:62
+-----BEGIN CERTIFICATE-----
+MIIB9zCCAZ2gAwIBAgIUSpBSCCDYPOEG/IFHUCKpZ2pIAQMwCgYIKoZIzj0EAwIw
+QzELMAkGA1UEBhMCQ0gxGTAXBgNVBAoMEE9JU1RFIEZvdW5kYXRpb24xGTAXBgNV
+BAMMEE9JU1RFIEdTTUEgQ0kgRzEwIBcNMjQwMTE2MjMxNzM5WhgPMjA1OTAxMDcy
+MzE3MzhaMEMxCzAJBgNVBAYTAkNIMRkwFwYDVQQKDBBPSVNURSBGb3VuZGF0aW9u
+MRkwFwYDVQQDDBBPSVNURSBHU01BIENJIEcxMFkwEwYHKoZIzj0CAQYIKoZIzj0D
+AQcDQgAEvZ3s3PFC4NgrCcCMmHJ6DJ66uzAHuLcvjJnOn+TtBNThS7YHLDyHCa2v
+7D+zTP+XTtgqgcLoB56Gha9EQQQ4xKNtMGswDwYDVR0TAQH/BAUwAwEB/zAQBgNV
+HREECTAHiAVghXQFDjAXBgNVHSABAf8EDTALMAkGB2eBEgECAQAwHQYDVR0OBBYE
+FEwnlnrSDBSzkelgHkHmBK1XwCIvMA4GA1UdDwEB/wQEAwIBBjAKBggqhkjOPQQD
+AgNIADBFAiBVcywTj017jKpAQ+gwy4MqK2hQvzve6lkvQkgSP6ykHwIhAI0KFwCD
+jnPbmcJsG41hUrWNlf+IcrMvFuYii0DasBNi
+-----END CERTIFICATE-----

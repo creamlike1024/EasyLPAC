@@ -1,0 +1,69 @@
+#!/bin/sh
+# zig as the C compiler for cgo and CMake, for any target: the target is
+# ZIG_TARGET when set, else derived from GOOS/GOARCH (set by go build and
+# mygo build for each platform), else the host.
+#   CC="$PWD/scripts/zcc" GOOS=windows GOARCH=amd64 CGO_ENABLED=1 go build ...
+set -eu
+target="${ZIG_TARGET:-}"
+if [ -z "$target" ] && [ -n "${GOOS:-}" ]; then
+	case "${GOARCH:-$(go env GOARCH)}" in
+	amd64) arch=x86_64 ;;
+	arm64) arch=aarch64 ;;
+	*) echo "zcc: unsupported GOARCH ${GOARCH}" >&2; exit 1 ;;
+	esac
+	case "$GOOS" in
+	darwin) target="$arch-macos" ;;
+	# glibc 2.31 (Ubuntu 20.04 and later, Debian 11 and later)
+	linux) target="$arch-linux-gnu.2.31" ;;
+	windows) target="$arch-windows-gnu" ;;
+	*) echo "zcc: unsupported GOOS $GOOS" >&2; exit 1 ;;
+	esac
+fi
+# Drop what only Apple's toolchain takes: -arch (the target carries the
+# architecture) and ld64's -U.
+# go build identifies the compiler with "-### -x c -c -", which clang only
+# prints but zig compiles, leaving "-.o" in the current directory: such
+# probes run in a temporary directory.
+probe=""
+skip=0
+for a in "$@"; do
+	shift
+	if [ "$skip" = 1 ]; then skip=0; continue; fi
+	if [ "$a" = "-###" ]; then probe=1; fi
+	case "$a" in
+	-arch) skip=1; continue ;;
+	# go test -race on darwin marks a symbol for lookup at run time
+	# (ld64's -U); zig's linker has no -U and finds it in libSystem.
+	-Wl,-U,*) continue ;;
+	esac
+	set -- "$@" "$a"
+done
+# macOS targets link against the system's frameworks and libraries
+# (PCSC, CoreFoundation, Security, libresolv), which zig does not ship:
+# they come from the macOS SDK, SDKROOT or the one xcrun finds. Apple
+# licenses the SDK for Apple hardware only, so macOS builds run on macOS.
+case "${target:-$(uname -s)}" in
+*macos* | Darwin)
+	sdk="${SDKROOT:-}"
+	if [ -z "$sdk" ] && command -v xcrun >/dev/null 2>&1; then
+		sdk="$(xcrun --sdk macosx --show-sdk-path)"
+	fi
+	if [ -z "$sdk" ]; then
+		echo "zcc: macOS targets need the macOS SDK (set SDKROOT or install Xcode Command Line Tools)" >&2
+		exit 1
+	fi
+	set -- -isysroot "$sdk" -iframework "$sdk/System/Library/Frameworks" \
+		-F "$sdk/System/Library/Frameworks" -L "$sdk/usr/lib" "$@"
+	;;
+esac
+if [ -n "$target" ]; then
+	set -- -target "$target" "$@"
+fi
+if [ -n "$probe" ]; then
+	dir="$(mktemp -d "${TMPDIR:-/tmp}/zcc.XXXXXX")"
+	status=0
+	(cd "$dir" && zig cc "$@") || status=$?
+	rm -rf "$dir"
+	exit "$status"
+fi
+exec zig cc "$@"

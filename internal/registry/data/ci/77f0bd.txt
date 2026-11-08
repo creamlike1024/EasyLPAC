@@ -1,0 +1,71 @@
+notBefore=2017-03-13 12:52:16Z
+notAfter=2052-03-12 12:52:16Z
+Certificate:
+    Data:
+        Version: 3 (0x2)
+        Serial Number: 219851796529 (0x3330303031)
+        Signature Algorithm: ecdsa-with-SHA256
+        Issuer:
+            commonName = GEMALTO Corporate CE CI
+            countryName = FR
+            organizationName = GEMALTO
+            organizationalUnitName = Corporate Security
+            localityName = GEMENOS
+            emailAddress = corporate.ITSecurity@gemaltocom
+        Validity
+            Not Before: Mar 13 12:52:16 2017 GMT
+            Not After : Mar 12 12:52:16 2052 GMT
+        Subject:
+            commonName = GEMALTO Corporate CE CI
+            countryName = FR
+            organizationName = GEMALTO
+            organizationalUnitName = Corporate Security
+            localityName = GEMENOS
+            emailAddress = corporate.ITSecurity@gemaltocom
+        Subject Public Key Info:
+            Public Key Algorithm: id-ecPublicKey
+                Public-Key: (256 bit field, 128 bit security level)
+                pub:
+                    04:15:6a:56:93:cc:ad:71:4a:a7:f1:0c:db:06:a8:38:
+                    e8:66:43:21:30:1c:a7:66:ca:ae:24:6f:d9:bb:06:6d:
+                    9c:bd:da:fd:66:ba:4c:29:7c:ee:2d:7d:e9:8d:2f:2a:
+                    bb:36:f3:0d:8e:1f:41:fe:bd:54:02:f6:f0:ed:61:2c:
+                    51
+                ASN1 OID: prime256v1
+                NIST CURVE: P-256
+        X509v3 extensions:
+            X509v3 Subject Key Identifier: 
+                77:F0:BD:69:D6:0B:DC:9E:31:DA:70:2B:22:1C:32:80:8B:B8:E4:2A
+            X509v3 Authority Key Identifier: 
+                77:F0:BD:69:D6:0B:DC:9E:31:DA:70:2B:22:1C:32:80:8B:B8:E4:2A
+            X509v3 Basic Constraints: critical
+                CA:TRUE
+            X509v3 Key Usage: critical
+                Certificate Sign, CRL Sign
+            X509v3 Subject Alternative Name: 
+                Registered ID:1.3.6.1.4.1.31746.1002.1.3
+            X509v3 Certificate Policies: critical
+                Policy: 2.23.146.1.2.1.0
+    Signature Algorithm: ecdsa-with-SHA256
+    Signature Value:
+        30:44:02:20:51:e0:76:9a:46:d6:fe:fa:c7:13:55:8b:40:6b:98:f1:8a:0f:ff:09:
+        e7:a3:a0:c9:cc:3c:82:ed:d6:02:44:18:02:20:07:0d:37:8e:70:d7:29:c1:0c:ac:
+        8f:10:3b:99:c9:3c:df:30:3a:c4:60:b8:d5:45:45:51:13:0a:a2:1b:0e:57
+-----BEGIN CERTIFICATE-----
+MIIC0zCCAnqgAwIBAgIFMzAwMDEwCgYIKoZIzj0EAwIwgaAxIDAeBgNVBAMTF0dF
+TUFMVE8gQ29ycG9yYXRlIENFIENJMQswCQYDVQQGEwJGUjEQMA4GA1UEChMHR0VN
+QUxUTzEbMBkGA1UECxMSQ29ycG9yYXRlIFNlY3VyaXR5MRAwDgYDVQQHEwdHRU1F
+Tk9TMS4wLAYJKoZIhvcNAQkBEx9jb3Jwb3JhdGUuSVRTZWN1cml0eUBnZW1hbHRv
+Y29tMCAXDTE3MDMxMzEyNTIxNloYDzIwNTIwMzEyMTI1MjE2WjCBoDEgMB4GA1UE
+AxMXR0VNQUxUTyBDb3Jwb3JhdGUgQ0UgQ0kxCzAJBgNVBAYTAkZSMRAwDgYDVQQK
+EwdHRU1BTFRPMRswGQYDVQQLExJDb3Jwb3JhdGUgU2VjdXJpdHkxEDAOBgNVBAcT
+B0dFTUVOT1MxLjAsBgkqhkiG9w0BCQETH2NvcnBvcmF0ZS5JVFNlY3VyaXR5QGdl
+bWFsdG9jb20wWTATBgcqhkjOPQIBBggqhkjOPQMBBwNCAAQValaTzK1xSqfxDNsG
+qDjoZkMhMBynZsquJG/ZuwZtnL3a/Wa6TCl87i196Y0vKrs28w2OH0H+vVQC9vDt
+YSxRo4GcMIGZMCAGA1UdDgEBAAQWBBR38L1p1gvcnjHacCsiHDKAi7jkKjAiBgNV
+HSMBAQAEGDAWgBR38L1p1gvcnjHacCsiHDKAi7jkKjAPBgNVHRMBAf8EBTADAQH/
+MA4GA1UdDwEB/wQEAwIBBjAXBgNVHREEEDAOiAwrBgEEAYH4AodqAQMwFwYDVR0g
+AQH/BA0wCzAJBgdngRIBAgEAMAoGCCqGSM49BAMCA0cAMEQCIFHgdppG1v76xxNV
+i0BrmPGKD/8J56Ogycw8gu3WAkQYAiAHDTeOcNcpwQysjxA7mck83zA6xGC41UVF
+URMKohsOVw==
+-----END CERTIFICATE-----

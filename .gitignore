@@ -2,11 +2,12 @@
 **/.DS_Store
 
 .idea/
-lpac/
-log/
-static/
+build/
 
-EasyLPAC
-EasyLPAC.exe
-EasyLPAC.app/
+/EasyLPAC
+/EasyLPAC.exe
+/EasyLPAC.app/
 __debug_bin*
+/third_party/libeuicc/
+/docs/
+-.o

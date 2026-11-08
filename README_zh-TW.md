@@ -1,73 +1,84 @@
 # EasyLPAC
-**語言:** [英文](./README.md) [日文](./README_ja-JP.md)
+**語言:** [English](./README.md) | [日本語](./README_ja-JP.md)
 
-[lpac](https://github.com/estkme-group/lpac) 圖形化前端
+用於管理可插拔 eUICC 上 eSIM 的圖形化 LPA。
 
-下載: [GitHub Release](https://github.com/creamlike1024/EasyLPAC/releases/latest)
+> [!IMPORTANT]
+> 自 0.9.0 起，EasyLPAC 已改寫為使用 **libeuicc**（[lpac](https://github.com/estkme-group/lpac) 的協定函式庫），並將其連結於程式內，不再使用也不需要外部的 `lpac` 執行檔。
+>
+> 先前的版本（lpac CLI + Fyne）保留在 [`legacy`](https://github.com/creamlike1024/EasyLPAC/tree/legacy) 分支，已不再維護。
 
-Arch Linux: ![AUR package](https://img.shields.io/aur/version/easylpac) [AUR - easylpac](https://aur.archlinux.org/packages/easylpac)
- 感謝 [1ridic](https://github.com/1ridic), [root-core](https://github.com/Root-Core)
+## 下載
 
-Nix / NixOS: nixpkgs 中的 [easylpac](https://search.nixos.org/packages?channel=unstable&show=easylpac)
-
-openSUSE: https://software.opensuse.org/package/easylpac ([OBS](https://build.opensuse.org/package/show/home:Psheng/EasyLPAC))
-
-系統需求:
-- Windows 10以上 (最後一個支援 Windows 7 的版本是 [0.7.7.2](https://github.com/creamlike1024/EasyLPAC/releases/tag/0.7.7.2))
-- 最新版的 macOS
-- Linux: `pcscd`/`pcsclite`, `libcurl`(適用於 lpac) 和 `gtk3dialog` (適用於 EasyLPAC).
-
-目前支援 curl 的 HTTPINTERFACE 以及多種 APDU 後端 (pcsc、AT、MBIM、QMI 等，透過動態搜尋)。
+[GitHub Release](https://github.com/creamlike1024/EasyLPAC/releases/latest)：
 
 # 用法
 
-執行前先連接您的讀卡機。
+連接讀卡機或數據機，開啟「設定」，選擇裝置後即會讀取晶片。
 
-## Linux
+## 通知
 
-lpac 可執行檔搜尋順序: 首先，在 EasyLPAC 所在的目錄下搜尋。如果找不到，則在系統 `PATH` 中搜尋。如果仍然找不到，則使用 `/usr/bin/lpac`
+預設情況下，EasyLPAC 會在每次操作（安裝、啟用、停用、刪除）後將通知傳送至電信業者的伺服器，並在傳送成功後移除。
 
-`EasyLPAC-linux-x86_64-with-lpac.tar.gz` 包含預先編譯的 lpac 可執行檔，如果無法執行，則需要透過套件管理器安裝 `lpac` 或自行 [編譯 lpac](https://github.com/estkme-group/lpac?tab=readme-ov-file#compile) 。
+您可以在「設定」中關閉「傳送通知」。關閉後，待處理的通知會列在「通知」頁。
 
-## 自動處理通知
-EasyLPAC 預設會處理任何操作的通知，並在處理成功後自動刪除。
-
-您可以前往「設定」分頁，取消勾選「自動處理通知」來停用此功能。
-
-不過，手動操作通知不符合 GSMA 規範，因此不建議這麼做。
+手動處理通知不符合 GSMA 規範，因此建議保持開啟。
 
 # 截圖
 <p>
-<a href="https://github.com/creamlike1024/EasyLPAC/blob/master/screenshots/chipinfo.png"><img src="https://github.com/creamlike1024/EasyLPAC/blob/master/screenshots/chipinfo.png?raw=true"  height="180px"/></a>
-<a href="https://github.com/creamlike1024/EasyLPAC/blob/master/screenshots/notification.png"><img src="https://github.com/creamlike1024/EasyLPAC/blob/master/screenshots/notification.png?raw=true" height="180px"/></a>
-<a href="https://github.com/creamlike1024/EasyLPAC/blob/master/screenshots/profile.png"><img src="https://github.com/creamlike1024/EasyLPAC/blob/master/screenshots/profile.png?raw=true" height="180px"/></a>
+<a href="./screenshots/profile.png"><img src="./screenshots/profile.png" height="240px"/></a>
+<a href="./screenshots/chipinfo.png"><img src="./screenshots/chipinfo.png" height="240px"/></a>
 </p>
 
-# 常見問題
+# 從原始碼建置
 
-## 使用 5ber 時出現 lpac 錯誤 euicc_init
+需求：Go 1.27.3 以上、[zig](https://ziglang.org/)（作為 C 編譯器）、CMake，Linux 另需 pcsc-lite 開發檔案（見 [Linux](#linux)）。
 
-前往「設定 -> lpac ISD-R AID」，點選5ber設定5ber的自訂AID，然後重試。
+```sh
+git clone --recursive https://github.com/creamlike1024/EasyLPAC.git
+cd EasyLPAC
+./scripts/build-app.sh          # 輸出於 build/<os>-<arch>/
+```
 
-## macOS `SCardTransmit() failed: 80100016`
+lpac 是位於 `third_party/lpac` 的 git 子模組。若複製時未加 `--recursive`，請先執行 `git submodule update --init`。
 
-如果你使用 macOS Sonoma，可能會遇到這個錯誤: `SCardTransmit() failed: 80100016`
+## Linux
 
-這是因為 Apple 的 USB CCID Card Reader Driver 有 bug，你可以試著安裝讀卡機廠商提供的 macOS 驅動程式，或者透過閱讀以下文章來解決：
+**注意：Linux 上的建置步驟尚未經過測試。**
 
-- [Apple's own CCID driver in Sonoma](https://blog.apdu.fr/posts/2023/11/apple-own-ccid-driver-in-sonoma/)
-- [macOS Sonoma bug: SCardControl() returns SCARD_E_NOT_TRANSACTED](https://blog.apdu.fr/posts/2023/09/macos-sonoma-bug-scardcontrol-returns-scard_e_not_transacted/)
+EasyLPAC 以動態連結使用系統的 pcsc-lite（`libpcsclite.so.1`），不會將其打包在內。因此無論建置機器上的版本為何，程式一律透過同一個 pcsc-lite 版本的用戶端函式庫與 `pcscd` 通訊。GTK 3 在執行時載入，不需要開發套件。
 
-## `SCardEstablishContext() failed: 8010001D`
+建置相依套件：
 
-這表示 PCSC 服務未運作。在 Linux 系統中，該服務名為 `pcscd` 。
+| 發行版 | 套件 |
+|---|---|
+| Debian / Ubuntu | `libpcsclite-dev pkg-config cmake` |
+| Fedora | `pcsc-lite-devel pkgconf-pkg-config cmake` |
+| Arch Linux | `pcsclite pkgconf cmake` |
+| openSUSE | `pcsc-lite-devel pkg-config cmake` |
 
-在基於 systemd 的發行版上啟動 `pcscd` : `sudo systemctl start pcscd`
+zig 不會搜尋系統的函式庫目錄，因此需告訴連結器 pcsc-lite 的位置。執行檔以 glibc 2.31 為目標，而系統的 `libpcsclite.so` 可能以較新的 glibc 建置；由於執行時載入的是使用者自己的函式庫，以 `--allow-shlib-undefined` 允許這種情況：
 
-## `SCardListReaders() failed: 8010002E`
+```sh
+export CGO_LDFLAGS="-L$(pkg-config --variable=libdir libpcsclite) -Wl,--allow-shlib-undefined"
+./scripts/build-app.sh
+```
 
-讀卡機未連接。
+執行相依套件：GTK 3、pcsc-lite，以及搭配讀卡機驅動程式（多數 USB 讀卡機為 `ccid`）的 `pcscd` 服務：
 
-## Other `SCard` error codes
+| 發行版 | 套件 |
+|---|---|
+| Debian / Ubuntu | `libgtk-3-0 libpcsclite1 pcscd libccid` |
+| Fedora | `gtk3 pcsc-lite pcsc-lite-ccid` |
+| Arch Linux | `gtk3 pcsclite ccid` |
+| openSUSE | `gtk3 pcsc-lite pcsc-ccid` |
 
-有關 PCSC 錯誤碼的完整解釋列表，請參閱 [pcsc-lite: 錯誤碼](https://pcsclite.apdu.fr/api/group__ErrorCodes.html)
+以 `sudo systemctl enable --now pcscd.socket` 啟動服務。
+
+發行版本中的 `.deb` 相依於 `libpcsclite1` 與 `pcscd`。其他發行版的打包者應將其對應為各自的套件，並維持以動態連結使用 pcsc-lite：靜態連結的用戶端可能使用系統 `pcscd` 不接受的協定版本。
+
+# 授權
+
+- EasyLPAC：[MIT](./LICENSE)
+- libeuicc（來自 lpac，靜態連結）：[LGPL-2.1-only](https://github.com/estkme-group/lpac/blob/main/euicc/LICENSE)。每個發行版本都附有 `EasyLPAC-source.tar.gz`，包含 libeuicc 在內的完整原始碼與建置腳本，可修改函式庫並重新建置程式。
+- 來自 [eUICC Manual](https://euicc-manual.osmocom.org/) 的 eUICC 製造商與 CI 資料：CC BY-NC-SA 4.0

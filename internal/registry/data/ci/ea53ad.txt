@@ -1,0 +1,66 @@
+notBefore=2016-08-12 13:51:48Z
+notAfter=2026-08-12 13:51:48Z
+Certificate:
+    Data:
+        Version: 3 (0x2)
+        Serial Number: 4325376 (0x420000)
+        Signature Algorithm: ecdsa-with-SHA256
+        Issuer:
+            countryName = DE
+            commonName = SubMan V4.2 CI
+            organizationName = Giesecke and Devrient
+            organizationalUnitName = Mobile Security
+        Validity
+            Not Before: Aug 12 13:51:48 2016 GMT
+            Not After : Aug 12 13:51:48 2026 GMT
+        Subject:
+            countryName = DE
+            commonName = SubMan V4.2 CI
+            organizationName = Giesecke and Devrient
+            organizationalUnitName = Mobile Security
+        Subject Public Key Info:
+            Public Key Algorithm: id-ecPublicKey
+                Public-Key: (256 bit field, 128 bit security level)
+                pub:
+                    04:60:88:25:55:0a:fd:c1:b5:ce:97:03:e9:f2:a3:20:
+                    e4:37:f4:f0:29:62:f4:c7:3e:96:9a:f7:2f:06:bd:3e:
+                    55:40:dd:05:a5:2d:e5:f8:19:f0:f8:1f:7a:61:2c:1a:
+                    95:21:ad:7b:c8:7b:6d:9a:d8:5e:4f:18:b4:2a:81:2a:
+                    84
+                ASN1 OID: prime256v1
+                NIST CURVE: P-256
+        X509v3 extensions:
+            X509v3 Subject Key Identifier: 
+                EA:53:AD:EF:33:29:B9:50:9A:FD:75:5F:D4:48:B8:2D:C1:BC:EC:FF
+            X509v3 Key Usage: critical
+                Certificate Sign, CRL Sign
+            X509v3 Certificate Policies: critical
+                Policy: 2.23.146.1.2.1.0
+            X509v3 Basic Constraints: critical
+                CA:TRUE
+            X509v3 Subject Alternative Name: 
+                Registered ID:1.3.6.1.4.1.11791
+            X509v3 CRL Distribution Points: 
+                Full Name:
+                  URI:http://gi-de.com/test.crl.pem
+
+    Signature Algorithm: ecdsa-with-SHA256
+    Signature Value:
+        30:45:02:21:00:c3:31:d8:bf:d5:1c:38:8e:5b:e1:65:fc:eb:85:9a:10:9d:8b:36:
+        0c:d7:b6:27:f7:30:15:89:e2:8e:d9:3d:22:02:20:0d:5a:d0:8c:99:8f:83:ce:4a:
+        8a:c8:7c:41:15:7d:14:da:d0:5d:eb:cd:b3:3f:80:e9:81:1b:7c:8f:76:25:7b
+-----BEGIN CERTIFICATE-----
+MIICUjCCAfigAwIBAgIDQgAAMAoGCCqGSM49BAMCMGAxCzAJBgNVBAYTAkRFMRcw
+FQYDVQQDEw5TdWJNYW4gVjQuMiBDSTEeMBwGA1UEChMVR2llc2Vja2UgYW5kIERl
+dnJpZW50MRgwFgYDVQQLEw9Nb2JpbGUgU2VjdXJpdHkwHhcNMTYwODEyMTM1MTQ4
+WhcNMjYwODEyMTM1MTQ4WjBgMQswCQYDVQQGEwJERTEXMBUGA1UEAxMOU3ViTWFu
+IFY0LjIgQ0kxHjAcBgNVBAoTFUdpZXNlY2tlIGFuZCBEZXZyaWVudDEYMBYGA1UE
+CxMPTW9iaWxlIFNlY3VyaXR5MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAEYIgl
+VQr9wbXOlwPp8qMg5Df08Cli9Mc+lpr3Lwa9PlVA3QWlLeX4GfD4H3phLBqVIa17
+yHttmtheTxi0KoEqhKOBoDCBnTAdBgNVHQ4EFgQU6lOt7zMpuVCa/XVf1Ei4LcG8
+7P8wDgYDVR0PAQH/BAQDAgEGMBcGA1UdIAEB/wQNMAswCQYHZ4ESAQIBADAPBgNV
+HRMBAf8EBTADAQH/MBIGA1UdEQQLMAmIBysGAQQB3A8wLgYDVR0fBCcwJTAjoCGg
+H4YdaHR0cDovL2dpLWRlLmNvbS90ZXN0LmNybC5wZW0wCgYIKoZIzj0EAwIDSAAw
+RQIhAMMx2L/VHDiOW+Fl/OuFmhCdizYM17Yn9zAVieKO2T0iAiANWtCMmY+DzkqK
+yHxBFX0U2tBd682zP4DpgRt8j3Ylew==
+-----END CERTIFICATE-----

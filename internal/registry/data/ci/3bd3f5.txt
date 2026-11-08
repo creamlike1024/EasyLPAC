@@ -1,0 +1,68 @@
+notBefore=2016-12-13 08:17:25Z
+notAfter=2017-06-13 08:17:25Z
+Certificate:
+    Data:
+        Version: 3 (0x2)
+        Serial Number: 1481617045088 (0x158f741f660)
+        Signature Algorithm: ecdsa-with-SHA256
+        Issuer:
+            commonName = China Unicom eSIM CA
+            organizationalUnitName = VSENS
+            organizationName = China Unicom
+            countryName = CN
+        Validity
+            Not Before: Dec 13 08:17:25 2016 GMT
+            Not After : Jun 13 08:17:25 2017 GMT
+        Subject:
+            emailAddress = caolt3@chinaunicom.cn
+            commonName = TEST DPAUTH
+            organizationName = VSENS
+            localityName = BEI JING
+            countryName = CN
+        Subject Public Key Info:
+            Public Key Algorithm: id-ecPublicKey
+                Public-Key: (256 bit field, 128 bit security level)
+                pub:
+                    04:99:c6:38:72:76:12:94:b3:fc:17:a9:d0:86:98:5d:
+                    85:7c:a7:26:b3:ed:cb:21:4d:cc:90:e5:54:4c:05:38:
+                    d1:b0:62:90:59:ef:4c:29:a7:92:1f:bb:9c:c0:ed:9e:
+                    6c:03:0c:f5:6f:5d:b6:7a:27:81:9f:52:f7:86:a3:d2:
+                    91
+                ASN1 OID: prime256v1
+                NIST CURVE: P-256
+        X509v3 extensions:
+            X509v3 Authority Key Identifier: 
+                3B:D3:F5:7B:34:F4:44:36:E0:8F:02:8B:51:01:C0:E0:A9:B0:98:6E
+            X509v3 Subject Key Identifier: 
+                C3:72:BE:81:4E:FB:E1:8C:3A:FF:56:E3:37:66:B3:3D:50:73:33:EE
+            X509v3 Key Usage: critical
+                Digital Signature
+            X509v3 Certificate Policies: critical
+                Policy: 2.23.146.1.2.1.4
+            X509v3 Subject Alternative Name: 
+                Registered ID:1.3.6.1.4.1.47814.2.4
+            X509v3 CRL Distribution Points: 
+                Full Name:
+                  URI:http://10.193.30.36/TASSCA/TASSCA_EUM/CRLCerti.CRL
+
+    Signature Algorithm: ecdsa-with-SHA256
+    Signature Value:
+        30:45:02:21:00:df:a5:d5:dc:e9:e2:59:0c:09:af:d8:69:9c:37:c5:95:54:38:1d:
+        30:d5:9e:99:a9:63:33:61:03:55:25:56:ac:02:20:63:96:af:fc:06:2b:46:e0:8e:
+        a1:9a:59:2e:bb:d6:c9:32:f7:a1:da:d4:8d:07:bc:26:fe:14:f3:0f:51:b9:22
+-----BEGIN CERTIFICATE-----
+MIICgDCCAiagAwIBAgIGAVj3QfZgMAoGCCqGSM49BAMCMFMxHTAbBgNVBAMMFENo
+aW5hIFVuaWNvbSBlU0lNIENBMQ4wDAYDVQQLDAVWU0VOUzEVMBMGA1UECgwMQ2hp
+bmEgVW5pY29tMQswCQYDVQQGDAJDTjAiGA8yMDE2MTIxMzA4MTcyNVoYDzIwMTcw
+NjEzMDgxNzI1WjBsMSQwIgYJKoZIhvcNAQkBFhVjYW9sdDNAY2hpbmF1bmljb20u
+Y24xFDASBgNVBAMMC1RFU1QgRFBBVVRIMQ4wDAYDVQQKDAVWU0VOUzERMA8GA1UE
+BwwIQkVJIEpJTkcxCzAJBgNVBAYMAkNOMFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcD
+QgAEmcY4cnYSlLP8F6nQhphdhXynJrPtyyFNzJDlVEwFONGwYpBZ70wpp5Ifu5zA
+7Z5sAwz1b122eieBn1L3hqPSkaOByDCBxTAfBgNVHSMEGDAWgBQ70/V7NPRENuCP
+AotRAcDgqbCYbjAdBgNVHQ4EFgQUw3K+gU774Yw6/1bjN2azPVBzM+4wDgYDVR0P
+AQH/BAQDAgCAMBcGA1UdIAEB/wQNMAswCQYHZ4ESAQIBBDAVBgNVHREEDjAMiAor
+BgEEAYL1RgIEMEMGA1UdHwQ8MDowOKA2oDSGMmh0dHA6Ly8xMC4xOTMuMzAuMzYv
+VEFTU0NBL1RBU1NDQV9FVU0vQ1JMQ2VydGkuQ1JMMAoGCCqGSM49BAMCA0gAMEUC
+IQDfpdXc6eJZDAmv2GmcN8WVVDgdMNWemaljM2EDVSVWrAIgY5av/AYrRuCOoZpZ
+LrvWyTL3odrUjQe8Jv4U8w9RuSI=
+-----END CERTIFICATE-----

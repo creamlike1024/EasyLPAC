@@ -1,0 +1,64 @@
+notBefore=2017-07-11 00:00:00Z
+notAfter=2049-12-31 23:59:59Z
+Certificate:
+    Data:
+        Version: 3 (0x2)
+        Serial Number:
+            3d:f0:8e:e4:e6:0b:f9:c7:5b:6f:1d:84:4c:33:bb:0c
+        Signature Algorithm: ecdsa-with-SHA256
+        Issuer:
+            organizationName = Symantec Corporation
+            commonName = Symantec Corporation RSP Test Root CA - For Test Purposes Only
+        Validity
+            Not Before: Jul 11 00:00:00 2017 GMT
+            Not After : Dec 31 23:59:59 2049 GMT
+        Subject:
+            organizationName = Symantec Corporation
+            commonName = Symantec Corporation RSP Test Root CA - For Test Purposes Only
+        Subject Public Key Info:
+            Public Key Algorithm: id-ecPublicKey
+                Public-Key: (256 bit field, 128 bit security level)
+                pub:
+                    04:25:6c:46:2d:f4:f4:e6:75:67:1a:5f:95:82:eb:c4:
+                    98:4c:5c:99:71:b0:4d:bc:5a:49:5b:a6:d9:42:91:11:
+                    94:c2:00:bb:31:29:82:c7:1b:4c:37:1c:1e:d3:69:0e:
+                    a2:70:32:a6:57:08:ee:de:6c:29:91:2f:22:3a:8e:a7:
+                    b7
+                ASN1 OID: prime256v1
+                NIST CURVE: P-256
+        X509v3 extensions:
+            X509v3 Key Usage: critical
+                Certificate Sign, CRL Sign
+            X509v3 Basic Constraints: critical
+                CA:TRUE
+            X509v3 Certificate Policies: critical
+                Policy: 2.23.146.1.2.1.0
+            X509v3 CRL Distribution Points: 
+                Full Name:
+                  URI:http://pki-crl.symauth.com/SymantecRSPTestRootCA/LatestCRL.crl
+
+            X509v3 Subject Alternative Name: 
+                Registered ID:1.3.6.1.4.1.393
+            X509v3 Subject Key Identifier: 
+                66:5A:14:33:D6:7C:1A:2C:5D:B8:B5:2C:96:7F:10:A0:57:BA:5C:B2
+    Signature Algorithm: ecdsa-with-SHA256
+    Signature Value:
+        30:45:02:20:10:d6:ab:93:a9:c7:b1:bc:39:ca:be:60:24:aa:84:0f:d3:d4:0c:5c:
+        05:f1:94:2c:a6:6b:cd:8d:b6:b6:2a:51:02:21:00:ff:d6:ea:94:5a:98:11:a1:4a:
+        58:95:f8:46:a7:72:06:d9:8f:e5:68:3a:42:9d:8f:4a:3b:b0:ff:dc:29:d8:59
+-----BEGIN CERTIFICATE-----
+MIICkDCCAjagAwIBAgIQPfCO5OYL+cdbbx2ETDO7DDAKBggqhkjOPQQDAjBoMR0w
+GwYDVQQKExRTeW1hbnRlYyBDb3Jwb3JhdGlvbjFHMEUGA1UEAxM+U3ltYW50ZWMg
+Q29ycG9yYXRpb24gUlNQIFRlc3QgUm9vdCBDQSAtIEZvciBUZXN0IFB1cnBvc2Vz
+IE9ubHkwHhcNMTcwNzExMDAwMDAwWhcNNDkxMjMxMjM1OTU5WjBoMR0wGwYDVQQK
+ExRTeW1hbnRlYyBDb3Jwb3JhdGlvbjFHMEUGA1UEAxM+U3ltYW50ZWMgQ29ycG9y
+YXRpb24gUlNQIFRlc3QgUm9vdCBDQSAtIEZvciBUZXN0IFB1cnBvc2VzIE9ubHkw
+WTATBgcqhkjOPQIBBggqhkjOPQMBBwNCAAQlbEYt9PTmdWcaX5WC68SYTFyZcbBN
+vFpJW6bZQpERlMIAuzEpgscbTDccHtNpDqJwMqZXCO7ebCmRLyI6jqe3o4HBMIG+
+MA4GA1UdDwEB/wQEAwIBBjAPBgNVHRMBAf8EBTADAQH/MBcGA1UdIAEB/wQNMAsw
+CQYHZ4ESAQIBADBPBgNVHR8ESDBGMESgQqBAhj5odHRwOi8vcGtpLWNybC5zeW1h
+dXRoLmNvbS9TeW1hbnRlY1JTUFRlc3RSb290Q0EvTGF0ZXN0Q1JMLmNybDASBgNV
+HREECzAJiAcrBgEEAYMJMB0GA1UdDgQWBBRmWhQz1nwaLF24tSyWfxCgV7pcsjAK
+BggqhkjOPQQDAgNIADBFAiAQ1quTqcexvDnKvmAkqoQP09QMXAXxlCyma82NtrYq
+UQIhAP/W6pRamBGhSliV+EancgbZj+VoOkKdj0o7sP/cKdhZ
+-----END CERTIFICATE-----
