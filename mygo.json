@@ -2,7 +2,7 @@
   "name": "EasyLPAC",
   "slug": "easylpac",
   "identifier": "github.creamlike1024.EasyLPAC",
-  "version": "0.9.1",
+  "version": "0.9.2",
   "license": "MIT",
   "icon": "assets/icon.png",
   "main": "./cmd/easylpac",
