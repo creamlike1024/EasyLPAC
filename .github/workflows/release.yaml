@@ -66,7 +66,7 @@ jobs:
       - name: Install build dependencies
         run: |
           sudo apt-get update
-          sudo apt-get install -y cmake libpcsclite-dev nsis
+          sudo apt-get install -y cmake libpcsclite-dev
       - name: Build libeuicc
         run: |
           ./scripts/build-libeuicc.sh linux/amd64
@@ -76,10 +76,15 @@ jobs:
           CC: ${{ github.workspace }}/scripts/zcc
           CGO_LDFLAGS: -L/usr/lib/x86_64-linux-gnu -Wl,--allow-shlib-undefined
         run: go run github.com/egoist/mygo/cmd/mygo@v0.8.3 build -platform linux/amd64
+      # Windows ships the single executable, without the NSIS installer:
+      # it needs no files beside it, and libeuicc is linked in statically.
       - name: Build Windows (amd64)
         env:
           CC: ${{ github.workspace }}/scripts/zcc
-        run: go run github.com/egoist/mygo/cmd/mygo@v0.8.3 build -platform windows/amd64
+        run: |
+          go run github.com/egoist/mygo/cmd/mygo@v0.8.3 build -platform windows/amd64 -skip-installer
+          VERSION=$(jq -r .version mygo.json)
+          mv build/windows-amd64/EasyLPAC.exe "build/windows-amd64/easylpac-$VERSION-windows-amd64.exe"
       - name: Collect licenses and source
         run: ./scripts/collect-licenses.sh dist
       - uses: actions/upload-artifact@v7
@@ -88,7 +93,7 @@ jobs:
           path: |
             build/linux-amd64/*.tar.gz
             build/linux-amd64/*.deb
-            build/windows-amd64/*-setup-*.exe
+            build/windows-amd64/easylpac-*-windows-amd64.exe
             dist/*
 
   build-macos:
@@ -130,6 +135,25 @@ jobs:
         with:
           path: artifacts
           merge-multiple: true
+      # The release files go flat into release/, as their assets are named
+      # by file name. SHA256SUMS ships with them (sha256sum -c
+      # --ignore-missing SHA256SUMS checks a download), and its lines go in
+      # the notes.
+      - name: Checksums
+        run: |
+          mkdir release
+          find artifacts -type f -exec mv -t release {} +
+          cd release
+          ls | LC_ALL=C sort | xargs -d '\n' sha256sum > SHA256SUMS
+          {
+            echo '## SHA-256'
+            echo
+            echo '```'
+            cat SHA256SUMS
+            echo '```'
+          } > ../notes.md
       - uses: softprops/action-gh-release@v3
         with:
-          files: artifacts/**/*
+          files: release/*
+          body_path: notes.md
+          generate_release_notes: true
