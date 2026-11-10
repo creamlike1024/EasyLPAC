@@ -264,7 +264,11 @@ func (a *App) stage(t *Task) func(string) {
 // service builds a service from a snapshot of the settings.
 func (a *App) service(t *Task) (lpa.Service, error) {
 	cfg := *a.Settings
-	return a.newService(&cfg, a.stage(t))
+	svc, err := a.newService(&cfg, a.stage(t))
+	if err != nil {
+		return nil, err
+	}
+	return knownIDs{svc, a.Log}, nil
 }
 
 // RefreshDevices looks for the devices of the selected backend, once:

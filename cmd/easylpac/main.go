@@ -17,6 +17,9 @@ var Version = "development"
 
 func main() {
 	isDemo := demoBuild
+	if v := mygo.App.Version(); v != "" {
+		Version = v
+	}
 	// Nothing is read from or written to disk: every launch starts from
 	// the defaults, with no device chosen.
 	opts := app.Options{Version: Version, Settings: settings.Default()}
@@ -24,9 +27,6 @@ func main() {
 		useDemo(&opts)
 	}
 
-	if v := mygo.App.Version(); v != "" {
-		Version = v
-	}
 	g := newGUI(mygo.Clipboard)
 	g.demo = isDemo
 	title := "EasyLPAC"

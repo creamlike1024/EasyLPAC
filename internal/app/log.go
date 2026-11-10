@@ -8,6 +8,8 @@ import (
 	"strings"
 	"sync"
 	"time"
+
+	"EasyLPAC/internal/logmask"
 )
 
 // LogEntry is one line of the in-memory application log.
@@ -16,6 +18,10 @@ type LogEntry struct {
 	Level   slog.Level
 	Message string
 	Attrs   []LogAttr
+	// known are the identifiers obscured in raw data (APDUs, HTTP
+	// bodies) when the entry renders obscured: those the app has read
+	// by then, earlier entries included.
+	known *logmask.Set
 }
 
 // LogAttr is one key=value of an entry. Secrets are already redacted;
@@ -25,7 +31,9 @@ type LogAttr struct {
 	Identifier bool
 }
 
-// AttrText renders the attributes, obscuring identifiers when hide is set.
+// AttrText renders the attributes, obscuring identifiers when hide is
+// set: the identifier attributes, and the known identifiers in the
+// others' values.
 func (e LogEntry) AttrText(hide bool) string {
 	var sb strings.Builder
 	for i, a := range e.Attrs {
@@ -33,8 +41,11 @@ func (e LogEntry) AttrText(hide bool) string {
 			sb.WriteByte(' ')
 		}
 		v := a.Value
-		if hide && a.Identifier {
+		switch {
+		case hide && a.Identifier:
 			v = Mask(v)
+		case hide:
+			v = e.known.Apply(v)
 		}
 		if strings.ContainsAny(v, " \t\"") {
 			v = fmt.Sprintf("%q", v)
@@ -82,6 +93,8 @@ type LogBuffer struct {
 	version uint64
 	started time.Time
 	header  []string
+	// known are the identifiers read so far (AddIdentifiers).
+	known *logmask.Set
 	// raw is set once raw protocol data may have been logged.
 	raw bool
 	// onAppend is called (without the lock held) after each entry.
@@ -90,7 +103,13 @@ type LogBuffer struct {
 
 // NewLogBuffer returns a buffer holding at most max entries.
 func NewLogBuffer(max int) *LogBuffer {
-	return &LogBuffer{max: max, started: time.Now()}
+	return &LogBuffer{max: max, started: time.Now(), known: new(logmask.Set)}
+}
+
+// AddIdentifiers records EIDs, ICCIDs and IMEIs the app has read or was
+// given, which obscured entries hide in raw protocol data.
+func (b *LogBuffer) AddIdentifiers(values ...string) {
+	b.known.Add(logmask.Identifier, values...)
 }
 
 // SetHeader sets the environment lines written at the top of exports.
@@ -121,6 +140,7 @@ func (b *LogBuffer) add(e LogEntry) {
 		b.entries = append(b.entries[:0], b.entries[n:]...)
 		b.dropped += n
 	}
+	e.known = b.known
 	b.entries = append(b.entries, e)
 	b.version++
 	fn := b.onAppend
@@ -156,7 +176,11 @@ func (b *LogBuffer) Export(w io.Writer, hide bool) error {
 	if hide {
 		sb.WriteString("# EIDs and ICCIDs are obscured.\n")
 	}
-	if b.raw {
+	switch {
+	case b.raw && hide:
+		sb.WriteString("# Debug logging was on: this log holds raw APDUs and HTTP bodies. The EIDs,\n")
+		sb.WriteString("# ICCIDs and IMEIs read in this run are obscured in them; other data is not.\n")
+	case b.raw:
 		sb.WriteString("# WARNING: debug logging was on; this log holds raw APDUs and HTTP bodies,\n")
 		sb.WriteString("# which include card identifiers. Do not publish it.\n")
 	}
@@ -244,9 +268,4 @@ func redactSecret(a slog.Attr) slog.Attr {
 
 // Mask keeps the first 7 characters of an identifier (EID, ICCID) and
 // hides the rest, as the UI does.
-func Mask(s string) string {
-	if len(s) <= 7 {
-		return s
-	}
-	return s[:7] + strings.Repeat("*", len(s)-7)
-}
+func Mask(s string) string { return logmask.Mask(s) }

@@ -361,3 +361,37 @@ func TestDiscoveryChoosesNothing(t *testing.T) {
 		t.Fatalf("devices %v current %q busy %v", h.a.Devices, h.a.CurrentDevice(), h.a.Busy())
 	}
 }
+
+// Raw APDUs and HTTP bodies logged before the card is read have its
+// identifiers obscured once it is, when entries render obscured.
+func TestRawDataObscuredOnceRead(t *testing.T) {
+	const eid, iccid = "89086030202200000000000000000001", "8901000000000000001"
+	card := &fakeCard{profiles: []*lpa.Profile{{Iccid: iccid, ProfileState: "enabled"}}}
+	h := newHarness(t, card)
+	h.a.Logger.Info("debug", "rx", "BF3E125A10"+eid, "body", `{"x":"`+iccid+`"}`)
+	h.a.Logger.Info("apdu", "rx", "E3125A0A"+"981000000000000000F1")
+	entries, _ := h.a.Log.Snapshot()
+	if raw := entries[len(entries)-2]; raw.Message != "debug" || !strings.Contains(raw.AttrText(true), eid) {
+		t.Fatalf("obscured before the card was read: %s", raw.Text(true))
+	}
+	if err := h.a.Refresh(); err != nil {
+		t.Fatal(err)
+	}
+	h.wait(t)
+	var buf bytes.Buffer
+	_ = h.a.Log.Export(&buf, true)
+	out := buf.String()
+	for _, leak := range []string{eid, iccid, "981000000000000000F1"} {
+		if strings.Contains(out, leak) {
+			t.Fatalf("%s not obscured:\n%s", leak, out)
+		}
+	}
+	if !strings.Contains(out, "BF3E125A10"+Mask(eid)) {
+		t.Fatalf("EID not masked as the UI does:\n%s", out)
+	}
+	buf.Reset()
+	_ = h.a.Log.Export(&buf, false)
+	if !strings.Contains(buf.String(), "E3125A0A981000000000000000F1") {
+		t.Fatalf("shown in full, raw data changed:\n%s", buf.String())
+	}
+}

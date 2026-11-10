@@ -1,6 +1,10 @@
 package main
 
-import "github.com/egoist/mygo/ui"
+import (
+	"github.com/egoist/mygo/ui"
+
+	"EasyLPAC/internal/settings"
+)
 
 // icon builds a 24×24 line icon drawn in the current text color.
 func icon(shapes string) *ui.SVG {
@@ -25,7 +29,17 @@ var (
 	iconExport   = icon(`<path d="M12 3v12M7 8l5-5 5 5"/><path d="M5 14v5a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-5"/>`)
 	iconAlert    = icon(`<path d="M12 3 2.5 20h19z"/><path d="M12 10v4.5M12 17.5v.01"/>`)
 	iconReader   = icon(`<rect x="3" y="8" width="18" height="11" rx="2"/><path d="M7 8V5h10v3"/><path d="M7 14h4"/>`)
+	iconModem    = icon(`<rect x="3" y="12" width="18" height="8" rx="2"/><path d="M16 12V8.5"/><path d="M13.5 6.5a3.5 3.5 0 0 1 5 0M11.5 4.5a6.5 6.5 0 0 1 9 0"/><path d="M7 16h.01M10 16h.01"/>`)
 	iconChevron  = icon(`<path d="m9 6 6 6-6 6"/>`)
 	iconExternal = icon(`<path d="M14 4h6v6M20 4l-9 9"/><path d="M18 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h5"/>`)
 	iconInfo     = icon(`<circle cx="12" cy="12" r="9"/><path d="M12 11v5.5M12 7.5v.01"/>`)
 )
+
+// deviceIcon is the icon of the devices of backend: a modem for AT, a
+// card reader for PC/SC.
+func deviceIcon(backend string) *ui.SVG {
+	if backend == settings.BackendAT {
+		return iconModem
+	}
+	return iconReader
+}

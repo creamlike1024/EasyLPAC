@@ -10,7 +10,6 @@ package euiccsvc
 
 import (
 	"context"
-	"encoding/hex"
 	"errors"
 	"fmt"
 	"log/slog"
@@ -21,6 +20,7 @@ import (
 
 	"EasyLPAC/internal/euicc"
 	"EasyLPAC/internal/httptransport"
+	"EasyLPAC/internal/logmask"
 	"EasyLPAC/internal/lpa"
 	"EasyLPAC/internal/transport"
 )
@@ -67,19 +67,26 @@ func New(cfg Config) (*Service, error) {
 // withContext opens a card session and a libeuicc context for one
 // operation, then releases both. Errors from fn are returned as-is.
 func (s *Service) withContext(ctx context.Context, fn func(*euicc.Context) error) error {
+	return s.withSecrets(ctx, nil, fn)
+}
+
+// withSecrets is withContext with secrets of the operation (the
+// matching ID of a download) starred in the APDUs and HTTP bodies it
+// logs.
+func (s *Service) withSecrets(ctx context.Context, secrets *logmask.Set, fn func(*euicc.Context) error) error {
 	session, err := s.cfg.Backend.Open(ctx, s.cfg.Device)
 	if err != nil {
 		return &lpa.OpError{Stage: lpa.StageConnect, BackendID: s.cfg.Backend.ID(),
 			Op: "open", Cause: err, StateKnown: true}
 	}
 
-	adapter := &sessionAPDU{session: session}
+	adapter := &sessionAPDU{session: session, secrets: secrets}
 	var httpIface euicc.HTTPInterface = httptransport.New(ctx, httptransport.Options{Client: s.cfg.HTTPClient})
 	if l := s.cfg.Logger; l != nil {
 		if s.cfg.DebugAPDU {
 			adapter.log = l
 		}
-		httpIface = &loggedHTTP{inner: httpIface, log: l, bodies: s.cfg.DebugHTTP}
+		httpIface = &loggedHTTP{inner: httpIface, log: l, bodies: s.cfg.DebugHTTP, secrets: secrets}
 	}
 	c, err := euicc.New(adapter, httpIface, s.cfg.AID)
 	if err != nil {
@@ -114,6 +121,8 @@ type sessionAPDU struct {
 	session transport.CardSession
 	// log receives every APDU exchange when set.
 	log *slog.Logger
+	// secrets are starred in what is logged.
+	secrets *logmask.Set
 }
 
 func (a *sessionAPDU) Connect() error { return nil }
@@ -123,7 +132,7 @@ func (a *sessionAPDU) Disconnect() { _ = a.session.Close() }
 func (a *sessionAPDU) LogicChannelOpen(aid []byte) (uint8, error) {
 	ch, err := a.session.OpenLogicalChannel(context.Background(), aid)
 	if a.log != nil {
-		a.log.Debug("apdu open channel", "aid", hex.EncodeToString(aid), "channel", ch, "err", err)
+		a.log.Debug("apdu open channel", "aid", hexUpper(aid), "channel", ch, "err", err)
 	}
 	return ch, err
 }
@@ -135,24 +144,19 @@ func (a *sessionAPDU) LogicChannelClose(channel uint8) {
 func (a *sessionAPDU) Transmit(apdu []byte) ([]byte, error) {
 	resp, err := a.session.Transmit(context.Background(), apdu)
 	if a.log != nil {
-		a.log.Debug("apdu", "tx", hexCap(apdu, 512), "rx", hexCap(resp, 512), "err", err)
+		a.log.Debug("apdu", apduAttrs(apdu, resp, err, a.secrets.Apply)...)
 	}
 	return resp, err
 }
 
-func hexCap(b []byte, max int) string {
-	if len(b) > max {
-		return hex.EncodeToString(b[:max]) + fmt.Sprintf("…(+%d bytes)", len(b)-max)
-	}
-	return hex.EncodeToString(b)
-}
-
 // loggedHTTP logs each ES9+ exchange: endpoint, status and duration at
-// info level, and the bodies at debug level when bodies is set.
+// info level, and the bodies at debug level when bodies is set, with
+// secrets starred.
 type loggedHTTP struct {
-	inner  euicc.HTTPInterface
-	log    *slog.Logger
-	bodies bool
+	inner   euicc.HTTPInterface
+	log     *slog.Logger
+	bodies  bool
+	secrets *logmask.Set
 }
 
 // matchingIDField hides the matching ID in logged request bodies.
@@ -168,8 +172,9 @@ func (h *loggedHTTP) Transmit(url string, headers []string, tx []byte) (uint32, 
 	h.log.Info("http", "endpoint", endpoint, "status", code, "elapsed", time.Since(start).Round(time.Millisecond),
 		"sent", len(tx), "received", len(rx), "err", err)
 	if h.bodies {
-		h.log.Debug("http request", "endpoint", endpoint, "body", textCap(matchingIDField.ReplaceAllString(string(tx), "${1}(redacted)${2}"), 2048))
-		h.log.Debug("http response", "endpoint", endpoint, "body", textCap(string(rx), 2048))
+		req := matchingIDField.ReplaceAllString(string(tx), "${1}(redacted)${2}")
+		h.log.Debug("http request", "endpoint", endpoint, "body", textCap(h.secrets.Apply(req), 2048))
+		h.log.Debug("http response", "endpoint", endpoint, "body", textCap(h.secrets.Apply(string(rx)), 2048))
 	}
 	return code, rx, err
 }

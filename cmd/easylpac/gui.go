@@ -206,7 +206,7 @@ func (g *gui) deviceCard(c *ui.Context) {
 		card.Background(t.Background).Border(1, t.Border).Shadow(0, 1, 2, 0, ui.RGBA(0, 0, 0, 0.05))
 	}
 	card.Children(func() {
-		ui.Icon(c, iconReader).Size(18, 18).TextColor(t.TextMuted)
+		ui.Icon(c, deviceIcon(g.app.Settings.Backend)).Size(18, 18).TextColor(t.TextMuted)
 		ui.Column(c).Grow(1).MinWidth(0).Gap(2).Children(func() {
 			ui.Row(c).Gap(6).Children(func() {
 				ui.Text(c, name).FontSize(12).Bold().SingleLine().MinWidth(0)
@@ -379,7 +379,7 @@ func (g *gui) connectionHint(c *ui.Context) bool {
 		if g.app.Settings.Backend == settings.BackendAT {
 			title = locales.HintChoosePort()
 		}
-		emptyState(c, iconReader, title, locales.HintChooseBody(), func() {
+		emptyState(c, deviceIcon(g.app.Settings.Backend), title, locales.HintChooseBody(), func() {
 			if ui.PrimaryButton(c, locales.HintOpenSettings()).Clicked() {
 				g.page = pageSettings
 			}
@@ -396,7 +396,7 @@ func (g *gui) connectionHint(c *ui.Context) bool {
 			}
 		})
 	case !g.app.DevicePresent():
-		emptyState(c, iconReader, locales.HintDeviceGone(g.app.CurrentDevice()), locales.HintDeviceGoneBody(), func() {
+		emptyState(c, deviceIcon(g.app.Settings.Backend), locales.HintDeviceGone(g.app.CurrentDevice()), locales.HintDeviceGoneBody(), func() {
 			if ui.PrimaryButton(c, locales.HintOpenSettings()).Clicked() {
 				g.page = pageSettings
 			}

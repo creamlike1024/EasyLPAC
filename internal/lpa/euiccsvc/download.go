@@ -10,6 +10,7 @@ import (
 	"strings"
 
 	"EasyLPAC/internal/euicc"
+	"EasyLPAC/internal/logmask"
 	"EasyLPAC/internal/lpa"
 )
 
@@ -131,7 +132,11 @@ const (
 // reported BPP command id / error reason so the card state is known.
 func (s *Service) ProfileDownload(ctx context.Context, req lpa.DownloadRequest) (*lpa.DownloadOutcome, error) {
 	var outcome *lpa.DownloadOutcome
-	err := s.withContext(ctx, func(c *euicc.Context) error {
+	// The matching ID travels in AuthenticateServer's ctxParams1 and in
+	// authenticateClient's body, besides initiateAuthentication's field.
+	secrets := new(logmask.Set)
+	secrets.Add(logmask.Secret, req.MatchID)
+	err := s.withSecrets(ctx, secrets, func(c *euicc.Context) error {
 		smdp := req.SMDP
 		if smdp == "" {
 			// Fall back to the card's configured default SM-DP+.
