@@ -38,9 +38,9 @@ However, arbitrary manipulation of notifications does not comply with GSMA speci
 
 # Screenshots
 <p>
-<a href="https://github.com/creamlike1024/EasyLPAC/blob/master/screenshots/chipinfo.png"><img src="https://github.com/creamlike1024/EasyLPAC/blob/master/screenshots/chipinfo.png?raw=true"  height="180px"/></a>
-<a href="https://github.com/creamlike1024/EasyLPAC/blob/master/screenshots/notification.png"><img src="https://github.com/creamlike1024/EasyLPAC/blob/master/screenshots/notification.png?raw=true" height="180px"/></a>
-<a href="https://github.com/creamlike1024/EasyLPAC/blob/master/screenshots/profile.png"><img src="https://github.com/creamlike1024/EasyLPAC/blob/master/screenshots/profile.png?raw=true" height="180px"/></a>
+<a href="https://github.com/creamlike1024/EasyLPAC/blob/legacy/screenshots/chipinfo.png"><img src="https://github.com/creamlike1024/EasyLPAC/blob/legacy/screenshots/chipinfo.png?raw=true"  height="180px"/></a>
+<a href="https://github.com/creamlike1024/EasyLPAC/blob/legacy/screenshots/notification.png"><img src="https://github.com/creamlike1024/EasyLPAC/blob/legacy/screenshots/notification.png?raw=true" height="180px"/></a>
+<a href="https://github.com/creamlike1024/EasyLPAC/blob/legacy/screenshots/profile.png"><img src="https://github.com/creamlike1024/EasyLPAC/blob/legacy/screenshots/profile.png?raw=true" height="180px"/></a>
 </p>
 
 # FAQ

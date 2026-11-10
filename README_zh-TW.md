@@ -38,9 +38,9 @@ EasyLPAC 預設會處理任何操作的通知，並在處理成功後自動刪�
 
 # 截圖
 <p>
-<a href="https://github.com/creamlike1024/EasyLPAC/blob/master/screenshots/chipinfo.png"><img src="https://github.com/creamlike1024/EasyLPAC/blob/master/screenshots/chipinfo.png?raw=true"  height="180px"/></a>
-<a href="https://github.com/creamlike1024/EasyLPAC/blob/master/screenshots/notification.png"><img src="https://github.com/creamlike1024/EasyLPAC/blob/master/screenshots/notification.png?raw=true" height="180px"/></a>
-<a href="https://github.com/creamlike1024/EasyLPAC/blob/master/screenshots/profile.png"><img src="https://github.com/creamlike1024/EasyLPAC/blob/master/screenshots/profile.png?raw=true" height="180px"/></a>
+<a href="https://github.com/creamlike1024/EasyLPAC/blob/legacy/screenshots/chipinfo.png"><img src="https://github.com/creamlike1024/EasyLPAC/blob/legacy/screenshots/chipinfo.png?raw=true"  height="180px"/></a>
+<a href="https://github.com/creamlike1024/EasyLPAC/blob/legacy/screenshots/notification.png"><img src="https://github.com/creamlike1024/EasyLPAC/blob/legacy/screenshots/notification.png?raw=true" height="180px"/></a>
+<a href="https://github.com/creamlike1024/EasyLPAC/blob/legacy/screenshots/profile.png"><img src="https://github.com/creamlike1024/EasyLPAC/blob/legacy/screenshots/profile.png?raw=true" height="180px"/></a>
 </p>
 
 # 常見問題
