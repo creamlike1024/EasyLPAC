@@ -16,6 +16,8 @@ permissions:
 # one package per architecture.
 # The eUICC data embedded is the one committed in internal/registry/data;
 # CI never downloads it (scripts/update-euicc-data.sh is run by hand).
+# CMake comes with the runner images (/usr/local/bin on Ubuntu, Homebrew
+# on macOS); apt only adds the PC/SC headers.
 env:
   ZIG_VERSION: 0.17.1
   CGO_ENABLED: '1'
@@ -36,7 +38,7 @@ jobs:
       - name: Install build dependencies
         run: |
           sudo apt-get update
-          sudo apt-get install -y cmake libpcsclite-dev
+          sudo apt-get install -y --no-install-recommends libpcsclite-dev
       - name: Build libeuicc (linux/amd64)
         run: ./scripts/build-libeuicc.sh linux/amd64
       - name: Test
@@ -66,7 +68,7 @@ jobs:
       - name: Install build dependencies
         run: |
           sudo apt-get update
-          sudo apt-get install -y cmake libpcsclite-dev
+          sudo apt-get install -y --no-install-recommends libpcsclite-dev
       - name: Build libeuicc
         run: |
           ./scripts/build-libeuicc.sh linux/amd64
