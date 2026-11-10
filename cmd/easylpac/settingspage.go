@@ -5,6 +5,8 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/egoist/mygo"
+	"github.com/egoist/mygo/i18n"
 	"github.com/egoist/mygo/ui"
 
 	"EasyLPAC/internal/app"
@@ -67,6 +69,13 @@ func (g *gui) settingsPage(c *ui.Context) {
 		ui.Divider(c)
 		toggleRow(c, locales.SettingsHideIds(), locales.SettingsHideIdsBody(),
 			cfg.HideIdentifiers, func(on bool) { g.app.UpdateSettings(func(s *settings.Config) { s.HideIdentifiers = on }) })
+	})
+
+	sectionTitle(c, locales.SettingsAppearance())
+	card(c, func() {
+		themeSettings(c)
+		ui.Divider(c)
+		g.languageSettings(c)
 	})
 
 	sectionTitle(c, locales.SettingsDiagnostics())
@@ -232,6 +241,39 @@ func (g *gui) aidSettings(c *ui.Context, busy bool) {
 		ui.Text(c, locales.SettingsAidNotApplied(cfg.AID)).FontSize(12).Font("monospace").TextColor(t.TextMuted)
 	}
 	ui.Text(c, locales.SettingsAidHint()).FontSize(12).TextColor(t.TextMuted)
+}
+
+// themeSettings picks the appearance. MyGo keeps it until the app quits:
+// each launch follows the system again.
+func themeSettings(c *ui.Context) {
+	choice := slices.Index(themeSources, mygo.Theme.Source())
+	ui.Field(c, locales.SettingsTheme(), func() {
+		if ui.Segmented(c, &choice, locales.SettingsThemeSystem(), locales.SettingsThemeLight(), locales.SettingsThemeDark()).AlignSelf(ui.Start).Changed() {
+			mygo.Theme.SetSource(themeSources[choice])
+		}
+	})
+}
+
+// languageSettings picks the language the app shows, or the user's
+// languages, which MyGo keeps for the next launches. Each language is
+// named in itself, so a reader lost in another language finds theirs.
+func (g *gui) languageSettings(c *ui.Context) {
+	tags := append([]string{""}, mygo.App.Languages()...)
+	names := []string{locales.SettingsLanguageSystem()}
+	for _, tag := range tags[1:] {
+		name := i18n.Autonym(tag)
+		if name == "" {
+			name = tag
+		}
+		names = append(names, name)
+	}
+	choice := names[max(slices.Index(tags, g.locale), 0)]
+	ui.Field(c, locales.SettingsLanguage(), func() {
+		if ui.Select(c, &choice, names).Label(locales.SettingsLanguage()).Width(200).Changed() {
+			g.locale = tags[slices.Index(names, choice)]
+			mygo.App.SetLocale(g.locale)
+		}
+	})
 }
 
 // manualNotifyWarning tells what turning automatic notifications off means.

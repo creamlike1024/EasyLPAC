@@ -20,8 +20,9 @@ func main() {
 	if v := mygo.App.Version(); v != "" {
 		Version = v
 	}
-	// Nothing is read from or written to disk: every launch starts from
-	// the defaults, with no device chosen.
+	// Only the language is kept between launches, by MyGo (SetLocale);
+	// every launch starts from the default settings and appearance, with
+	// no device chosen.
 	opts := app.Options{Version: Version, Settings: settings.Default()}
 	if isDemo {
 		useDemo(&opts)
@@ -34,6 +35,7 @@ func main() {
 		title = "EasyLPAC (Demo)"
 	}
 	mygo.App.WhenReady(func() {
+		g.locale = chosenLocale()
 		g.win = mygo.NewWindow(mygo.WindowOptions{
 			Title:          title,
 			Width:          1040,

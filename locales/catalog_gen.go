@@ -1298,6 +1298,76 @@ func (msgs Messages) SettingsDiagnostics() string {
 	return Catalog.Format(msgs.locale, "settingsDiagnostics", nil)
 }
 
+// SettingsAppearance says "Appearance"
+// in the language the app shows.
+func SettingsAppearance() string { return In(i18n.Locale()).SettingsAppearance() }
+
+// SettingsAppearance says "Appearance"
+// in the language of msgs.
+func (msgs Messages) SettingsAppearance() string {
+	return Catalog.Format(msgs.locale, "settingsAppearance", nil)
+}
+
+// SettingsTheme says "Theme"
+// in the language the app shows.
+func SettingsTheme() string { return In(i18n.Locale()).SettingsTheme() }
+
+// SettingsTheme says "Theme"
+// in the language of msgs.
+func (msgs Messages) SettingsTheme() string {
+	return Catalog.Format(msgs.locale, "settingsTheme", nil)
+}
+
+// SettingsThemeSystem says "System"
+// in the language the app shows.
+func SettingsThemeSystem() string { return In(i18n.Locale()).SettingsThemeSystem() }
+
+// SettingsThemeSystem says "System"
+// in the language of msgs.
+func (msgs Messages) SettingsThemeSystem() string {
+	return Catalog.Format(msgs.locale, "settingsThemeSystem", nil)
+}
+
+// SettingsThemeLight says "Light"
+// in the language the app shows.
+func SettingsThemeLight() string { return In(i18n.Locale()).SettingsThemeLight() }
+
+// SettingsThemeLight says "Light"
+// in the language of msgs.
+func (msgs Messages) SettingsThemeLight() string {
+	return Catalog.Format(msgs.locale, "settingsThemeLight", nil)
+}
+
+// SettingsThemeDark says "Dark"
+// in the language the app shows.
+func SettingsThemeDark() string { return In(i18n.Locale()).SettingsThemeDark() }
+
+// SettingsThemeDark says "Dark"
+// in the language of msgs.
+func (msgs Messages) SettingsThemeDark() string {
+	return Catalog.Format(msgs.locale, "settingsThemeDark", nil)
+}
+
+// SettingsLanguage says "Language"
+// in the language the app shows.
+func SettingsLanguage() string { return In(i18n.Locale()).SettingsLanguage() }
+
+// SettingsLanguage says "Language"
+// in the language of msgs.
+func (msgs Messages) SettingsLanguage() string {
+	return Catalog.Format(msgs.locale, "settingsLanguage", nil)
+}
+
+// SettingsLanguageSystem says "System"
+// in the language the app shows.
+func SettingsLanguageSystem() string { return In(i18n.Locale()).SettingsLanguageSystem() }
+
+// SettingsLanguageSystem says "System"
+// in the language of msgs.
+func (msgs Messages) SettingsLanguageSystem() string {
+	return Catalog.Format(msgs.locale, "settingsLanguageSystem", nil)
+}
+
 // SettingsAutoNotify says "Send notifications"
 // in the language the app shows.
 func SettingsAutoNotify() string { return In(i18n.Locale()).SettingsAutoNotify() }

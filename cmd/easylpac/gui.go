@@ -63,6 +63,8 @@ type gui struct {
 	aidCustomMode bool
 	aidInit       bool
 	atPort        string
+	// locale is the language chosen, "" to follow the user's.
+	locale string
 
 	// Log page.
 	logList ui.ListState
