@@ -1,4 +1,6 @@
 # EasyLPAC
+[![Listed on Awesome MyGo](https://awesomemygo.dev/badge.svg)](https://awesomemygo.dev/apps/easylpac)
+
 **語言:** [English](./README.md) | [日本語](./README_ja-JP.md)
 
 用於管理可插拔 eUICC 上 eSIM 的圖形化 LPA。
@@ -10,7 +12,7 @@
 
 ## 下載
 
-[GitHub Release](https://github.com/creamlike1024/EasyLPAC/releases/latest)：
+[GitHub Release](https://github.com/creamlike1024/EasyLPAC/releases/latest)
 
 # 用法
 

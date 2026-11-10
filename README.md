@@ -1,4 +1,6 @@
 # EasyLPAC
+[![Listed on Awesome MyGo](https://awesomemygo.dev/badge.svg)](https://awesomemygo.dev/apps/easylpac)
+
 **Language:** [日本語](./README_ja-JP.md) | [正體中文](./README_zh-TW.md)
 
 A GUI LPA for managing eSIMs on removable eUICCs.
@@ -10,7 +12,7 @@ A GUI LPA for managing eSIMs on removable eUICCs.
 
 ## Download
 
-[GitHub Release](https://github.com/creamlike1024/EasyLPAC/releases/latest):
+[GitHub Release](https://github.com/creamlike1024/EasyLPAC/releases/latest)
 
 # Usage
 
