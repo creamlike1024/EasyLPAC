@@ -31,11 +31,15 @@ windows) SYSTEM=Windows ;;
 esac
 
 # The compiler wrapper picks the zig target from GOOS/GOARCH.
+# LTO is off on every target, which also skips lpac's probe for it: on
+# windows-gnu zig's LTO does not link, and the probe's errors fill the
+# log.
 export GOOS="$GOOS_T" GOARCH="$GOARCH_T"
 cmake -S "$SRC" -B "$BUILD" \
 	-DLPAC_BUILD_LIBEUICC_ONLY=ON \
 	-DLPAC_DYNAMIC_LIBEUICC=OFF \
 	-DBUILD_TESTING=OFF \
+	-DCMAKE_INTERPROCEDURAL_OPTIMIZATION=OFF \
 	-DCMAKE_BUILD_TYPE="${CMAKE_BUILD_TYPE:-Release}" \
 	-DCMAKE_SYSTEM_NAME="$SYSTEM" \
 	-DCMAKE_C_COMPILER="$ROOT/scripts/zcc" \
