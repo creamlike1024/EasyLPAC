@@ -46,7 +46,7 @@ lpac 是位於 `third_party/lpac` 的 git 子模組。若複製時未加 `--recu
 
 ## 版本號
 
-`mygo.json` 不記錄實際版本號（內容為 `0.0.0-dev`）：建置腳本會以 `scripts/version.sh` 從 git 標籤取得版本號。在發行標籤上建置即為該版本，如 `0.9.3`；在之後的提交上建置則為快照版本，如 `0.9.3.r12.ga4e79e0`（0.9.3 之後第 12 個提交，commit 為 a4e79e0），有未提交的變更時結尾再加上 `.dirty`。對 dpkg、rpm 與 pacman 而言，快照版本都排在其前一個發行版本之後、下一個發行版本之前，因此也可直接作為 Arch Linux `-git` 套件的 `pkgver`：
+`mygo.json` 不記錄實際版本號（內容為 `0.0.0-dev`）：建置腳本會以 `scripts/version.sh` 從 git 標籤取得版本號。在發行標籤上建置即為該版本，如標籤 `v0.9.3` 的 `0.9.3`；在之後的提交上建置則為快照版本，如 `0.9.3.r12.ga4e79e0`（0.9.3 之後第 12 個提交，commit 為 a4e79e0），有未提交的變更時結尾再加上 `.dirty`。對 dpkg、rpm 與 pacman 而言，快照版本都排在其前一個發行版本之後、下一個發行版本之前，因此也可直接作為 Arch Linux `-git` 套件的 `pkgver`：
 
 ```sh
 pkgver() {
@@ -59,14 +59,14 @@ pkgver() {
 
 ## 發行流程
 
-開發在 `master` 上進行。CI 會測試並建置每次推送與 pull request，並將套件保存為該次執行的 artifact。發行時，在 CI 已通過的 `master` 提交上打 `x.y.z` 標籤（預發行版本為 `x.y.z-rc.1`），並推送該標籤：
+開發在 `master` 上進行。CI 會測試並建置每次推送與 pull request，並將套件保存為該次執行的 artifact。發行時，在 CI 已通過的 `master` 提交上打 `vx.y.z` 標籤（預發行版本為 `vx.y.z-rc.1`；開頭的 `v` 是 MyGo 自動更新所要求的），並推送該標籤：
 
 ```sh
-git tag 0.9.3
-git push origin 0.9.3
+git tag v0.9.3
+git push origin v0.9.3
 ```
 
-該標籤的 CI 會以此版本號建置套件並發布 GitHub Release。舊版本的修正先提交到 `master`，再 cherry-pick 到從該版本標籤建立的 `release/x.y` 分支（`git switch -c release/0.9 0.9.3`），並在該分支上打標籤。
+該標籤的 CI 會以此版本號建置套件並發布 GitHub Release。舊版本的修正先提交到 `master`，再 cherry-pick 到從該版本標籤建立的 `release/x.y` 分支（`git switch -c release/0.9 v0.9.3`），並在該分支上打標籤。
 
 ## Linux
 

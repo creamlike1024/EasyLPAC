@@ -1,17 +1,18 @@
 name: Build
 # Every push to master or a release/ branch, and every pull request, is
 # tested and built: the packages are the run's artifacts, with a snapshot
-# version (0.9.2.r12.ga4e79e0). A pushed release tag (0.9.3, 0.10.0-rc.1)
-# builds the same way, with the tag as the version, and publishes the
-# GitHub Release; a pre-release tag makes a pre-release.
+# version (0.9.2.r12.ga4e79e0). A pushed release tag (v0.9.3,
+# v0.10.0-rc.1) builds the same way, with the tag without its "v" as the
+# version, and publishes the GitHub Release; a pre-release tag makes a
+# pre-release. Tags begin with "v" as mygo's updater expects (tagPrefix).
 on:
   push:
     branches:
       - master
       - 'release/**'
     tags:
-      - '[0-9]+.[0-9]+.[0-9]+'
-      - '[0-9]+.[0-9]+.[0-9]+-*'
+      - 'v[0-9]+.[0-9]+.[0-9]+'
+      - 'v[0-9]+.[0-9]+.[0-9]+-*'
   pull_request:
   workflow_dispatch:
 
@@ -51,8 +52,9 @@ jobs:
         with:
           submodules: true # third_party/lpac
           fetch-depth: 0 # the tags and history scripts/version.sh reads
-      # A release tag is the version, checked for the form x.y.z[-pre] by
-      # scripts/version.sh; anything else is a snapshot of the git history.
+      # A release tag, without its "v", is the version, checked for the
+      # form x.y.z[-pre] by scripts/version.sh; anything else is a snapshot
+      # of the git history.
       - name: Version
         id: version
         run: |
