@@ -44,6 +44,30 @@ cd EasyLPAC
 
 lpac は `third_party/lpac` にある git サブモジュールです。`--recursive` を付けずにクローンした場合は、先に `git submodule update --init` を実行してください。
 
+## バージョン
+
+`mygo.json` には実際のバージョンを記録しません（`0.0.0-dev` のままです）。ビルドスクリプトが `scripts/version.sh` で git のタグからバージョンを求めます。リリースタグ上のビルドはそのバージョン（例：`0.9.3`）、それ以降のコミットのビルドはスナップショット（例：`0.9.3.r12.ga4e79e0`、0.9.3 から 12 コミット後のコミット a4e79e0）になり、未コミットの変更があれば末尾に `.dirty` が付きます。スナップショットは dpkg・rpm・pacman のいずれでも直前のリリースより新しく、次のリリースより古いと判定されるため、Arch Linux の `-git` パッケージの `pkgver` としてそのまま使えます：
+
+```sh
+pkgver() {
+  cd "$srcdir/EasyLPAC"
+  ./scripts/version.sh
+}
+```
+
+履歴とタグが必要です。シャロークローン（`--depth 1`）には数え始めるタグがありません。`EASYLPAC_VERSION=0.9.3 ./scripts/build-app.sh` でバージョンを手動で指定できます。
+
+## リリース
+
+開発は `master` で行います。CI はすべての push と pull request をテスト・ビルドし、パッケージをその実行の artifact として残します。リリースするには、CI が通った `master` のコミットに `x.y.z`（プレリリースは `x.y.z-rc.1`）のタグを付けて push します：
+
+```sh
+git tag 0.9.3
+git push origin 0.9.3
+```
+
+タグの CI がそのバージョンでパッケージをビルドし、GitHub Release を公開します。古いリリースの修正は `master` にコミットしたうえで、そのリリースのタグから作った `release/x.y` ブランチ（`git switch -c release/0.9 0.9.3`）に cherry-pick し、そこでタグを付けます。
+
 ## Linux
 
 **注意：Linux でのビルド手順は未検証です。**

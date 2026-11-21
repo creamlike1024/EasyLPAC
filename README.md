@@ -44,6 +44,30 @@ cd EasyLPAC
 
 lpac is a git submodule at `third_party/lpac`. If you cloned without `--recursive`, run `git submodule update --init` first.
 
+## Versions
+
+`mygo.json` holds no real version (it says `0.0.0-dev`): the build scripts take it from the git tags, with `scripts/version.sh`. A build of a release tag has that version, as `0.9.3`; a build of a later commit is a snapshot, as `0.9.3.r12.ga4e79e0` (12 commits after 0.9.3, at commit a4e79e0), with `.dirty` at the end when there are uncommitted changes. A snapshot sorts after the release it follows and before the next one, for dpkg, rpm and pacman alike, so it is also the `pkgver` of an Arch Linux `-git` package as it is:
+
+```sh
+pkgver() {
+  cd "$srcdir/EasyLPAC"
+  ./scripts/version.sh
+}
+```
+
+The history and the tags are needed: a shallow clone (`--depth 1`) has no tag to count from. `EASYLPAC_VERSION=0.9.3 ./scripts/build-app.sh` sets the version by hand.
+
+## Releases
+
+Development happens on `master`. CI tests and builds every push and pull request, and keeps the packages as the run's artifacts. To release, tag a commit of `master` whose CI passed as `x.y.z` (`x.y.z-rc.1` for a pre-release), and push the tag:
+
+```sh
+git tag 0.9.3
+git push origin 0.9.3
+```
+
+The tag's run builds the packages with that version and publishes the GitHub Release. A fix for an older release is made on `master`, cherry-picked to a `release/x.y` branch made from that release's tag (`git switch -c release/0.9 0.9.3`), and tagged there.
+
 ## Linux
 
 **Note: The build steps on Linux have not been tested.**

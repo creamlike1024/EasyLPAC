@@ -3,7 +3,8 @@
 # libeuicc, then the app bundle and installer with MyGo. Extra arguments go
 # to `mygo build`. The eUICC data embedded is the one committed in
 # internal/registry/data: builds never download it (to update it, run
-# scripts/update-euicc-data.sh and commit the result).
+# scripts/update-euicc-data.sh and commit the result). The version is the
+# one scripts/version.sh gives from the git tags (EASYLPAC_VERSION sets it).
 #
 #   ./scripts/build-app.sh            # release build, build/<os>-<arch>/
 #
@@ -27,4 +28,6 @@ fi
 export CC="$ROOT/scripts/zcc"
 # mygo_nowebview: every window is native UI, so Windows builds leave
 # WebView2 out (the tag does nothing on other platforms).
-GOFLAGS="${GOFLAGS:+$GOFLAGS }-tags=mygo_nowebview" CGO_ENABLED=1 go run github.com/egoist/mygo/cmd/mygo@v0.10.0 build "$@"
+# The version comes from git (scripts/version.sh), not from mygo.json.
+GOFLAGS="${GOFLAGS:+$GOFLAGS }-tags=mygo_nowebview" CGO_ENABLED=1 \
+	./scripts/with-version.sh go run github.com/egoist/mygo/cmd/mygo@v0.10.0 build "$@"

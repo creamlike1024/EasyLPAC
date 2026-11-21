@@ -21,4 +21,4 @@ export CC="$ROOT/scripts/zcc"
 # mygo_nowebview: every window is native UI, so Windows builds leave
 # WebView2 out (the tag does nothing on other platforms).
 GOFLAGS="${GOFLAGS:+$GOFLAGS }-tags=demo,mygo_nowebview" CGO_ENABLED=1 \
-	go run github.com/egoist/mygo/cmd/mygo@v0.10.0 build -o build/demo --skip-dmg "$@"
+	./scripts/with-version.sh go run github.com/egoist/mygo/cmd/mygo@v0.10.0 build -o build/demo --skip-dmg "$@"
