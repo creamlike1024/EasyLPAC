@@ -5,7 +5,7 @@ go 1.27.3
 require (
 	github.com/creack/pty v1.1.24
 	github.com/ebfe/scard v0.0.0-20241214075232-7af069cabc25
-	github.com/egoist/mygo v0.8.3
+	github.com/egoist/mygo v0.10.0
 	github.com/makiuchi-d/gozxing v0.1.1
 	go.bug.st/serial v1.8.0
 )

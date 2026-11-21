@@ -25,4 +25,6 @@ if [ ! -f "third_party/libeuicc/$(go env GOOS)-$(go env GOARCH)/libeuicc.a" ]; t
 fi
 # zig compiles the C code, as in CI.
 export CC="$ROOT/scripts/zcc"
-CGO_ENABLED=1 go run github.com/egoist/mygo/cmd/mygo@v0.8.3 build "$@"
+# mygo_nowebview: every window is native UI, so Windows builds leave
+# WebView2 out (the tag does nothing on other platforms).
+GOFLAGS="${GOFLAGS:+$GOFLAGS }-tags=mygo_nowebview" CGO_ENABLED=1 go run github.com/egoist/mygo/cmd/mygo@v0.10.0 build "$@"

@@ -77,14 +77,17 @@ jobs:
         env:
           CC: ${{ github.workspace }}/scripts/zcc
           CGO_LDFLAGS: -L/usr/lib/x86_64-linux-gnu -Wl,--allow-shlib-undefined
-        run: go run github.com/egoist/mygo/cmd/mygo@v0.8.3 build -platform linux/amd64
+        run: go run github.com/egoist/mygo/cmd/mygo@v0.10.0 build -platform linux/amd64
       # Windows ships the single executable, without the NSIS installer:
       # it needs no files beside it, and libeuicc is linked in statically.
+      # mygo_nowebview leaves WebView2 out: every window is native UI, so
+      # the app needs no WebView2 Runtime.
       - name: Build Windows (amd64)
         env:
           CC: ${{ github.workspace }}/scripts/zcc
+          GOFLAGS: -tags=mygo_nowebview
         run: |
-          go run github.com/egoist/mygo/cmd/mygo@v0.8.3 build -platform windows/amd64 -skip-installer
+          go run github.com/egoist/mygo/cmd/mygo@v0.10.0 build -platform windows/amd64 -skip-installer
           VERSION=$(jq -r .version mygo.json)
           mv build/windows-amd64/EasyLPAC.exe "build/windows-amd64/easylpac-$VERSION-windows-amd64.exe"
       - name: Collect licenses and source
@@ -95,6 +98,10 @@ jobs:
           path: |
             build/linux-amd64/*.tar.gz
             build/linux-amd64/*.deb
+            build/linux-amd64/*.rpm
+            build/linux-amd64/PKGBUILD
+            build/linux-amd64/easylpac-256x256.png
+            build/linux-amd64/easylpac-512x512.png
             build/windows-amd64/easylpac-*-windows-amd64.exe
             dist/*
 
@@ -120,7 +127,7 @@ jobs:
       - name: Build macOS (arm64, amd64)
         env:
           CC: ${{ github.workspace }}/scripts/zcc
-        run: go run github.com/egoist/mygo/cmd/mygo@v0.8.3 build -platform darwin/arm64,darwin/amd64
+        run: go run github.com/egoist/mygo/cmd/mygo@v0.10.0 build -platform darwin/arm64,darwin/amd64
       - uses: actions/upload-artifact@v7
         with:
           name: easylpac-macos

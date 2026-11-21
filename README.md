@@ -77,7 +77,7 @@ Run-time dependencies: GTK 3, pcsc-lite, and the `pcscd` service with a reader d
 
 Start the service with `sudo systemctl enable --now pcscd.socket`.
 
-The `.deb` from the release depends on `libpcsclite1` and `pcscd`. Packagers for other distributions should map these to their own packages, and keep pcsc-lite linked dynamically: a statically linked client may speak a protocol version the system's `pcscd` refuses.
+The release has a `.deb`, which depends on `libpcsclite1` and `pcscd`, an `.rpm`, which depends on `libpcsclite.so.1` and `pcsc-lite`, and a `PKGBUILD`, which depends on `pcsclite` and `ccid`: put it next to the release's `.tar.gz` and its two icons (`easylpac-256x256.png`, `easylpac-512x512.png`), then run `makepkg -si`. Packagers for other distributions should map these to their own packages, and keep pcsc-lite linked dynamically: a statically linked client may speak a protocol version the system's `pcscd` refuses.
 
 # License
 

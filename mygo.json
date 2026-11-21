@@ -12,7 +12,12 @@
     "source": "en"
   },
   "linux": {
-    "depends": ["libpcsclite1", "pcscd"],
+    "depends": {
+      "deb": ["libpcsclite1", "pcscd"],
+      "rpm": ["libpcsclite.so.1()(64bit)", "pcsc-lite"],
+      "arch": ["pcsclite", "ccid"]
+    },
+    "formats": ["deb", "rpm", "pkgbuild"],
     "webview": false
   }
 }
