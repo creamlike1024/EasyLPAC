@@ -18,6 +18,7 @@ import (
 	"EasyLPAC/internal/settings"
 	"EasyLPAC/internal/transport"
 	"EasyLPAC/internal/transport/at"
+	"EasyLPAC/internal/transport/ccidusb"
 	"EasyLPAC/internal/transport/pcsc"
 )
 
@@ -25,9 +26,6 @@ var (
 	ErrBackendUnsupported  = errors.New("backend is not supported by this build")
 	ErrDeviceNotConfigured = errors.New("no device configured for the selected backend")
 )
-
-// SupportedBackends are the backends this build can drive.
-var SupportedBackends = []string{settings.BackendPCSC, settings.BackendAT}
 
 // IsSupportedBackend reports whether a backend id is implemented.
 func IsSupportedBackend(id string) bool {
@@ -77,6 +75,19 @@ func newService(cfg *settings.Config, onStage func(string), logger *slog.Logger)
 				DisableTerminalCapability: b.DisableTerminalCapability,
 			},
 		}
+	case settings.BackendCCID:
+		if b.Reader == "" {
+			return nil, ErrDeviceNotConfigured
+		}
+		svcCfg.Backend = ccidusb.New(nil)
+		svcCfg.Device = transport.DeviceConfig{
+			BackendID: settings.BackendCCID,
+			CCID: &transport.CCIDConfig{
+				Reader:                    b.Reader,
+				DisableTerminalCapability: b.DisableTerminalCapability,
+				NoPPS:                     b.NoPPS,
+			},
+		}
 	case settings.BackendAT:
 		if b.Port == "" {
 			return nil, ErrDeviceNotConfigured
@@ -103,6 +114,8 @@ func DiscoverDevices(ctx context.Context, backend string) ([]transport.Device, e
 		b = pcsc.New()
 	case settings.BackendAT:
 		b = at.New()
+	case settings.BackendCCID:
+		b = ccidusb.New(nil)
 	default:
 		return nil, fmt.Errorf("%w: %s", ErrBackendUnsupported, backend)
 	}

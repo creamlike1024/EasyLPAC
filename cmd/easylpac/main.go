@@ -26,6 +26,8 @@ func main() {
 	opts := app.Options{Version: Version, Settings: settings.Default()}
 	if isDemo {
 		useDemo(&opts)
+	} else {
+		opts.Settings.Backend = app.SupportedBackends[0]
 	}
 
 	g := newGUI(mygo.Clipboard)
@@ -45,7 +47,7 @@ func main() {
 			TitleBarStyle:  mygo.TitleBarHiddenInset,
 			TitleBarHeight: titleBarHeight,
 			Vibrancy:       mygo.VibrancySidebar,
-			Content:        ui.View(g.view),
+			Content:        ui.View(g.rootView),
 		})
 		opts.Dispatch = g.win.Update
 		g.app = app.New(opts)

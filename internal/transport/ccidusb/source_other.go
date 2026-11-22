@@ -1,7 +1,7 @@
-//go:build !linux || android
+//go:build !linux
 
 package ccidusb
 
-// platformSource is none: Android's readers come from the app, through
-// New with a Source of their file descriptors.
+// platformSource is none: readers are reached on Linux and Android only,
+// or through New with a Source.
 func platformSource() Source { return nil }
