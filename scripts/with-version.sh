@@ -26,4 +26,17 @@ if ! grep -qxF "  \"version\": \"$VERSION\"," "$CONFIG"; then
 fi
 echo "with-version.sh: version $VERSION" >&2
 
+# Android's versionCode, which mygo would take wrongly from a snapshot
+# (0.9.2.r12.g... as 900): scripts/build-android.sh asks for it.
+if [ -n "${EASYLPAC_ANDROID:-}" ]; then
+	CODE=$("$ROOT/scripts/android-version-code.sh" "$VERSION")
+	VERSIONED=$(sed -E "s/^(    \"versionCode\": )[0-9]+/\\1$CODE/" "$CONFIG")
+	printf '%s\n' "$VERSIONED" >"$CONFIG"
+	if ! grep -Eq "^    \"versionCode\": $CODE,?\$" "$CONFIG"; then
+		echo "with-version.sh: no android.versionCode in mygo.json to set" >&2
+		exit 1
+	fi
+	echo "with-version.sh: versionCode $CODE" >&2
+fi
+
 "$@"
