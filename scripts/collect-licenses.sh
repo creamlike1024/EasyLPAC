@@ -11,6 +11,7 @@ DIR="${1:?usage: collect-licenses.sh <dir>}"
 mkdir -p "$DIR"
 cp "$ROOT/LICENSE" "$DIR/LICENSE"
 cp "$ROOT/third_party/lpac/euicc/LICENSE" "$DIR/LICENSE-libeuicc"
+cp "$ROOT/third_party/go-ccid/LICENSE" "$DIR/LICENSE-go-ccid"
 cp "$ROOT/third_party/lpac/LICENSES/MIT.txt" "$DIR/LICENSE-cjson-ext"
 CJSON=$(find "$ROOT"/third_party/libeuicc -path '*/cjson/LICENSE' | head -n 1)
 cp "$CJSON" "$DIR/LICENSE-cjson"
@@ -34,12 +35,15 @@ This license applies to the files above, not to EasyLPAC's own code
 (see LICENSE).
 NOTICE
 # git archive leaves submodules out: add lpac's tree (libeuicc's source,
-# which the LGPL asks for) under third_party/lpac/.
+# which the LGPL asks for) under third_party/lpac/, and go-ccid's, which
+# go.mod builds from, under third_party/go-ccid/.
 WORK=$(mktemp -d)
 git -C "$ROOT" archive --format=tar --prefix=EasyLPAC/ -o "$WORK/app.tar" HEAD
 git -C "$ROOT/third_party/lpac" archive --format=tar --prefix=EasyLPAC/third_party/lpac/ -o "$WORK/lpac.tar" HEAD
 tar -C "$WORK" -xf "$WORK/app.tar"
 tar -C "$WORK" -xf "$WORK/lpac.tar"
+git -C "$ROOT/third_party/go-ccid" archive --format=tar --prefix=EasyLPAC/third_party/go-ccid/ -o "$WORK/go-ccid.tar" HEAD
+tar -C "$WORK" -xf "$WORK/go-ccid.tar"
 tar -C "$WORK" -czf "$DIR/EasyLPAC-source.tar.gz" EasyLPAC
 rm -rf "$WORK"
 ls -l "$DIR"
