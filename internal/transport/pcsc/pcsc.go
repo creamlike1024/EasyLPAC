@@ -1,3 +1,5 @@
+//go:build !android && !ios
+
 // Package pcsc implements the PC/SC card transport on top of
 // github.com/ebfe/scard (BSD-3-Clause).
 //

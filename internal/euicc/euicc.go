@@ -1,6 +1,8 @@
 // Package euicc binds the vendored static libeuicc (LGPL-2.1, built per
 // target by scripts/build-libeuicc.sh into
-// third_party/libeuicc/<GOOS>-<GOARCH>; see
+// third_party/libeuicc/<GOOS>-<GOARCH>, Android's apart from Linux's
+// and iOS's (none yet) apart from macOS's, as GOOS android and ios also
+// match linux and darwin; see
 // third_party/lpac/euicc/LICENSE) to Go via an original C shim with
 // opaque handles. Memory, callback and lifecycle contracts are defined
 // in docs/refactor-architecture.md §4.
@@ -8,10 +10,13 @@ package euicc
 
 /*
 #cgo CFLAGS: -I${SRCDIR}/../../third_party/lpac
-#cgo darwin,arm64 LDFLAGS: -L${SRCDIR}/../../third_party/libeuicc/darwin-arm64
-#cgo darwin,amd64 LDFLAGS: -L${SRCDIR}/../../third_party/libeuicc/darwin-amd64
-#cgo linux,amd64 LDFLAGS: -L${SRCDIR}/../../third_party/libeuicc/linux-amd64
-#cgo linux,arm64 LDFLAGS: -L${SRCDIR}/../../third_party/libeuicc/linux-arm64
+#cgo darwin,!ios,arm64 LDFLAGS: -L${SRCDIR}/../../third_party/libeuicc/darwin-arm64
+#cgo darwin,!ios,amd64 LDFLAGS: -L${SRCDIR}/../../third_party/libeuicc/darwin-amd64
+#cgo linux,!android,amd64 LDFLAGS: -L${SRCDIR}/../../third_party/libeuicc/linux-amd64
+#cgo linux,!android,arm64 LDFLAGS: -L${SRCDIR}/../../third_party/libeuicc/linux-arm64
+#cgo android,arm64 LDFLAGS: -L${SRCDIR}/../../third_party/libeuicc/android-arm64
+#cgo android,arm LDFLAGS: -L${SRCDIR}/../../third_party/libeuicc/android-arm
+#cgo android,amd64 LDFLAGS: -L${SRCDIR}/../../third_party/libeuicc/android-amd64
 #cgo windows,amd64 LDFLAGS: -L${SRCDIR}/../../third_party/libeuicc/windows-amd64
 #cgo windows,arm64 LDFLAGS: -L${SRCDIR}/../../third_party/libeuicc/windows-arm64
 #cgo LDFLAGS: -leuicc -lcjsonext -lcjson
