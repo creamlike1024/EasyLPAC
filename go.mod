@@ -4,6 +4,7 @@ go 1.27.3
 
 require (
 	github.com/creack/pty v1.1.24
+	github.com/creamlike1024/go-ccid v0.0.0
 	github.com/ebfe/scard v0.0.0-20241214075232-7af069cabc25
 	github.com/egoist/mygo v0.10.0
 	github.com/makiuchi-d/gozxing v0.1.1
@@ -19,3 +20,6 @@ require (
 	golang.org/x/text v0.43.0 // indirect
 	golang.org/x/xerrors v0.0.0-20240903120638-7835f813f4da // indirect
 )
+
+// go-ccid is the git submodule in third_party, built from there.
+replace github.com/creamlike1024/go-ccid => ./third_party/go-ccid

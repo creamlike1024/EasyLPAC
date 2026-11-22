@@ -46,6 +46,7 @@ type DeviceConfig struct {
 	BackendID string
 	PCSC      *PCSCConfig
 	AT        *ATConfig
+	CCID      *CCIDConfig
 }
 
 // PCSCConfig configures the PC/SC backend.
@@ -58,6 +59,18 @@ type PCSCConfig struct {
 	// 1a9cb3a, "send terminal profile is required on some card");
 	// its response is ignored by design.
 	DisableTerminalCapability bool
+}
+
+// CCIDConfig configures the USB CCID backend (go-ccid, no PC/SC).
+type CCIDConfig struct {
+	// Reader is the reader's ID from Discover (a usbfs device file on
+	// Linux).
+	Reader string
+	// DisableTerminalCapability: as PCSCConfig's.
+	DisableTerminalCapability bool
+	// NoPPS keeps the card at the default rate with a TPDU level reader,
+	// for a card or reader that cannot take a faster one.
+	NoPPS bool
 }
 
 // ATConfig configures the AT backend (P4).
