@@ -276,3 +276,34 @@ func TestContextCancellation(t *testing.T) {
 		t.Fatalf("err = %v", err)
 	}
 }
+
+// PC/SC's errors of a card or reader gone are told by their kind.
+func TestErrorKinds(t *testing.T) {
+	for _, tc := range []struct {
+		err  error
+		kind error
+	}{
+		{scard.ErrNoSmartcard, transport.ErrNoCard},
+		{scard.ErrRemovedCard, transport.ErrNoCard},
+		{scard.ErrUnknownReader, transport.ErrDeviceGone},
+		{scard.ErrReaderUnavailable, transport.ErrDeviceGone},
+		{scard.ErrUnresponsiveCard, transport.ErrCardMute},
+	} {
+		cl := &fakeClient{readers: []string{"R"}, connErr: tc.err}
+		_, err := newTestBackend(cl).Open(context.Background(), transport.DeviceConfig{BackendID: "pcsc", PCSC: &transport.PCSCConfig{Reader: "R"}})
+		if !errors.Is(err, tc.kind) || !errors.Is(err, tc.err) {
+			t.Errorf("connect %v: %v", tc.err, err)
+		}
+	}
+
+	card := managedCard(1)
+	s, err := newTestBackend(&fakeClient{readers: []string{"R"}, card: card}).Open(context.Background(),
+		transport.DeviceConfig{BackendID: "pcsc", PCSC: &transport.PCSCConfig{Reader: "R", DisableTerminalCapability: true}})
+	if err != nil {
+		t.Fatal(err)
+	}
+	card.responder = func([]byte) ([]byte, error) { return nil, scard.ErrRemovedCard }
+	if _, err := s.Transmit(context.Background(), []byte{0x00, 0xCA, 0x00, 0x00, 0x00}); !errors.Is(err, transport.ErrNoCard) {
+		t.Errorf("transmit: %v", err)
+	}
+}

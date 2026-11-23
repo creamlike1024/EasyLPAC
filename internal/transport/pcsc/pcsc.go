@@ -123,7 +123,7 @@ func (b *Backend) Open(ctx context.Context, cfg transport.DeviceConfig) (transpo
 	crd, err := cl.Connect(cfg.PCSC.Reader, scard.ShareExclusive, scard.ProtocolAny)
 	if err != nil {
 		_ = cl.Release()
-		return nil, fmt.Errorf("pcsc: connect %q: %w", cfg.PCSC.Reader, err)
+		return nil, kind(fmt.Errorf("pcsc: connect %q: %w", cfg.PCSC.Reader, err))
 	}
 
 	s := &session{client: cl, card: crd}
@@ -162,7 +162,7 @@ func (s *session) transmitRaw(apdu string) ([]byte, error) {
 	}
 	resp, err := s.card.Transmit([]byte(apdu))
 	if err != nil {
-		return nil, fmt.Errorf("pcsc: transmit: %w", err)
+		return nil, kind(fmt.Errorf("pcsc: transmit: %w", err))
 	}
 	return resp, nil
 }
@@ -200,6 +200,21 @@ func (s *session) Close() error {
 		if rerr := s.client.Release(); rerr != nil && err == nil {
 			err = rerr
 		}
+	}
+	return err
+}
+
+// kind gives err the kind of failure the interface explains: the reader
+// gone, no card, a card that does not answer.
+func kind(err error) error {
+	switch {
+	case errors.Is(err, scard.ErrNoSmartcard), errors.Is(err, scard.ErrRemovedCard):
+		return transport.Kind(transport.ErrNoCard, err)
+	case errors.Is(err, scard.ErrUnknownReader), errors.Is(err, scard.ErrReaderUnavailable),
+		errors.Is(err, scard.ErrNoReadersAvailable):
+		return transport.Kind(transport.ErrDeviceGone, err)
+	case errors.Is(err, scard.ErrUnresponsiveCard):
+		return transport.Kind(transport.ErrCardMute, err)
 	}
 	return err
 }
