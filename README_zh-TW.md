@@ -26,6 +26,12 @@
 
 手動處理通知不符合 GSMA 規範，因此建議保持開啟。
 
+## Android（實驗性）
+
+在 Android 上，EasyLPAC 透過以 OTG 轉接頭連接的 USB 智慧卡讀卡機（CCID）讀取晶片，不經 PC/SC，而是由 [go-ccid](https://github.com/creamlike1024/go-ccid) 直接與讀卡機通訊。系統詢問時，請允許 USB 存取。不支援手機內建的 eSIM 與 SIM 卡槽。
+
+目前僅以一款讀卡機（ACS ACR38U）測試過讀取晶片；在 Android 上安裝與變更 eSIM 尚未測試。
+
 # 截圖
 <p>
 <a href="./screenshots/profile.png"><img src="./screenshots/profile.png" height="240px"/></a>
@@ -103,8 +109,19 @@ export CGO_LDFLAGS="-L$(pkg-config --variable=libdir libpcsclite) -Wl,--allow-sh
 
 發行版本提供 `.deb`（相依於 `libpcsclite1` 與 `pcscd`）、`.rpm`（相依於 `libpcsclite.so.1` 與 `pcsc-lite`）及 `PKGBUILD`（相依於 `pcsclite` 與 `ccid`）：將 `PKGBUILD` 與發行版本中的 `.tar.gz` 及兩個圖示（`easylpac-256x256.png`、`easylpac-512x512.png`）放在同一目錄，再執行 `makepkg -si`。其他發行版的打包者應將其對應為各自的套件，並維持以動態連結使用 pcsc-lite：靜態連結的用戶端可能使用系統 `pcscd` 不接受的協定版本。
 
+## Android
+
+除 Go 與 CMake 外，另需 Android SDK（Platform 36、Build-Tools 35.0.0、NDK）與 JDK 17（Gradle 8.14 最高支援 Java 24）。
+
+```sh
+./scripts/build-android.sh          # build/android/：APK 與 AAB，arm64
+```
+
+未提供上傳金鑰時，發行版以 debug 金鑰簽署。`EASYLPAC_ANDROID_KEYSTORE` 與 `EASYLPAC_ANDROID_KEY_ALIAS` 指定金鑰，`MYGO_ANDROID_KEYSTORE_PASSWORD` 與 `MYGO_ANDROID_KEY_PASSWORD` 提供其密碼。
+
 # 授權
 
 - EasyLPAC：[MIT](./LICENSE)
 - libeuicc（來自 lpac，靜態連結）：[LGPL-2.1-only](https://github.com/estkme-group/lpac/blob/main/euicc/LICENSE)。每個發行版本都附有 `EasyLPAC-source.tar.gz`，包含 libeuicc 在內的完整原始碼與建置腳本，可修改函式庫並重新建置程式。
+- USB CCID 驅動程式 go-ccid：[MIT](https://github.com/creamlike1024/go-ccid/blob/main/LICENSE)
 - 來自 [eUICC Manual](https://euicc-manual.osmocom.org/) 的 eUICC 製造商與 CI 資料：CC BY-NC-SA 4.0

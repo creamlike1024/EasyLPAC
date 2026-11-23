@@ -26,6 +26,12 @@ You can turn this off with **Send notifications** in Settings. The pending notif
 
 Handling notifications by hand does not follow the GSMA specifications, so leaving this on is recommended.
 
+## Android (experimental)
+
+On Android, EasyLPAC reads the card through a USB smart card reader (CCID) plugged in with an OTG adapter, without PC/SC: it speaks to the reader itself, through [go-ccid](https://github.com/creamlike1024/go-ccid). Allow USB access when Android asks. The phone's own eSIM, and SIM slots, are not supported.
+
+So far it has been tested with one reader (ACS ACR38U) reading cards; installing and changing eSIMs on Android has not been tested yet.
+
 # Screenshots
 <p>
 <a href="./screenshots/profile.png"><img src="./screenshots/profile.png" height="240px"/></a>
@@ -103,8 +109,19 @@ Start the service with `sudo systemctl enable --now pcscd.socket`.
 
 The release has a `.deb`, which depends on `libpcsclite1` and `pcscd`, an `.rpm`, which depends on `libpcsclite.so.1` and `pcsc-lite`, and a `PKGBUILD`, which depends on `pcsclite` and `ccid`: put it next to the release's `.tar.gz` and its two icons (`easylpac-256x256.png`, `easylpac-512x512.png`), then run `makepkg -si`. Packagers for other distributions should map these to their own packages, and keep pcsc-lite linked dynamically: a statically linked client may speak a protocol version the system's `pcscd` refuses.
 
+## Android
+
+Requirements, besides Go and CMake: the Android SDK (Platform 36, Build-Tools 35.0.0, an NDK) and JDK 17 (Gradle 8.14 runs on Java 24 at most).
+
+```sh
+./scripts/build-android.sh          # build/android/: the APK and the AAB, arm64
+```
+
+Release builds are signed with the debug key unless an upload key is given: `EASYLPAC_ANDROID_KEYSTORE` and `EASYLPAC_ANDROID_KEY_ALIAS` name it, `MYGO_ANDROID_KEYSTORE_PASSWORD` and `MYGO_ANDROID_KEY_PASSWORD` hold its passwords.
+
 # License
 
 - EasyLPAC: [MIT](./LICENSE)
 - libeuicc (from lpac), statically linked: [LGPL-2.1-only](https://github.com/estkme-group/lpac/blob/main/euicc/LICENSE). Each release ships `EasyLPAC-source.tar.gz`, the complete source including libeuicc and the scripts that build it, so the library can be modified and the app rebuilt.
+- go-ccid, the USB CCID driver: [MIT](https://github.com/creamlike1024/go-ccid/blob/main/LICENSE)
 - eUICC manufacturer and CI data from the [eUICC Manual](https://euicc-manual.osmocom.org/): CC BY-NC-SA 4.0

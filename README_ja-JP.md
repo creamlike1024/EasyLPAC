@@ -26,6 +26,12 @@
 
 通知を手動で操作することは GSMA の仕様に沿わないため、オンのままにすることをお勧めします。
 
+## Android（試験的）
+
+Android では、EasyLPAC は OTG アダプターで接続した USB スマートカードリーダー（CCID）を通じてチップを読み取ります。PC/SC は使わず、[go-ccid](https://github.com/creamlike1024/go-ccid) がリーダーと直接通信します。Android に確認されたら USB へのアクセスを許可してください。端末内蔵の eSIM や SIM スロットには対応していません。
+
+現時点でテストしたのは 1 台のリーダー（ACS ACR38U）でのチップの読み取りだけです。Android での eSIM のインストールや変更はまだテストしていません。
+
 # スクリーンショット
 <p>
 <a href="./screenshots/profile.png"><img src="./screenshots/profile.png" height="240px"/></a>
@@ -103,8 +109,19 @@ export CGO_LDFLAGS="-L$(pkg-config --variable=libdir libpcsclite) -Wl,--allow-sh
 
 リリースには `.deb`（`libpcsclite1` と `pcscd` に依存）、`.rpm`（`libpcsclite.so.1` と `pcsc-lite` に依存）、`PKGBUILD`（`pcsclite` と `ccid` に依存）があります。`PKGBUILD` はリリースの `.tar.gz` と 2 つのアイコン（`easylpac-256x256.png`、`easylpac-512x512.png`）と同じディレクトリに置き、`makepkg -si` を実行してください。他のディストリビューションのパッケージ作成者は、これらを各ディストリビューションのパッケージに置き換え、pcsc-lite は動的リンクのままにしてください。静的リンクしたクライアントは、システムの `pcscd` が受け付けないプロトコルバージョンを使う可能性があります。
 
+## Android
+
+Go と CMake のほかに、Android SDK（Platform 36、Build-Tools 35.0.0、NDK）と JDK 17 が必要です（Gradle 8.14 が動くのは Java 24 まで）。
+
+```sh
+./scripts/build-android.sh          # build/android/：APK と AAB、arm64
+```
+
+アップロード鍵を指定しない場合、リリースビルドはデバッグ鍵で署名されます。`EASYLPAC_ANDROID_KEYSTORE` と `EASYLPAC_ANDROID_KEY_ALIAS` で鍵を、`MYGO_ANDROID_KEYSTORE_PASSWORD` と `MYGO_ANDROID_KEY_PASSWORD` でそのパスワードを指定します。
+
 # ライセンス
 
 - EasyLPAC：[MIT](./LICENSE)
 - libeuicc（lpac 由来、静的リンク）：[LGPL-2.1-only](https://github.com/estkme-group/lpac/blob/main/euicc/LICENSE)。各リリースには libeuicc を含む完全なソースコードとビルドスクリプト `EasyLPAC-source.tar.gz` が付属しており、ライブラリを変更してアプリを再ビルドできます。
+- USB CCID ドライバー go-ccid：[MIT](https://github.com/creamlike1024/go-ccid/blob/main/LICENSE)
 - [eUICC Manual](https://euicc-manual.osmocom.org/) の eUICC 製造元および CI データ：CC BY-NC-SA 4.0
