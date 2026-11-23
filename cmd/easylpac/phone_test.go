@@ -4,6 +4,7 @@ package main
 
 import (
 	"context"
+	"errors"
 	"sync/atomic"
 	"testing"
 
@@ -23,16 +24,22 @@ type phoneFixture struct {
 	tabs  map[string]*ui.Tester
 	got   settings.Backend // the reader's settings the service was made with
 	reads atomic.Int32
+	// fail, when set, is what reading the card fails with.
+	fail atomic.Pointer[error]
 }
 
-// countingCard counts the reads of the card.
+// countingCard counts the reads of the card, and fails them on demand.
 type countingCard struct {
 	*fakeCard
 	reads *atomic.Int32
+	fail  *atomic.Pointer[error]
 }
 
 func (c countingCard) ChipInfo(ctx context.Context) (*lpa.EuiccInfo, error) {
 	c.reads.Add(1)
+	if err := c.fail.Load(); err != nil {
+		return nil, *err
+	}
 	return c.fakeCard.ChipInfo(ctx)
 }
 
@@ -51,7 +58,7 @@ func newPhoneFixture(t *testing.T) *phoneFixture {
 		Version:  "test",
 		NewService: func(s *settings.Config, _ func(string)) (lpa.Service, error) {
 			f.got = s.Backends[settings.BackendCCID]
-			return countingCard{card, &f.reads}, nil
+			return countingCard{card, &f.reads, &f.fail}, nil
 		},
 		Discover: func(context.Context, string) ([]transport.Device, error) {
 			return []transport.Device{{ID: phoneReader, Label: "ACS CCID USB Reader (072f:90cc)"}}, nil
@@ -286,4 +293,17 @@ func TestPhoneDeleteInUse(t *testing.T) {
 	if !f.tt.HasText(locales.ProfileDeleteDisabledHint()) {
 		t.Fatalf("no reason shown; texts %q", f.tt.Texts())
 	}
+}
+
+// A reader unplugged is told in words, not by usbfs's error.
+func TestPhoneReaderGone(t *testing.T) {
+	f := newPhoneFixture(t)
+	gone := transport.Kind(transport.ErrDeviceGone, errors.New("usbfs: device disconnected"))
+	f.fail.Store(&gone)
+	f.chooseReader(t, phoneReader)
+	f.tab(pageProfiles)
+	if !f.tt.HasText(locales.ErrorDeviceGone()) || f.tt.HasText("usbfs") {
+		t.Fatalf("texts %q", f.tt.Texts())
+	}
+	f.shot(t, "phone-reader-gone")
 }

@@ -156,7 +156,11 @@ func (g *gui) downloadInput(c *ui.Context) {
 						in.Invalid(true)
 					}
 				})
-				ui.Text(c, locales.DlCodeHint()).FontSize(12).TextColor(t.TextMuted)
+				hint := locales.DlCodeHint()
+				if phoneUI {
+					hint = locales.DlCodeHintPhone() // no images to drop
+				}
+				ui.Text(c, hint).FontSize(12).TextColor(t.TextMuted)
 				ui.Row(c).Gap(8).Children(func() {
 					if ui.Button(c, "").Radius(14).Children(func() {
 						ui.Icon(c, iconPaste).Size(16, 16)
@@ -516,7 +520,13 @@ func (g *gui) chooseQRFile() {
 	if err != nil || len(paths) == 0 {
 		return
 	}
-	g.update(func() { g.scanQRFile(paths[0]) })
+	g.update(func() {
+		g.scanQRFile(paths[0])
+		if phoneUI {
+			// Phones' pickers give a copy, which holds the activation code.
+			_ = os.Remove(paths[0])
+		}
+	})
 }
 
 func (g *gui) scanQRFile(path string) {

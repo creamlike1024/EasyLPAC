@@ -81,19 +81,19 @@ func (b *Backend) Open(ctx context.Context, cfg transport.DeviceConfig) (transpo
 	}
 	t, desc, err := b.src.Open(ctx, cfg.CCID.Reader)
 	if err != nil {
-		return nil, fmt.Errorf("ccid: opening %q: %w", cfg.CCID.Reader, err)
+		return nil, kind(fmt.Errorf("ccid: opening %q: %w", cfg.CCID.Reader, err))
 	}
 	r, err := ccid.Open(t, desc, nil)
 	if err != nil {
 		t.Close()
-		return nil, fmt.Errorf("ccid: %w", err)
+		return nil, kind(fmt.Errorf("ccid: %w", err))
 	}
 	// The status words come back as the card sends them, as with PC/SC:
 	// libeuicc fetches the responses of 61xx itself.
 	card, err := r.Connect(ctx, 0, &ccid.ConnectOptions{NoPPS: cfg.CCID.NoPPS})
 	if err != nil {
 		r.Close()
-		return nil, fmt.Errorf("ccid: connecting to the card: %w", err)
+		return nil, kind(fmt.Errorf("ccid: connecting to the card: %w", err))
 	}
 	s := &session{reader: r, card: card}
 	if !cfg.CCID.DisableTerminalCapability {
@@ -117,7 +117,7 @@ func (s *session) Transmit(ctx context.Context, apdu []byte) ([]byte, error) {
 	}
 	resp, err := s.card.Transmit(ctx, apdu)
 	if err != nil {
-		return nil, fmt.Errorf("ccid: transmit: %w", err)
+		return nil, kind(fmt.Errorf("ccid: transmit: %w", err))
 	}
 	return resp, nil
 }
@@ -151,4 +151,16 @@ func (s *session) Close() error {
 		err = cerr
 	}
 	return err
+}
+
+// kind gives err the kind of failure the interface explains: the reader
+// gone, no card, a card that does not answer.
+func kind(err error) error {
+	switch {
+	case errors.Is(err, ccid.ErrNoCard):
+		return transport.Kind(transport.ErrNoCard, err)
+	case errors.Is(err, ccid.ErrCardMute):
+		return transport.Kind(transport.ErrCardMute, err)
+	}
+	return usbKind(err)
 }

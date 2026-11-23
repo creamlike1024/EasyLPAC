@@ -1550,6 +1550,46 @@ func (msgs Messages) SettingsPpsBody() string {
 	return Catalog.Format(msgs.locale, "settingsPpsBody", nil)
 }
 
+// ErrorAccessDenied says "EasyLPAC was not allowed to use the reader. Try again, and allow it when asked."
+// in the language the app shows.
+func ErrorAccessDenied() string { return In(i18n.Locale()).ErrorAccessDenied() }
+
+// ErrorAccessDenied says "EasyLPAC was not allowed to use the reader. Try again, and allow it when asked."
+// in the language of msgs.
+func (msgs Messages) ErrorAccessDenied() string {
+	return Catalog.Format(msgs.locale, "errorAccessDenied", nil)
+}
+
+// ErrorDeviceGone says "The reader was disconnected. Plug it in again, then read the card."
+// in the language the app shows.
+func ErrorDeviceGone() string { return In(i18n.Locale()).ErrorDeviceGone() }
+
+// ErrorDeviceGone says "The reader was disconnected. Plug it in again, then read the card."
+// in the language of msgs.
+func (msgs Messages) ErrorDeviceGone() string {
+	return Catalog.Format(msgs.locale, "errorDeviceGone", nil)
+}
+
+// ErrorNoCard says "There is no card in the reader."
+// in the language the app shows.
+func ErrorNoCard() string { return In(i18n.Locale()).ErrorNoCard() }
+
+// ErrorNoCard says "There is no card in the reader."
+// in the language of msgs.
+func (msgs Messages) ErrorNoCard() string {
+	return Catalog.Format(msgs.locale, "errorNoCard", nil)
+}
+
+// ErrorCardMute says "The card does not answer. Check that it sits the right way in the reader."
+// in the language the app shows.
+func ErrorCardMute() string { return In(i18n.Locale()).ErrorCardMute() }
+
+// ErrorCardMute says "The card does not answer. Check that it sits the right way in the reader."
+// in the language of msgs.
+func (msgs Messages) ErrorCardMute() string {
+	return Catalog.Format(msgs.locale, "errorCardMute", nil)
+}
+
 // SettingsSerialPort says "Serial port"
 // in the language the app shows.
 func SettingsSerialPort() string { return In(i18n.Locale()).SettingsSerialPort() }
@@ -1808,6 +1848,16 @@ func DlCodeHint() string { return In(i18n.Locale()).DlCodeHint() }
 // in the language of msgs.
 func (msgs Messages) DlCodeHint() string {
 	return Catalog.Format(msgs.locale, "dlCodeHint", nil)
+}
+
+// DlCodeHintPhone says "Paste the activation code, or open a picture of its QR code."
+// in the language the app shows.
+func DlCodeHintPhone() string { return In(i18n.Locale()).DlCodeHintPhone() }
+
+// DlCodeHintPhone says "Paste the activation code, or open a picture of its QR code."
+// in the language of msgs.
+func (msgs Messages) DlCodeHintPhone() string {
+	return Catalog.Format(msgs.locale, "dlCodeHintPhone", nil)
 }
 
 // DlPaste says "Paste"

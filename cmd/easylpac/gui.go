@@ -1,6 +1,8 @@
 package main
 
 import (
+	"errors"
+
 	"github.com/egoist/mygo"
 	"github.com/egoist/mygo/plugins/glass"
 	"github.com/egoist/mygo/ui"
@@ -8,6 +10,7 @@ import (
 	"EasyLPAC/internal/app"
 	"EasyLPAC/internal/registry"
 	"EasyLPAC/internal/settings"
+	"EasyLPAC/internal/transport"
 	"EasyLPAC/locales"
 )
 
@@ -293,7 +296,7 @@ func (g *gui) connectionHint(c *ui.Context) bool {
 			ui.Text(c, locales.HintReading()).TextColor(c.Theme().TextMuted)
 		})
 	case g.app.LastError != nil:
-		emptyState(c, iconAlert, locales.HintReadFailed(), app.DescribeError(g.app.LastError), func() {
+		emptyState(c, iconAlert, locales.HintReadFailed(), readErrorText(g.app.LastError), func() {
 			if ui.PrimaryButton(c, locales.HintTryAgain()).Clicked() {
 				g.refresh()
 			}
@@ -341,6 +344,9 @@ func taskLabel(k app.TaskKind) string {
 
 // errorText explains an error, an SM-DP+ one by its codes' meaning.
 func errorText(err error) string {
+	if s := deviceErrorText(err); s != "" {
+		return s
+	}
 	if summary, codes, ok := app.ServerError(err); ok {
 		return locales.NoticeServerError(summary, codes)
 	}
@@ -430,4 +436,28 @@ func autoFocus(e ui.Element) ui.Element {
 		e.AutoFocus()
 	}
 	return e
+}
+
+// deviceErrorText explains what went wrong with the reader or the card,
+// or is "" for other errors.
+func deviceErrorText(err error) string {
+	switch {
+	case errors.Is(err, transport.ErrAccessDenied):
+		return locales.ErrorAccessDenied()
+	case errors.Is(err, transport.ErrDeviceGone):
+		return locales.ErrorDeviceGone()
+	case errors.Is(err, transport.ErrNoCard):
+		return locales.ErrorNoCard()
+	case errors.Is(err, transport.ErrCardMute):
+		return locales.ErrorCardMute()
+	}
+	return ""
+}
+
+// readErrorText explains why the card could not be read.
+func readErrorText(err error) string {
+	if s := deviceErrorText(err); s != "" {
+		return s
+	}
+	return app.DescribeError(err)
 }

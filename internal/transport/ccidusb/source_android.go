@@ -12,6 +12,7 @@ import (
 	ccid "github.com/creamlike1024/go-ccid"
 	"github.com/creamlike1024/go-ccid/usbfs"
 
+	"EasyLPAC/internal/transport"
 	"EasyLPAC/internal/usbhost"
 )
 
@@ -50,7 +51,12 @@ func (androidSource) Open(ctx context.Context, id string) (ccid.Transport, ccid.
 		return nil, none, err
 	}
 	conn, err := h.Open(ctx, id)
-	if err != nil {
+	switch {
+	case errors.Is(err, usbhost.ErrDenied):
+		return nil, none, transport.Kind(transport.ErrAccessDenied, err)
+	case errors.Is(err, usbhost.ErrGone):
+		return nil, none, transport.Kind(transport.ErrDeviceGone, err)
+	case err != nil:
 		return nil, none, err
 	}
 	fd, err := conn.FD()

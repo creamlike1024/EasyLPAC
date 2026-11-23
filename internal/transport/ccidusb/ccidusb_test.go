@@ -189,3 +189,19 @@ func TestOpenErrors(t *testing.T) {
 		t.Error("Available does not follow the platform source")
 	}
 }
+
+// No card in the reader, before or after the session opens, is told by
+// its kind, which the interface explains.
+func TestNoCardKind(t *testing.T) {
+	src := &simSource{sim: ccidtest.NewReader(nil, ccidtest.Options{})}
+	_, err := New(src).Open(context.Background(), transport.DeviceConfig{BackendID: "ccid", CCID: &transport.CCIDConfig{Reader: "sim0"}})
+	if !errors.Is(err, transport.ErrNoCard) {
+		t.Fatalf("open with no card: %v", err)
+	}
+
+	s, src2 := openSession(t, &euiccCard{atr: ccidtest.ATRT0, channel: 1}, ccidtest.Options{}, transport.CCIDConfig{})
+	src2.sim.Remove()
+	if _, err := s.Transmit(context.Background(), []byte{0x00, 0xA4, 0x04, 0x00, 0x00}); !errors.Is(err, transport.ErrNoCard) {
+		t.Fatalf("transmit with the card out: %v", err)
+	}
+}
