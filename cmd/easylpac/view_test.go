@@ -444,7 +444,7 @@ func TestSettingsAIDCustomAndManualNotify(t *testing.T) {
 	if !f.tt.HasText("from lpac 654215e") || !f.tt.HasText("Author: creamlike1024") {
 		t.Fatalf("about; texts %q", f.tt.Texts())
 	}
-	for _, want := range []string{"LGPL-2.1-only", "MIT", "cJSON", "MyGo", "libeuicc"} {
+	for _, want := range []string{"LGPL-2.1-only", "MIT", "cJSON", "go-ccid", "MyGo", "libeuicc"} {
 		if !f.tt.HasText(want) {
 			t.Fatalf("license %q missing; texts %q", want, f.tt.Texts())
 		}
