@@ -2,6 +2,9 @@
 
 package main
 
+// phoneUI is set where pages take the layout of phones.
+const phoneUI = false
+
 // phoneState is the phone frame's; desktops have none.
 type phoneState struct{}
 

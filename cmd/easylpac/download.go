@@ -87,10 +87,14 @@ func (g *gui) downloadModal(c *ui.Context) {
 	// Anchored at the top rather than centered: the dialog grows and
 	// shrinks downwards between steps and input modes, so what is near
 	// its top (the mode switch) stays under the pointer.
-	m := ui.DialogBase(c, &d.open, func(backdrop, panel ui.Element) {
-		backdrop.Background(ui.RGBA(0, 0, 0, 0.32)).Justify(ui.Start).Padding(96, 0, 0)
-		panel.Width(508).Padding(24).Radius(16).Background(t.Background).
-			Shadow(0, 12, 40, 0, ui.RGBA(0, 0, 0, 0.22)).Border(1, t.Border)
+	top, width := float32(96), float32(508)
+	if phoneUI {
+		// Near the top, as wide as the window leaves: room for the
+		// keyboard below.
+		ww, _ := c.Size()
+		top, width = 16, min(width, ww-32)
+	}
+	body := func() {
 		ui.Column(c).Gap(14).Children(func() {
 			switch d.step {
 			case dlInput:
@@ -103,6 +107,20 @@ func (g *gui) downloadModal(c *ui.Context) {
 				g.downloadFailed(c)
 			}
 		})
+	}
+	m := ui.DialogBase(c, &d.open, func(backdrop, panel ui.Element) {
+		backdrop.Background(ui.RGBA(0, 0, 0, 0.32)).Justify(ui.Start).Padding(top, 0, 0)
+		panel.Width(width).Radius(16).Background(t.Background).
+			Shadow(0, 12, 40, 0, ui.RGBA(0, 0, 0, 0.22)).Border(1, t.Border)
+		if !phoneUI {
+			panel.Padding(24)
+			body()
+			return
+		}
+		// Taller than a phone's window: what it holds scrolls.
+		_, wh := c.Size()
+		panel.MaxHeight(wh - 2*top).Clip()
+		ui.Scroll(c).Shrink(1).MinHeight(0).Padding(24).Children(body)
 	})
 	// The dialog stays while the card is written.
 	if m.Dismissed() && d.step == dlRunning {
@@ -132,8 +150,8 @@ func (g *gui) downloadInput(c *ui.Context) {
 		ui.Column(c).Gap(14).Children(func() {
 			if d.mode == 0 {
 				ui.Field(c, locales.DlModeCode(), func() {
-					in := ui.TextInput(c, &d.code).Placeholder("LPA:1$smdp.example.com$MATCHING-ID").
-						Label(locales.DlModeCode()).Font("monospace").AutoFocus()
+					in := autoFocus(ui.TextInput(c, &d.code).Placeholder("LPA:1$smdp.example.com$MATCHING-ID").
+						Label(locales.DlModeCode()).Font("monospace"))
 					if err != nil && err.Error() != "" {
 						in.Invalid(true)
 					}
@@ -163,7 +181,7 @@ func (g *gui) downloadInput(c *ui.Context) {
 				}
 			} else {
 				ui.Field(c, locales.DlSmdpAddress(), func() {
-					ui.TextInput(c, &d.smdp).Placeholder("smdp.example.com").Label(locales.DlSmdpAddress()).AutoFocus()
+					autoFocus(ui.TextInput(c, &d.smdp).Placeholder("smdp.example.com").Label(locales.DlSmdpAddress()))
 				})
 				ui.Field(c, locales.DlMatchingId(), func() {
 					ui.TextInput(c, &d.matchID).Placeholder(locales.CommonOptional()).Label(locales.DlMatchingId())

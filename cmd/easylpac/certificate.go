@@ -34,7 +34,7 @@ func (g *gui) certificateDialog(c *ui.Context) {
 	t := c.Theme()
 	ci := g.certCI
 	ui.Modal(c, &g.certOpen, func() {
-		ui.Column(c).Width(640).Gap(12).Children(func() {
+		ui.Column(c).Width(dialogWidth(c, 640)).Gap(12).Children(func() {
 			ui.Row(c).Gap(8).Children(func() {
 				ui.Text(c, ci.Name).FontSize(16).Bold().MinWidth(0)
 				if cat := categoryLabel(ci.Category); cat != "" {

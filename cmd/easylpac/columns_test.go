@@ -5,6 +5,7 @@ import "testing"
 // The notifications table names each eSIM in a column of its own, beside
 // its ICCID; the About header links the repository.
 func TestNotificationColumnsAndAboutHeader(t *testing.T) {
+	skipOnPhone(t)
 	card := newFakeCard()
 	card.add("delete", "8981100000000000041") // an eSIM no longer on the card
 	f := newFixture(t, card)

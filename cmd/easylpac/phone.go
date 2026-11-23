@@ -22,6 +22,9 @@ import (
 	"EasyLPAC/locales"
 )
 
+// phoneUI is set where pages take the layout of phones.
+const phoneUI = true
+
 const (
 	// phonePadding is the padding of a phone's page.
 	phonePadding = 16
@@ -148,7 +151,9 @@ func (g *gui) phoneFrame(c *ui.Context, page string) {
 	if g.app.Task != nil {
 		bottom = 76 // the task pill floats there
 	}
-	fab := page == pageProfiles && g.app.Loaded
+	// The button would show over a dialog's backdrop: it goes while one
+	// is open.
+	fab := page == pageProfiles && g.app.Loaded && !g.dialogOpen()
 	pad := bottom
 	if fab {
 		pad += 56 + phonePadding // the last eSIM scrolls above the button
@@ -184,6 +189,11 @@ func (g *gui) phoneFrame(c *ui.Context, page string) {
 		g.dialogs(c)
 	}
 	g.taskPill(c)
+}
+
+// dialogOpen reports whether a dialog of the pages is open.
+func (g *gui) dialogOpen() bool {
+	return g.dl.open || g.renaming || g.deleting || g.certOpen || g.editSMDP || g.removeAll
 }
 
 // pulled reads the card again as a finger asked, or sends the indicator

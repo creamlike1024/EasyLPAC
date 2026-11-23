@@ -1530,6 +1530,26 @@ func (msgs Messages) SettingsTerminalCapBody() string {
 	return Catalog.Format(msgs.locale, "settingsTerminalCapBody", nil)
 }
 
+// SettingsPps says "Faster card rate"
+// in the language the app shows.
+func SettingsPps() string { return In(i18n.Locale()).SettingsPps() }
+
+// SettingsPps says "Faster card rate"
+// in the language of msgs.
+func (msgs Messages) SettingsPps() string {
+	return Catalog.Format(msgs.locale, "settingsPps", nil)
+}
+
+// SettingsPpsBody says "Ask the card for a faster rate (PPS) when it allows one; turn it off only if reading fails."
+// in the language the app shows.
+func SettingsPpsBody() string { return In(i18n.Locale()).SettingsPpsBody() }
+
+// SettingsPpsBody says "Ask the card for a faster rate (PPS) when it allows one; turn it off only if reading fails."
+// in the language of msgs.
+func (msgs Messages) SettingsPpsBody() string {
+	return Catalog.Format(msgs.locale, "settingsPpsBody", nil)
+}
+
 // SettingsSerialPort says "Serial port"
 // in the language the app shows.
 func SettingsSerialPort() string { return In(i18n.Locale()).SettingsSerialPort() }
@@ -2334,6 +2354,20 @@ func NotifSelectHint(key string) string { return In(i18n.Locale()).NotifSelectHi
 // How to choose several notifications; key is ⌘ on macOS, Ctrl elsewhere
 func (msgs Messages) NotifSelectHint(key string) string {
 	return Catalog.Format(msgs.locale, "notifSelectHint", map[string]any{"key": key})
+}
+
+// NotifSelectOne says "Choose notification {seq}"
+// in the language the app shows.
+//
+// Accessibility label of a notification's checkbox on phones
+func NotifSelectOne(seq int) string { return In(i18n.Locale()).NotifSelectOne(seq) }
+
+// NotifSelectOne says "Choose notification {seq}"
+// in the language of msgs.
+//
+// Accessibility label of a notification's checkbox on phones
+func (msgs Messages) NotifSelectOne(seq int) string {
+	return Catalog.Format(msgs.locale, "notifSelectOne", map[string]any{"seq": seq})
 }
 
 // ProfileIccidCopied says "ICCID copied"

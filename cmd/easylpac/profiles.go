@@ -116,6 +116,18 @@ func (g *gui) profileMenu(m *ui.Menu, p *lpa.Profile) {
 		g.toast = locales.ProfileIccidCopied()
 	}
 	m.Separator()
+	if phoneUI {
+		// Phones' menus show no tooltips, nor which items are disabled:
+		// choosing it says why an eSIM in use stays.
+		if m.Item(locales.ProfileMenuDelete()).Danger().Disabled(busy).Chosen() {
+			if enabled {
+				g.toast = locales.ProfileDeleteDisabledHint()
+			} else {
+				g.deleteICCID, g.deleting = p.Iccid, true
+			}
+		}
+		return
+	}
 	del := m.Item(locales.ProfileMenuDelete()).Danger().Disabled(busy || enabled)
 	if enabled {
 		del.Tooltip(locales.ProfileDeleteDisabledHint())
@@ -153,10 +165,10 @@ func (g *gui) profileIcon(c *ui.Context, key string, data []byte, name string, s
 // profileDialogs are the rename and delete dialogs.
 func (g *gui) profileDialogs(c *ui.Context) {
 	ui.Modal(c, &g.renaming, func() {
-		ui.Column(c).Width(360).Gap(12).Children(func() {
+		ui.Column(c).Width(dialogWidth(c, 360)).Gap(12).Children(func() {
 			ui.Text(c, locales.ProfileRenameTitle()).FontSize(16).Bold()
 			ui.Text(c, locales.ProfileRenameBody()).FontSize(13).TextColor(c.Theme().TextMuted)
-			submit := ui.TextInput(c, &g.renameText).Placeholder(locales.ProfileNickname()).Label(locales.ProfileNickname()).MaxLength(64).AutoFocus().Submitted()
+			submit := autoFocus(ui.TextInput(c, &g.renameText).Placeholder(locales.ProfileNickname()).Label(locales.ProfileNickname()).MaxLength(64)).Submitted()
 			ui.Row(c).Gap(8).Justify(ui.End).Children(func() {
 				if ui.Button(c, locales.CommonCancel()).Clicked() {
 					g.renaming = false

@@ -13,6 +13,7 @@ import (
 	"EasyLPAC/internal/lpa"
 	"EasyLPAC/internal/settings"
 	"EasyLPAC/internal/transport"
+	"EasyLPAC/locales"
 )
 
 // phoneFixture is a gui over a fake card behind a USB reader, a tester
@@ -177,5 +178,112 @@ func TestPhonePulled(t *testing.T) {
 	}
 	if pull.Refreshing {
 		t.Fatal("still refreshing after the read")
+	}
+}
+
+// The notifications are a list a tap checks, without the desktop's hint
+// of modifier keys, and the checked ones send on their own.
+func TestPhoneNotificationList(t *testing.T) {
+	f := newPhoneFixture(t)
+	f.g.app.UpdateSettings(func(s *settings.Config) { s.AutoNotify = false })
+	f.chooseReader(t, phoneReader)
+	card := f.g.app.Notifications
+	f.tab(pageNotifications)
+	if f.tt.HasText("Shift-click") {
+		t.Fatal("the hint of modifier keys shows on a phone")
+	}
+	f.shot(t, "phone-notification-list")
+	f.click(t, "#1")
+	if !f.g.notifSel.Has(1) {
+		t.Fatal("a tap on the row did not check it")
+	}
+	f.tt.Frame()
+	f.click(t, "Choose notification 1")
+	if f.g.notifSel.Has(1) {
+		t.Fatal("the checkbox did not uncheck it")
+	}
+	f.tt.Frame()
+	f.click(t, "#1")
+	f.tt.Frame()
+	f.click(t, "Send 1 selected")
+	f.settle(t)
+	if len(f.g.app.Notifications) != len(card)-1 {
+		t.Fatalf("%d notifications left, want %d", len(f.g.app.Notifications), len(card)-1)
+	}
+}
+
+// Settings choose a reader by its name, and set PPS, with no choice of
+// PC/SC or modem.
+func TestPhoneSettings(t *testing.T) {
+	f := newPhoneFixture(t)
+	f.g.app.RefreshDevices()
+	f.until(t, func() bool { return !f.g.app.Discovering })
+	f.tab(pageSettings)
+	if f.tt.HasText("Connect through") || f.tt.HasText("Modem (AT)") {
+		t.Fatal("the choice of backend shows on a phone")
+	}
+	f.g.app.SelectDevice(phoneReader)
+	f.until(t, func() bool { return f.g.app.Loaded })
+	f.tab(pageSettings)
+	if !f.tt.HasText("ACS CCID USB Reader (072f:90cc)") || f.tt.HasText(phoneReader) {
+		t.Fatalf("the reader is not shown by its name; texts %q", f.tt.Texts())
+	}
+	f.shot(t, "phone-settings-reader")
+	sw, ok := f.tt.AccessByRole(ui.RoleSwitch, "Faster card rate")
+	if !ok {
+		t.Fatal("no PPS switch")
+	}
+	f.tt.ClickAt(sw.Bounds.X+sw.Bounds.W/2, sw.Bounds.Y+sw.Bounds.H/2)
+	if !f.g.app.Settings.Backends[settings.BackendCCID].NoPPS {
+		t.Fatal("PPS still on")
+	}
+}
+
+// Dialogs fit the window.
+func TestPhoneDialogsFit(t *testing.T) {
+	f := newPhoneFixture(t)
+	f.chooseReader(t, phoneReader)
+	f.tab(pageCard)
+	f.click(t, "Change…")
+	f.tt.Frame()
+	f.shot(t, "phone-smdp-dialog")
+	for _, s := range []string{"Cancel", "Save"} {
+		r, ok := f.tt.Find(s)
+		if !ok || r.X < 0 || r.X+r.W > 360 {
+			t.Fatalf("%q at %+v, outside the window", s, r)
+		}
+	}
+	f.g.editSMDP = false
+	f.tab(pageProfiles)
+	f.click(t, "Add eSIM")
+	f.tt.Frame()
+	f.shot(t, "phone-download")
+	// Taller than the window (with the demo's codes), it scrolls down to
+	// its buttons.
+	f.tt.Scroll(180, 300, 0, 2000)
+	f.tt.Frame()
+	f.shot(t, "phone-download-end")
+	r, ok := f.tt.Find("Cancel")
+	if !ok || r.X < 0 || r.X+r.W > 360 || r.Y < 0 || r.Y+r.H > 720 {
+		t.Fatalf("Cancel at %+v, outside the window; texts %q", r, f.tt.Texts())
+	}
+}
+
+// Deleting the eSIM in use says why it can't, as phones show no tooltip.
+func TestPhoneDeleteInUse(t *testing.T) {
+	f := newPhoneFixture(t)
+	f.chooseReader(t, phoneReader)
+	f.tab(pageProfiles)
+	f.click(t, "More for Travel Data")
+	f.tt.Frame()
+	if err := f.tt.ChooseMenuItem("Delete…"); err != nil {
+		t.Fatalf("%v; menu %q", err, f.tt.Menu())
+	}
+	f.tt.Frame()
+	if f.g.deleting {
+		t.Fatal("the delete dialog opened for the eSIM in use")
+	}
+	if !f.tt.HasText(locales.ProfileDeleteDisabledHint()) {
+		t.Fatalf("no reason shown; texts %q", f.tt.Texts())
 	}
 }

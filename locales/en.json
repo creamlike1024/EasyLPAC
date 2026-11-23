@@ -302,6 +302,8 @@
   },
   "settingsTerminalCap": "Announce terminal capabilities",
   "settingsTerminalCapBody": "Some cards need it; turn it off only if reading fails.",
+  "settingsPps": "Faster card rate",
+  "settingsPpsBody": "Ask the card for a faster rate (PPS) when it allows one; turn it off only if reading fails.",
   "settingsSerialPort": "Serial port",
   "settingsDetectedPorts": "Detected ports",
   "settingsPort": "Port",
@@ -457,6 +459,15 @@
     "placeholders": {
       "key": {
         "type": "String"
+      }
+    }
+  },
+  "notifSelectOne": "Choose notification {seq}",
+  "@notifSelectOne": {
+    "description": "Accessibility label of a notification's checkbox on phones",
+    "placeholders": {
+      "seq": {
+        "type": "int"
       }
     }
   },

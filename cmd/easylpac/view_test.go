@@ -249,6 +249,7 @@ func (f *fixture) shot(t *testing.T, name string) {
 }
 
 func TestPagesAndProfileFlow(t *testing.T) {
+	skipOnPhone(t)
 	card := newFakeCard()
 	f := newFixture(t, card)
 	f.tt.Frame()
@@ -452,6 +453,7 @@ func TestSettingsAIDCustomAndManualNotify(t *testing.T) {
 }
 
 func TestNotificationsNewestFirstAndMultiSelect(t *testing.T) {
+	skipOnPhone(t)
 	card := newFakeCard()
 	card.add("enable", "8985200012345678901")
 	card.add("disable", "8944100098765432109")
@@ -505,5 +507,14 @@ func TestEUMAndSiteTiles(t *testing.T) {
 	}
 	if m := siteTile(""); m.name != "Unknown" {
 		t.Fatalf("unknown site %+v", m)
+	}
+}
+
+// skipOnPhone skips a test of the desktop's layout where pages take the
+// phones' (-tags phone).
+func skipOnPhone(t *testing.T) {
+	t.Helper()
+	if phoneUI {
+		t.Skip("the desktop's layout")
 	}
 }

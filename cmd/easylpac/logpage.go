@@ -67,10 +67,14 @@ func (g *gui) logActions(c *ui.Context) {
 // exportLog asks where to save the log and writes it there.
 // hide is read on the UI thread when the export starts.
 func (g *gui) exportLog(hide bool) {
+	if phoneUI {
+		g.exportLogCopy(hide)
+		return
+	}
 	path, err := mygo.Dialog.Save(mygo.SaveDialogOptions{
 		Parent:      g.win,
 		Title:       locales.LogExportTitle(),
-		DefaultPath: fmt.Sprintf("EasyLPAC-%s.log", time.Now().Format("20060102-150405")),
+		DefaultPath: logFileName(),
 		Filters:     []mygo.FileFilter{{Name: locales.LogFileType(), Extensions: []string{"log"}}},
 	})
 	if err != nil || path == "" {
@@ -81,7 +85,31 @@ func (g *gui) exportLog(hide bool) {
 	}
 	var b bytes.Buffer
 	_ = g.app.Log.Export(&b, hide)
-	err = os.WriteFile(path, b.Bytes(), 0o600)
+	g.logExported(os.WriteFile(path, b.Bytes(), 0o600))
+}
+
+// exportLogCopy writes the log to a file of the app's own, then has the
+// system's picker save a copy of it: phones give apps no paths of other
+// apps' folders.
+func (g *gui) exportLogCopy(hide bool) {
+	name := logFileName()
+	path := filepath.Join(os.TempDir(), name)
+	var b bytes.Buffer
+	_ = g.app.Log.Export(&b, hide)
+	if err := os.WriteFile(path, b.Bytes(), 0o600); err != nil {
+		g.logExported(err)
+		return
+	}
+	defer os.Remove(path)
+	saved, err := mygo.Dialog.SaveCopy(path, name)
+	if err == nil && saved == "" {
+		return // canceled
+	}
+	g.logExported(err)
+}
+
+// logExported tells how an export went.
+func (g *gui) logExported(err error) {
 	g.update(func() {
 		if err != nil {
 			g.app.Logger.Error("log export failed", "err", err)
@@ -102,4 +130,9 @@ func (g *gui) logHeight(c *ui.Context, hint bool) float32 {
 		h -= 36 + 16
 	}
 	return h
+}
+
+// logFileName names an export of the log by when it was made.
+func logFileName() string {
+	return fmt.Sprintf("EasyLPAC-%s.log", time.Now().Format("20060102-150405"))
 }

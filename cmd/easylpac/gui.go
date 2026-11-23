@@ -299,7 +299,7 @@ func (g *gui) connectionHint(c *ui.Context) bool {
 			}
 		})
 	case !g.app.DevicePresent():
-		emptyState(c, deviceIcon(g.app.Settings.Backend), locales.HintDeviceGone(g.app.CurrentDevice()), locales.HintDeviceGoneBody(), func() {
+		emptyState(c, deviceIcon(g.app.Settings.Backend), locales.HintDeviceGone(g.deviceLabel(g.app.CurrentDevice())), locales.HintDeviceGoneBody(), func() {
 			if ui.PrimaryButton(c, locales.HintOpenSettings()).Clicked() {
 				g.show(pageSettings)
 			}
@@ -410,4 +410,24 @@ func (g *gui) taskPill(c *ui.Context) {
 			ui.Text(c, taskText(task)).FontSize(13).SingleLine()
 		})
 	})
+}
+
+// dialogWidth is the width of a dialog's content: w, or on phones what
+// the window leaves of it beside the panel's margins and padding (the
+// panel stays 20 from each edge, and pads 20 within).
+func dialogWidth(c *ui.Context, w float32) float32 {
+	if !phoneUI {
+		return w
+	}
+	ww, _ := c.Size()
+	return max(min(w, ww-80), 0)
+}
+
+// autoFocus focuses e as it shows, on desktops: on phones that would
+// bring the keyboard up over a dialog before the user chose to type.
+func autoFocus(e ui.Element) ui.Element {
+	if !phoneUI {
+		e.AutoFocus()
+	}
+	return e
 }
