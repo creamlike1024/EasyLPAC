@@ -9,13 +9,16 @@ package main
 
 import (
 	"bytes"
+	"context"
 	"fmt"
 	"image/color"
 	"image/png"
 	"log"
+	"os"
 	"slices"
 
 	"github.com/egoist/mygo"
+	"github.com/egoist/mygo/plugins/imagepicker"
 	"github.com/egoist/mygo/ui"
 	"github.com/egoist/mygo/ui/mobile"
 
@@ -285,4 +288,35 @@ func (g *gui) syncBadge() {
 	}
 	g.phone.badge = badge
 	g.phone.tabs.SetBadge(tabIndex(pageNotifications), badge)
+}
+
+// phoneQRButtons read an activation code's QR code with the system's
+// camera, or from a photo the system's picker gives: neither needs a
+// permission.
+func (g *gui) phoneQRButtons(c *ui.Context) {
+	if ui.Button(c, "").Radius(14).Children(func() {
+		ui.Icon(c, iconCamera).Size(16, 16)
+		ui.Text(c, locales.DlScanQr()).SingleLine()
+	}).Clicked() {
+		go func() {
+			path, err := imagepicker.Capture(context.Background())
+			g.scanQRPhoto(path, err)
+		}()
+	}
+	if ui.Button(c, "").Radius(14).Children(func() {
+		ui.Icon(c, iconImage).Size(16, 16)
+		ui.Text(c, locales.DlChoosePhoto()).SingleLine()
+	}).Clicked() {
+		go func() {
+			paths, err := imagepicker.Pick(context.Background(), imagepicker.Options{})
+			for _, p := range paths[min(1, len(paths)):] {
+				_ = os.Remove(p) // one is asked for
+			}
+			path := ""
+			if len(paths) > 0 {
+				path = paths[0]
+			}
+			g.scanQRPhoto(path, err)
+		}()
+	}
 }

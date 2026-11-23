@@ -5,10 +5,16 @@ package main
 import (
 	"context"
 	"errors"
+	"image"
+	"image/png"
+	"os"
+	"path/filepath"
 	"sync/atomic"
 	"testing"
 
 	"github.com/egoist/mygo/ui"
+	"github.com/makiuchi-d/gozxing"
+	"github.com/makiuchi-d/gozxing/qrcode"
 
 	"EasyLPAC/internal/app"
 	"EasyLPAC/internal/lpa"
@@ -306,4 +312,64 @@ func TestPhoneReaderGone(t *testing.T) {
 		t.Fatalf("texts %q", f.tt.Texts())
 	}
 	f.shot(t, "phone-reader-gone")
+}
+
+// Phones read a QR code from the camera or a photo, and the photo, which
+// holds the activation code, goes once read.
+func TestPhoneQRPhoto(t *testing.T) {
+	f := newPhoneFixture(t)
+	f.chooseReader(t, phoneReader)
+	f.tab(pageProfiles)
+	f.click(t, "Add eSIM")
+	f.tt.Frame()
+	for _, s := range []string{"Scan QR code", "Choose photo"} {
+		if !f.tt.HasText(s) {
+			t.Fatalf("no %q; texts %q", s, f.tt.Texts())
+		}
+	}
+	if f.tt.HasText("Open QR image…") || f.tt.HasText("drop") {
+		t.Fatal("the desktop's ways show on a phone")
+	}
+
+	const code = "LPA:1$smdp.example.com$MATCH-1"
+	m, err := qrcode.NewQRCodeWriter().Encode(code, gozxing.BarcodeFormat_QR_CODE, 300, 300, nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+	path := filepath.Join(t.TempDir(), "photo.png")
+	out, err := os.Create(path)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err := png.Encode(out, m); err != nil {
+		t.Fatal(err)
+	}
+	out.Close()
+	f.g.foundQR(readQRPhoto(path, nil))
+	if f.g.dl.code != code {
+		t.Fatalf("code %q", f.g.dl.code)
+	}
+	if _, err := os.Stat(path); !os.IsNotExist(err) {
+		t.Fatal("the photo was kept")
+	}
+}
+
+// A photo without a QR code says so, and goes too.
+func TestPhoneQRPhotoWithoutCode(t *testing.T) {
+	path := filepath.Join(t.TempDir(), "photo.png")
+	out, err := os.Create(path)
+	if err != nil {
+		t.Fatal(err)
+	}
+	png.Encode(out, image.NewGray(image.Rect(0, 0, 64, 64)))
+	out.Close()
+	g := newGUI(&memClipboard{})
+	g.foundQR(readQRPhoto(path, nil))
+	// In a toast: the form's end is out of sight on a phone.
+	if g.toast != locales.DlNoQrImage() || g.dl.inputError != "" {
+		t.Fatalf("toast %q, error %q", g.toast, g.dl.inputError)
+	}
+	if _, err := os.Stat(path); !os.IsNotExist(err) {
+		t.Fatal("the photo was kept")
+	}
 }

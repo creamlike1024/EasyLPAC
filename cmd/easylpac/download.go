@@ -161,12 +161,20 @@ func (g *gui) downloadInput(c *ui.Context) {
 					hint = locales.DlCodeHintPhone() // no images to drop
 				}
 				ui.Text(c, hint).FontSize(12).TextColor(t.TextMuted)
-				ui.Row(c).Gap(8).Children(func() {
+				buttons := ui.Row(c).Gap(8)
+				if phoneUI {
+					buttons.Wrap()
+				}
+				buttons.Children(func() {
 					if ui.Button(c, "").Radius(14).Children(func() {
 						ui.Icon(c, iconPaste).Size(16, 16)
 						ui.Text(c, locales.DlPaste()).SingleLine()
 					}).Clicked() {
 						g.pasteActivation(c)
+					}
+					if phoneUI {
+						g.phoneQRButtons(c)
+						return
 					}
 					if ui.Button(c, "").Radius(14).Children(func() {
 						ui.Icon(c, iconImage).Size(16, 16)
@@ -502,13 +510,24 @@ func (g *gui) pasteActivation(c *ui.Context) {
 	if img := g.clip.ReadImage(); img != nil {
 		text, err := activation.ScanQRCodeBytes(img)
 		if err != nil {
-			d.inputError = locales.DlNoQrClipboard()
+			g.codeError(locales.DlNoQrClipboard())
 			return
 		}
 		d.code = text
 		return
 	}
-	d.inputError = locales.DlClipboardEmpty()
+	g.codeError(locales.DlClipboardEmpty())
+}
+
+// codeError says why the code could not be taken from where the user
+// looked for it: under the form on desktops, in a toast on phones, where
+// the form's end is out of sight below the buttons the user pressed.
+func (g *gui) codeError(msg string) {
+	if phoneUI {
+		g.toast = msg
+		return
+	}
+	g.dl.inputError = msg
 }
 
 func (g *gui) chooseQRFile() {
@@ -520,13 +539,7 @@ func (g *gui) chooseQRFile() {
 	if err != nil || len(paths) == 0 {
 		return
 	}
-	g.update(func() {
-		g.scanQRFile(paths[0])
-		if phoneUI {
-			// Phones' pickers give a copy, which holds the activation code.
-			_ = os.Remove(paths[0])
-		}
-	})
+	g.update(func() { g.scanQRFile(paths[0]) })
 }
 
 func (g *gui) scanQRFile(path string) {
@@ -552,3 +565,49 @@ func lastN(s string, n int) string {
 	}
 	return s[len(s)-n:]
 }
+
+// scanQRPhoto decodes the QR code of a photo a phone's picker or camera
+// gave, off the main thread, and removes the photo. err is the picker's.
+func (g *gui) scanQRPhoto(path string, err error) {
+	if err == nil && path == "" {
+		return // the user went back
+	}
+	text, err := readQRPhoto(path, err)
+	g.update(func() { g.foundQR(text, err) })
+}
+
+// readQRPhoto reads the QR code of the photo at path, then removes the
+// photo: a copy of the app's, which holds the activation code.
+func readQRPhoto(path string, err error) (string, error) {
+	if err != nil {
+		return "", err
+	}
+	defer os.Remove(path)
+	f, err := os.Open(path)
+	if err != nil {
+		return "", err
+	}
+	defer f.Close()
+	text, err := activation.ScanQRCode(f)
+	if err != nil {
+		return "", errNoQR
+	}
+	return text, nil
+}
+
+// foundQR puts the activation code read from a QR code in the form, or
+// says why there is none.
+func (g *gui) foundQR(text string, err error) {
+	d := &g.dl
+	switch {
+	case errors.Is(err, errNoQR):
+		g.codeError(locales.DlNoQrImage())
+	case err != nil:
+		g.codeError(err.Error())
+	default:
+		d.mode, d.code, d.inputError = 0, text, ""
+	}
+}
+
+// errNoQR is a photo without a QR code to read.
+var errNoQR = errors.New("no QR code")

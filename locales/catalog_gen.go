@@ -1850,14 +1850,34 @@ func (msgs Messages) DlCodeHint() string {
 	return Catalog.Format(msgs.locale, "dlCodeHint", nil)
 }
 
-// DlCodeHintPhone says "Paste the activation code, or open a picture of its QR code."
+// DlCodeHintPhone says "Paste the activation code, or scan its QR code."
 // in the language the app shows.
 func DlCodeHintPhone() string { return In(i18n.Locale()).DlCodeHintPhone() }
 
-// DlCodeHintPhone says "Paste the activation code, or open a picture of its QR code."
+// DlCodeHintPhone says "Paste the activation code, or scan its QR code."
 // in the language of msgs.
 func (msgs Messages) DlCodeHintPhone() string {
 	return Catalog.Format(msgs.locale, "dlCodeHintPhone", nil)
+}
+
+// DlScanQr says "Scan QR code"
+// in the language the app shows.
+func DlScanQr() string { return In(i18n.Locale()).DlScanQr() }
+
+// DlScanQr says "Scan QR code"
+// in the language of msgs.
+func (msgs Messages) DlScanQr() string {
+	return Catalog.Format(msgs.locale, "dlScanQr", nil)
+}
+
+// DlChoosePhoto says "Choose photo"
+// in the language the app shows.
+func DlChoosePhoto() string { return In(i18n.Locale()).DlChoosePhoto() }
+
+// DlChoosePhoto says "Choose photo"
+// in the language of msgs.
+func (msgs Messages) DlChoosePhoto() string {
+	return Catalog.Format(msgs.locale, "dlChoosePhoto", nil)
 }
 
 // DlPaste says "Paste"
