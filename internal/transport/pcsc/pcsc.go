@@ -192,7 +192,9 @@ func (s *session) Close() error {
 	s.closed = true
 	var err error
 	if s.card != nil {
-		err = s.card.Disconnect(scard.LeaveCard)
+		// Power off, as lpac does, so that the next connection activates
+		// the card afresh: a profile switched without refresh needs it.
+		err = s.card.Disconnect(scard.UnpowerCard)
 	}
 	if s.client != nil {
 		if rerr := s.client.Release(); rerr != nil && err == nil {

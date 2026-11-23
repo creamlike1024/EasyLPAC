@@ -6,6 +6,7 @@ package euiccsvc
 // through the real vendored libeuicc.
 
 import (
+	"bytes"
 	"context"
 	"errors"
 	"strings"
@@ -297,6 +298,34 @@ func TestWriteOperationsHitTheCard(t *testing.T) {
 		if !found {
 			t.Fatalf("tag %04X not seen in requests %x", tag, card.Requests)
 		}
+	}
+}
+
+// Enable and disable must not request a refresh: behind a card reader
+// some eUICCs refuse such an enable with commandError (7), see #68.
+func TestProfileSwitchDoesNotRequestRefresh(t *testing.T) {
+	for _, tc := range []struct {
+		name string
+		tag  uint16
+		run  func(*Service, context.Context, string) error
+	}{
+		{"enable", 0xBF31, (*Service).ProfileEnable},
+		{"disable", 0xBF32, (*Service).ProfileDisable},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			card := &testcard.Card{}
+			svc := newDownloadService(t, card, testsmdp.New(t))
+			if err := tc.run(svc, context.Background(), testcard.ICCID); err != nil {
+				t.Fatal(err)
+			}
+			want := testcard.DER(tc.tag, testcard.Cat(
+				testcard.DER(0xA0, testcard.DER(0x5A, testcard.GSMBCD(testcard.ICCID))),
+				testcard.DER(0x81, []byte{0x00}), // refreshFlag FALSE
+			))
+			if len(card.Requests) != 1 || !bytes.Equal(card.Requests[0], want) {
+				t.Fatalf("requests = %X, want %X", card.Requests, want)
+			}
+		})
 	}
 }
 

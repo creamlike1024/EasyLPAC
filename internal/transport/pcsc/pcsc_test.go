@@ -136,6 +136,9 @@ func TestOpenSendsTerminalCapabilityThenSelect(t *testing.T) {
 	if !fc.closed || !cl.released {
 		t.Fatal("Close must disconnect card and release context")
 	}
+	if fc.disconn != scard.UnpowerCard {
+		t.Fatalf("disposition = %v, want UnpowerCard", fc.disconn)
+	}
 	if err := s.Close(); err != nil {
 		t.Fatalf("second Close: %v", err)
 	}

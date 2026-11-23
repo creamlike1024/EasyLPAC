@@ -19,15 +19,22 @@ func IsUserCancelled(err error) bool { return lpa.IsUserCancelled(err) }
 
 // --- write operations ------------------------------------------------
 
+// Profiles are switched without refresh on every backend, as lpac does
+// by default. With it some eUICCs refuse to enable behind a card reader
+// (#68); SGP.22 v3 requires that while CAT is not initialised (5.7.16:
+// commandError, 7). Without it the device has to activate the card again
+// (3.2.1): PC/SC powers it off on Close, a modem may have to be restarted
+// by the user.
+
 func (s *Service) ProfileEnable(ctx context.Context, iccid string) error {
 	return s.write(ctx, lpa.StageProfileEnable, "profile-enable", func(c *euicc.Context) error {
-		return c.EnableProfile(iccid, euicc.RefreshYes)
+		return c.EnableProfile(iccid, euicc.RefreshNo)
 	})
 }
 
 func (s *Service) ProfileDisable(ctx context.Context, iccid string) error {
 	return s.write(ctx, lpa.StageProfileDisable, "profile-disable", func(c *euicc.Context) error {
-		return c.DisableProfile(iccid, euicc.RefreshYes)
+		return c.DisableProfile(iccid, euicc.RefreshNo)
 	})
 }
 
