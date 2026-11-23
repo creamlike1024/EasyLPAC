@@ -37,6 +37,41 @@ if [ -n "${EASYLPAC_ANDROID:-}" ]; then
 		exit 1
 	fi
 	echo "with-version.sh: versionCode $CODE" >&2
+
+	# The upload key that signs release builds, when given: its keystore
+	# and alias here, its passwords in MYGO_ANDROID_KEYSTORE_PASSWORD and
+	# MYGO_ANDROID_KEY_PASSWORD, which mygo reads. Without it mygo signs
+	# with the debug key.
+	if [ -n "${EASYLPAC_ANDROID_KEYSTORE:-}" ]; then
+		ALIAS="${EASYLPAC_ANDROID_KEY_ALIAS:?with-version.sh: EASYLPAC_ANDROID_KEY_ALIAS is needed with EASYLPAC_ANDROID_KEYSTORE}"
+		case "$EASYLPAC_ANDROID_KEYSTORE$ALIAS" in
+		*'"'* | *'\'*)
+			echo "with-version.sh: no quotes or backslashes in the keystore's path or alias" >&2
+			exit 1
+			;;
+		esac
+		if [ ! -f "$EASYLPAC_ANDROID_KEYSTORE" ]; then
+			echo "with-version.sh: no keystore at $EASYLPAC_ANDROID_KEYSTORE" >&2
+			exit 1
+		fi
+		# After the versionCode line, the last of "android".
+		SIGNED=$(awk -v ks="$EASYLPAC_ANDROID_KEYSTORE" -v alias="$ALIAS" '
+			/^    "versionCode": [0-9]+$/ {
+				print $0 ","
+				print "    \"keystore\": \"" ks "\","
+				print "    \"keyAlias\": \"" alias "\""
+				done = 1
+				next
+			}
+			{ print }
+			END { if (!done) exit 1 }
+		' "$CONFIG") || {
+			echo "with-version.sh: android.versionCode is not the last of \"android\" in mygo.json" >&2
+			exit 1
+		}
+		printf '%s\n' "$SIGNED" >"$CONFIG"
+		echo "with-version.sh: signed with the key $ALIAS of $EASYLPAC_ANDROID_KEYSTORE" >&2
+	fi
 fi
 
 "$@"
