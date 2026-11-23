@@ -26,9 +26,20 @@ const (
 
 // gui is the state of the window: what the app layer does not own.
 type gui struct {
+	// win is the window dialogs of the system belong to; wins are all the
+	// windows showing the state, which update redraws.
 	win  *mygo.Window
+	wins []*mygo.Window
 	app  *app.App
+	// page is the page shown: the sidebar's choice, or the tab chosen.
 	page string
+	// selectTab, set on phones, chooses the tab of a page.
+	selectTab func(page string)
+	// phone is the phone frame's state.
+	phone phoneState
+	// chrome is the height the frame takes from a page: the header and the
+	// paddings above and below it.
+	chrome float32
 
 	// Profiles page.
 	renaming    bool
@@ -89,7 +100,36 @@ type clipboard interface {
 }
 
 func newGUI(clip clipboard) *gui {
-	return &gui{page: pageProfiles, clip: clip, notifSort: ui.SortOrder{Column: "seq", Descending: true}}
+	return &gui{page: pageProfiles, chrome: frameChrome, clip: clip, notifSort: ui.SortOrder{Column: "seq", Descending: true}}
+}
+
+// update runs fn on the main thread, then redraws every window: it is
+// the app's Dispatch, and how goroutines change the state.
+func (g *gui) update(fn func()) {
+	if len(g.wins) == 0 {
+		return
+	}
+	g.wins[0].Update(func() {
+		fn()
+		for _, w := range g.wins[1:] {
+			w.Invalidate()
+		}
+	})
+}
+
+// invalidate redraws every window; safe from any goroutine.
+func (g *gui) invalidate() {
+	for _, w := range g.wins {
+		w.Invalidate()
+	}
+}
+
+// show goes to a page: the sidebar's item, or on phones its tab.
+func (g *gui) show(page string) {
+	g.page = page
+	if g.selectTab != nil {
+		g.selectTab(page)
+	}
 }
 
 // canRefresh reports whether the card can be read now.
@@ -244,7 +284,7 @@ func (g *gui) connectionHint(c *ui.Context) bool {
 		}
 		emptyState(c, deviceIcon(g.app.Settings.Backend), title, locales.HintChooseBody(), func() {
 			if ui.PrimaryButton(c, locales.HintOpenSettings()).Clicked() {
-				g.page = pageSettings
+				g.show(pageSettings)
 			}
 		})
 	case g.app.Busy():
@@ -261,7 +301,7 @@ func (g *gui) connectionHint(c *ui.Context) bool {
 	case !g.app.DevicePresent():
 		emptyState(c, deviceIcon(g.app.Settings.Backend), locales.HintDeviceGone(g.app.CurrentDevice()), locales.HintDeviceGoneBody(), func() {
 			if ui.PrimaryButton(c, locales.HintOpenSettings()).Clicked() {
-				g.page = pageSettings
+				g.show(pageSettings)
 			}
 		})
 	default:
@@ -356,4 +396,18 @@ func copyButton(c *ui.Context, key, label string) ui.Element {
 	}
 	b.Children(func() { ui.Icon(c, iconCopy).Size(13, 13).TextColor(t.TextMuted) })
 	return b
+}
+
+// taskPill floats at the bottom while a card task runs.
+func (g *gui) taskPill(c *ui.Context) {
+	task := g.app.Task
+	if task == nil || g.dl.open {
+		return
+	}
+	ui.Row(c).Absolute().Left(0).Right(0).Bottom(20).Justify(ui.Center).PassThrough().Children(func() {
+		ui.Row(c).Padding(8, 16).Gap(10).Radius(20).Material(glass.Glass{}).Children(func() {
+			ui.Spinner(c).Size(16, 16)
+			ui.Text(c, taskText(task)).FontSize(13).SingleLine()
+		})
+	})
 }

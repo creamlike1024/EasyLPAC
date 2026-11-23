@@ -6,7 +6,6 @@ import (
 	"log"
 
 	"github.com/egoist/mygo"
-	"github.com/egoist/mygo/ui"
 
 	"EasyLPAC/internal/app"
 	"EasyLPAC/internal/settings"
@@ -38,23 +37,13 @@ func main() {
 	}
 	mygo.App.WhenReady(func() {
 		g.locale = chosenLocale()
-		g.win = mygo.NewWindow(mygo.WindowOptions{
-			Title:          title,
-			Width:          1040,
-			Height:         700,
-			MinWidth:       760,
-			MinHeight:      520,
-			TitleBarStyle:  mygo.TitleBarHiddenInset,
-			TitleBarHeight: titleBarHeight,
-			Vibrancy:       mygo.VibrancySidebar,
-			Content:        ui.View(g.rootView),
-		})
-		opts.Dispatch = g.win.Update
+		g.openWindows(title)
+		opts.Dispatch = g.update
 		g.app = app.New(opts)
 		if isDemo {
 			g.app.Logger.Info("demo mode: simulated card and SM-DP+")
 		}
-		g.app.Log.OnAppend(func() { g.win.Invalidate() })
+		g.app.Log.OnAppend(g.invalidate)
 		// One look for devices at launch; after that only when asked.
 		g.app.RefreshDevices()
 	})

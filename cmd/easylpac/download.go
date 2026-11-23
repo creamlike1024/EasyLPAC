@@ -498,7 +498,7 @@ func (g *gui) chooseQRFile() {
 	if err != nil || len(paths) == 0 {
 		return
 	}
-	g.win.Update(func() { g.scanQRFile(paths[0]) })
+	g.update(func() { g.scanQRFile(paths[0]) })
 }
 
 func (g *gui) scanQRFile(path string) {

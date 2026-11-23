@@ -45,7 +45,7 @@ func (g *gui) logPage(c *ui.Context) {
 			}
 			ui.Text(c, msg).Font("monospace").FontSize(12).TextColor(color).Grow(1).MinWidth(0)
 		})
-	}).Height(max(logHeight(c, !hide), 240)).Radius(12).Border(1, t.Border).Background(t.Surface).Padding(6, 0).Selectable()
+	}).Height(max(g.logHeight(c, !hide), 240)).Radius(12).Border(1, t.Border).Background(t.Surface).Padding(6, 0).Selectable()
 }
 
 func (g *gui) logActions(c *ui.Context) {
@@ -82,7 +82,7 @@ func (g *gui) exportLog(hide bool) {
 	var b bytes.Buffer
 	_ = g.app.Log.Export(&b, hide)
 	err = os.WriteFile(path, b.Bytes(), 0o600)
-	g.win.Update(func() {
+	g.update(func() {
 		if err != nil {
 			g.app.Logger.Error("log export failed", "err", err)
 			g.toast = locales.LogExportFailed(err.Error())
@@ -93,11 +93,11 @@ func (g *gui) exportLog(hide bool) {
 	})
 }
 
-// logHeight fills the window below the page's header (68), its bottom
-// padding (28) and the hint above the list when it shows.
-func logHeight(c *ui.Context, hint bool) float32 {
+// logHeight fills the window but for what the frame takes and the hint
+// above the list when it shows.
+func (g *gui) logHeight(c *ui.Context, hint bool) float32 {
 	_, h := c.Size()
-	h -= 68 + 28
+	h -= g.chrome
 	if hint {
 		h -= 36 + 16
 	}

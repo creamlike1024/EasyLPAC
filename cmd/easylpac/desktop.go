@@ -15,6 +15,9 @@ import (
 const (
 	sidebarWidth = 232
 	headerHeight = 48
+	// desktopChrome is what the floating header (68) and the bottom
+	// padding (28) take from a page.
+	desktopChrome = 68 + 28
 )
 
 // view builds the window from the state, every frame.
@@ -115,7 +118,7 @@ func (g *gui) deviceCard(c *ui.Context) {
 		})
 	})
 	if card.Clicked() {
-		g.page = pageSettings
+		g.show(pageSettings)
 	}
 }
 
@@ -162,18 +165,4 @@ func (g *gui) headerActions(c *ui.Context) {
 	case pageLog:
 		g.logActions(c)
 	}
-}
-
-// taskPill floats at the bottom while a card task runs.
-func (g *gui) taskPill(c *ui.Context) {
-	task := g.app.Task
-	if task == nil || g.dl.open {
-		return
-	}
-	ui.Row(c).Absolute().Left(0).Right(0).Bottom(20).Justify(ui.Center).PassThrough().Children(func() {
-		ui.Row(c).Padding(8, 16).Gap(10).Radius(20).Material(glass.Glass{}).Children(func() {
-			ui.Spinner(c).Size(16, 16)
-			ui.Text(c, taskText(task)).FontSize(13).SingleLine()
-		})
-	})
 }
