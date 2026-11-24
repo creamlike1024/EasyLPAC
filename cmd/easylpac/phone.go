@@ -82,12 +82,11 @@ func (g *gui) openWindows(string) {
 		log.Fatal(err)
 	}
 	// The tabs make the windows' bars: their buttons go in after.
-	refresh := mygo.BarItem{Title: locales.ActionRefresh(), Icon: tabIcon(iconRefresh), OnClick: g.refresh}
-	for i, tab := range phoneTabs {
-		if readsCard(tab.page) {
-			mygo.SetBarItems(g.wins[i], refresh)
-		}
-	}
+	g.setBarItems()
+	// The bars say the language chosen in Settings, or the system's.
+	// The tab bar's own labels stay those of the launch: MyGo's Tabs
+	// can't change them.
+	mygo.App.OnLocaleChanged(func(string) { g.retitle() })
 	g.phone.tabs = tabs
 	tabs.OnSelect(func(i int) {
 		g.page = phoneTabs[i].page
@@ -264,6 +263,35 @@ func (g *gui) morePages(c *ui.Context) {
 			}
 		}
 	})
+}
+
+// setBarItems puts the refresh button in the bars of the tabs that read
+// the card.
+func (g *gui) setBarItems() {
+	refresh := mygo.BarItem{Title: locales.ActionRefresh(), Icon: tabIcon(iconRefresh), OnClick: g.refresh}
+	for i, tab := range phoneTabs {
+		if readsCard(tab.page) {
+			mygo.SetBarItems(g.wins[i], refresh)
+		}
+	}
+}
+
+// retitle says the windows' titles, and their bars' buttons, in the
+// language now shown.
+func (g *gui) retitle() {
+	if len(g.wins) < len(phoneTabs) {
+		return
+	}
+	for i, tab := range phoneTabs {
+		g.wins[i].SetTitle(tab.title())
+	}
+	// The pushed windows follow the tabs', in the order pushed.
+	for i, page := range g.phone.pushed {
+		if j := len(phoneTabs) + i; j < len(g.wins) {
+			g.wins[j].SetTitle(pageTitle(page))
+		}
+	}
+	g.setBarItems()
 }
 
 // push shows page in a window over the settings tab's, which the
