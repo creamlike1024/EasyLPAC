@@ -230,36 +230,63 @@ func (g *gui) aidSettings(c *ui.Context, busy bool) {
 	}
 	custom := g.aidCustomMode
 	_, aidErr := app.ParseAID(g.customAID)
-	ui.Field(c, locales.SettingsAid(), func() {
-		ui.Row(c).Gap(8).Children(func() {
-			if ui.Select(c, &choice, names).Label(locales.SettingsAid()).Disabled(busy).Width(200).Shrink(0).Changed() {
-				if choice == aidCustom {
-					// Custom starts from what the field shows.
-					g.aidCustomMode = true
-				} else {
-					g.aidCustomMode = false
-					for _, p := range aidPresets {
-						if p.label() == choice {
-							g.app.UpdateSettings(func(s *settings.Config) { s.AID = p.aid })
-							g.customAID = p.aid
-						}
+	pick := func() {
+		sel := ui.Select(c, &choice, names).Label(locales.SettingsAid()).Disabled(busy)
+		if !phoneUI {
+			sel.Width(200).Shrink(0)
+		}
+		if sel.Changed() {
+			if choice == aidCustom {
+				// Custom starts from what the field shows.
+				g.aidCustomMode = true
+			} else {
+				g.aidCustomMode = false
+				for _, p := range aidPresets {
+					if p.label() == choice {
+						g.app.UpdateSettings(func(s *settings.Config) { s.AID = p.aid })
+						g.customAID = p.aid
 					}
 				}
 			}
-			in := ui.TextInput(c, &g.customAID).Placeholder(locales.SettingsAidPlaceholder()).Label(locales.SettingsCustomAid()).
-				Font("monospace").MaxLength(32).Disabled(busy || !custom).Grow(1)
-			if custom && aidErr != nil && g.customAID != "" {
-				in.Invalid(true)
+		}
+	}
+	entry := func() {
+		in := ui.TextInput(c, &g.customAID).Placeholder(locales.SettingsAidPlaceholder()).Label(locales.SettingsCustomAid()).
+			Font("monospace").MaxLength(32).Disabled(busy || !custom)
+		if phoneUI {
+			// The 32 digits in the phone's 16 don't fit its width.
+			in.FontSize(13)
+		} else {
+			in.Grow(1)
+		}
+		if custom && aidErr != nil && g.customAID != "" {
+			in.Invalid(true)
+		}
+		if !custom {
+			return
+		}
+		applyButton := func() {
+			apply := ui.Button(c, locales.SettingsApply()).Radius(14).Disabled(busy || aidErr != nil || strings.EqualFold(g.customAID, cfg.AID))
+			if apply.Clicked() || (in.Submitted() && aidErr == nil) {
+				aid := strings.ToUpper(g.customAID)
+				g.app.UpdateSettings(func(s *settings.Config) { s.AID = aid })
+				c.Toast(locales.SettingsAidSaved())
 			}
-			if custom {
-				apply := ui.Button(c, locales.SettingsApply()).Radius(14).Disabled(busy || aidErr != nil || strings.EqualFold(g.customAID, cfg.AID))
-				if apply.Clicked() || (in.Submitted() && aidErr == nil) {
-					aid := strings.ToUpper(g.customAID)
-					g.app.UpdateSettings(func(s *settings.Config) { s.AID = aid })
-					c.Toast(locales.SettingsAidSaved())
-				}
-			}
-		})
+		}
+		if phoneUI {
+			ui.Row(c).Justify(ui.End).Children(applyButton)
+		} else {
+			applyButton()
+		}
+	}
+	ui.Field(c, locales.SettingsAid(), func() {
+		if !phoneUI {
+			ui.Row(c).Gap(8).Children(func() { pick(); entry() })
+			return
+		}
+		// A phone is too narrow for one row: the AID's 32 digits get a
+		// row of their own, the button its own below them.
+		ui.Column(c).Gap(8).Children(func() { pick(); entry() })
 	})
 	switch {
 	case custom && aidErr != nil && g.customAID != "":

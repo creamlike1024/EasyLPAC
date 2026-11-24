@@ -149,9 +149,23 @@ func (g *gui) downloadInput(c *ui.Context) {
 		})
 		ui.Column(c).Gap(14).Children(func() {
 			if d.mode == 0 {
-				ui.Field(c, locales.DlModeCode(), func() {
-					in := autoFocus(ui.TextInput(c, &d.code).Placeholder("LPA:1$smdp.example.com$MATCHING-ID").
-						Label(locales.DlModeCode()).Font("monospace"))
+				// Keyed apart from the fields typed in, which take this place:
+				// what an element keeps follows its place otherwise, and the
+				// code's taller field would hand its height on.
+				ui.Field(c.Key("dl-code"), locales.DlModeCode(), func() {
+					var in ui.Element
+					if phoneUI {
+						// Too narrow for a code on one line: it wraps, so the
+						// whole of it shows, and the lines it breaks into
+						// aren't part of it.
+						in = ui.TextArea(c, &d.code).Lines(2, 4)
+						if strings.ContainsAny(d.code, "\r\n") {
+							d.code = strings.NewReplacer("\r", "", "\n", "").Replace(d.code)
+						}
+					} else {
+						in = autoFocus(ui.TextInput(c, &d.code))
+					}
+					in.Placeholder("LPA:1$smdp.example.com$MATCHING-ID").Label(locales.DlModeCode()).Font("monospace")
 					if err != nil && err.Error() != "" {
 						in.Invalid(true)
 					}
@@ -192,7 +206,7 @@ func (g *gui) downloadInput(c *ui.Context) {
 					})
 				}
 			} else {
-				ui.Field(c, locales.DlSmdpAddress(), func() {
+				ui.Field(c.Key("dl-smdp"), locales.DlSmdpAddress(), func() {
 					autoFocus(ui.TextInput(c, &d.smdp).Placeholder("smdp.example.com").Label(locales.DlSmdpAddress()))
 				})
 				ui.Field(c, locales.DlMatchingId(), func() {
@@ -212,6 +226,16 @@ func (g *gui) downloadInput(c *ui.Context) {
 				g.demoCodes(c)
 			}
 			ui.Collapsible(c, locales.DlAdvanced(), &d.advanced, func() {
+				if phoneUI {
+					// Too narrow for the label and the long placeholder on
+					// one row: the label goes above, what the field is for
+					// below, where it wraps.
+					ui.Field(c, "IMEI", func() {
+						ui.TextInput(c, &d.imei).Placeholder(locales.CommonOptional()).Label("IMEI").Font("monospace")
+						ui.Text(c, locales.DlImeiPlaceholder()).FontSize(12).TextColor(t.TextMuted)
+					})
+					return
+				}
 				// The label before the field, on its row.
 				ui.Row(c).Gap(12).Children(func() {
 					ui.Text(c, "IMEI").FontWeight(600).Shrink(0)

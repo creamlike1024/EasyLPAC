@@ -11,6 +11,7 @@ import (
 	"path/filepath"
 	"sync/atomic"
 	"testing"
+	"time"
 
 	"github.com/egoist/mygo/ui"
 	"github.com/makiuchi-d/gozxing"
@@ -71,7 +72,11 @@ func newPhoneFixture(t *testing.T) *phoneFixture {
 		},
 	})
 	for _, tab := range phoneTabs {
-		f.tabs[tab.page] = ui.NewTester(f.g.pageView(tab.page), 360, 720)
+		tt := ui.NewTester(f.g.pageView(tab.page), 360, 720)
+		// Android's body text is 16, the Mac's 13: the phone's pages are
+		// drawn here with the text of the phone.
+		tt.SetPreferences(ui.Preferences{TextScale: 16.0 / 13})
+		f.tabs[tab.page] = tt
 	}
 	f.tab(pageProfiles)
 	return f
@@ -250,6 +255,24 @@ func TestPhoneSettings(t *testing.T) {
 	if !f.g.app.Settings.Backends[settings.BackendCCID].NoPPS {
 		t.Fatal("PPS still on")
 	}
+
+	// A custom AID's 32 digits get the width of the page, and the button
+	// to apply it goes below them.
+	f.g.aidCustomMode = true
+	f.g.customAID = "A0000005591010FFFFFFFF8900000177"
+	f.tab(pageSettings)
+	f.shot(t, "phone-settings-aid")
+	in, ok := f.tt.AccessByRole(ui.RoleTextField, "Custom AID")
+	if !ok {
+		t.Fatalf("no AID field; texts %q", f.tt.Texts())
+	}
+	apply, ok := f.tt.AccessByRole(ui.RoleButton, "Apply")
+	if !ok {
+		t.Fatal("no Apply button")
+	}
+	if in.Bounds.W < 260 || apply.Bounds.Y < in.Bounds.Y+in.Bounds.H {
+		t.Fatalf("AID field %+v, Apply %+v: want the field the page's width, the button below it", in.Bounds, apply.Bounds)
+	}
 }
 
 // Dialogs fit the window.
@@ -280,6 +303,13 @@ func TestPhoneDialogsFit(t *testing.T) {
 	if !ok || r.X < 0 || r.X+r.W > 360 || r.Y < 0 || r.Y+r.H > 720 {
 		t.Fatalf("Cancel at %+v, outside the window; texts %q", r, f.tt.Texts())
 	}
+
+	f.click(t, "Advanced")
+	f.tt.Advance(time.Second) // the section opens
+	f.tt.Frame()
+	f.tt.Scroll(180, 300, 0, 2000)
+	f.tt.Frame()
+	f.shot(t, "phone-download-advanced")
 }
 
 // Deleting the eSIM in use says why it can't, as phones show no tooltip.
@@ -371,5 +401,40 @@ func TestPhoneQRPhotoWithoutCode(t *testing.T) {
 	}
 	if _, err := os.Stat(path); !os.IsNotExist(err) {
 		t.Fatal("the photo was kept")
+	}
+}
+
+// The fields typed in are one line high, after the code's taller field.
+func TestPhoneManualFields(t *testing.T) {
+	f := newPhoneFixture(t)
+	f.chooseReader(t, phoneReader)
+	f.tab(pageProfiles)
+	f.click(t, "Add eSIM")
+	f.tt.Frame()
+	f.click(t, "Enter details manually")
+	f.tt.Frame()
+	f.tt.Frame()
+	f.shot(t, "phone-download-manual")
+	smdp, ok := f.tt.AccessByRole(ui.RoleTextField, "SM-DP+ address")
+	if !ok {
+		t.Fatalf("no SM-DP+ field; texts %q", f.tt.Texts())
+	}
+	id, ok := f.tt.AccessByRole(ui.RoleTextField, "Matching ID")
+	if !ok {
+		t.Fatal("no matching ID field")
+	}
+	if smdp.Bounds.H > id.Bounds.H+1 {
+		t.Fatalf("SM-DP+ field %v high, matching ID %v", smdp.Bounds.H, id.Bounds.H)
+	}
+	// And back: the code's field is taller again, for its lines.
+	f.click(t, "Use an activation code")
+	f.tt.Frame()
+	f.tt.Frame()
+	code, ok := f.tt.AccessByRole(ui.RoleTextField, "Activation code")
+	if !ok {
+		t.Fatalf("no activation code field; texts %q", f.tt.Texts())
+	}
+	if code.Bounds.H < 1.5*id.Bounds.H {
+		t.Fatalf("activation code field %v high, want two lines at least", code.Bounds.H)
 	}
 }
