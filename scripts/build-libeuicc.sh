@@ -7,8 +7,10 @@
 # Usage: scripts/build-libeuicc.sh [GOOS/GOARCH]    (default: the host's)
 #
 # Output: third_party/libeuicc/<GOOS>-<GOARCH>/{libeuicc.a,libcjson.a,libcjsonext.a},
-# which internal/euicc links for that target. Everything is written
-# outside the submodule, which stays as checked out.
+# which internal/euicc links for that target. CMake builds in
+# build/libeuicc/<GOOS>-<GOARCH>: not under the output, which the linker
+# searches (-L), where its object files once made Go refuse to link.
+# Everything is written outside the submodule, which stays as checked out.
 set -eu
 
 ROOT=$(CDPATH='' cd -- "$(dirname -- "$0")/.." && pwd)
@@ -18,7 +20,7 @@ GOOS_T="${PLATFORM%/*}"
 GOARCH_T="${PLATFORM#*/}"
 NAME="$GOOS_T-$GOARCH_T"
 OUT="$ROOT/third_party/libeuicc/$NAME"
-BUILD="$OUT/cmake"
+BUILD="$ROOT/build/libeuicc/$NAME"
 if [ ! -f "$SRC/CMakeLists.txt" ]; then
 	echo "build-libeuicc: third_party/lpac is empty; run: git submodule update --init" >&2
 	exit 1
@@ -81,6 +83,8 @@ cmake -S "$SRC" -B "$BUILD" \
 cmake --build "$BUILD" --parallel
 
 mkdir -p "$OUT"
+# What earlier builds left under the output.
+rm -rf "$OUT/cmake"
 cp "$BUILD/euicc/libeuicc.a" "$OUT/libeuicc.a"
 cp "$BUILD/_deps/cjson-build/libcjson.a" "$OUT/libcjson.a"
 rm -f "$OUT/libcjsonext.a"
