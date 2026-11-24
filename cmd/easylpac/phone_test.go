@@ -465,17 +465,34 @@ func TestPhoneAboutAndStages(t *testing.T) {
 	f.tab(pageProfiles)
 	at := time.Now()
 	var marks []app.StageMark
-	for i, st := range downloadStages[:3] {
-		marks = append(marks, app.StageMark{Name: st.id, At: at.Add(time.Duration(i-3) * 450 * time.Millisecond)})
+	for i, st := range downloadStages[:2] {
+		marks = append(marks, app.StageMark{Name: st.id, At: at.Add(time.Duration(i-2) * 450 * time.Millisecond)})
 	}
 	f.g.dl = download{open: true, step: dlRunning}
-	f.g.app.Task = &app.Task{Kind: app.TaskDownload, Stage: marks[2].Name, Stages: marks}
+	f.g.app.Task = &app.Task{Kind: app.TaskDownload, Stage: marks[1].Name, Stages: marks}
 	f.tt.Frame()
 	f.shot(t, "phone-download-stages")
+	// Only the stage under way shows, not the list of them all.
+	if !f.tt.HasText(locales.StageContactServer()) {
+		t.Fatalf("the stage under way doesn't show; texts %q", f.tt.Texts())
+	}
+	for _, other := range []string{locales.StagePrepareCard(), locales.StageCheckServer(), locales.StageInstall()} {
+		if f.tt.HasText(other) {
+			t.Fatalf("%q shows besides the stage under way; texts %q", other, f.tt.Texts())
+		}
+	}
 	long, ok1 := f.tt.Find("ES9+.InitiateAuthentication")
-	short, ok2 := f.tt.Find("ES10b.PrepareDownload")
-	if !ok1 || !ok2 || long.H > 1.5*short.H {
-		t.Fatalf("function name %+v, a line is %v high: want it on one line; texts %q", long, short.H, f.tt.Texts())
+	label, ok2 := f.tt.Find(locales.StageContactServer())
+	if !ok1 || !ok2 || long.H > label.H {
+		t.Fatalf("function name %+v, the stage's name %+v: want it on one line; texts %q", long, label, f.tt.Texts())
+	}
+
+	// Cancelling, the cancel stage shows instead.
+	marks = append(marks, app.StageMark{Name: cancelStage.id, At: at})
+	f.g.app.Task = &app.Task{Kind: app.TaskDownload, Stage: cancelStage.id, Stages: marks}
+	f.tt.Frame()
+	if !f.tt.HasText(locales.StageCancel()) || f.tt.HasText(locales.StageContactServer()) {
+		t.Fatalf("cancelling shows %q", f.tt.Texts())
 	}
 	f.g.app.Task = nil
 }

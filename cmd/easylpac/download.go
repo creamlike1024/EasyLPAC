@@ -360,6 +360,18 @@ func (g *gui) downloadRunning(c *ui.Context) {
 	})
 	ui.Progress(c, float64(at+1)/float64(len(stages)))
 	ui.Column(c).Gap(2).Radius(12).Padding(6).Background(t.Surface).Border(1, t.Border).Children(func() {
+		if phoneUI {
+			// A phone shows the stage under way alone; the bar above
+			// tells how far along it is.
+			switch {
+			case cancelling:
+				g.stageRow(c, cancelStage, at+1, at+1, began, marks, now)
+			default:
+				cur := max(at, 0)
+				g.stageRow(c, stages[cur], cur, cur, began, marks, now)
+			}
+			return
+		}
 		for i, st := range stages {
 			if cancelling && i > at {
 				break
