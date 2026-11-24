@@ -70,7 +70,10 @@ func (g *gui) profileCard(c *ui.Context, p *lpa.Profile) {
 		ui.Column(c).Grow(1).MinWidth(0).Gap(3).Children(func() {
 			ui.Row(c).Gap(8).Children(func() {
 				ui.Text(c, profileName(p)).FontSize(15).Bold().SingleLine()
-				if enabled {
+				// A phone's row is too narrow for the badge next to the
+				// name; the "In use" heading, the border and the switch
+				// already say it.
+				if enabled && !phoneUI {
 					ui.Badge(c, locales.ProfileActive())
 				}
 			})

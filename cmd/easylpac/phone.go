@@ -157,11 +157,18 @@ func (g *gui) phoneFrame(c *ui.Context, page string) {
 	// The button would show over a dialog's backdrop: it goes while one
 	// is open.
 	fab := page == pageProfiles && g.app.Loaded && !g.dialogOpen()
-	pad := bottom
+	pad, right := bottom, float32(phonePadding)
 	if fab {
-		pad += 56 + phonePadding // the last eSIM scrolls above the button
+		// Upright, the last eSIM scrolls above the button. Sideways the
+		// page is too short for that, and the button would cover the rows'
+		// ends: it gets a margin of its own on the right.
+		if w, h := c.Size(); w > h {
+			right += 56 + phonePadding
+		} else {
+			pad += 56 + phonePadding
+		}
 	}
-	list := ui.Scroll(c).Fill().Padding(phonePadding, phonePadding, pad).Gap(16)
+	list := ui.Scroll(c).Fill().Padding(phonePadding, right, pad, phonePadding).Gap(16)
 	if readsCard(page) {
 		pull := g.pullState(page)
 		if list.PullToRefresh(pull) {
