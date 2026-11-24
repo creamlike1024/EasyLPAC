@@ -394,24 +394,41 @@ func (g *gui) stageRow(c *ui.Context, st dlStage, i, at int, began map[string]ti
 				ui.Spinner(c).Size(14, 14)
 			}
 		})
-		ui.Column(c).Grow(1).MinWidth(0).Gap(1).Children(func() {
-			label := ui.Text(c, st.label())
-			switch {
-			case i == at:
-				label.FontWeight(600)
-			case i > at:
-				label.TextColor(t.TextMuted)
-			}
-			if st.fn != "" {
-				ui.Text(c, st.fn).FontSize(11).Font("monospace").TextColor(t.TextMuted).Tooltip(st.id)
-			}
-		})
+		elapsed := ""
 		if start, ok := began[st.id]; ok && i <= at {
 			end := now
 			if i < at {
 				end = stageEnd(marks, st.id, now)
 			}
-			ui.Text(c, formatStageTime(end.Sub(start))).FontSize(11).Font("monospace").TextColor(t.TextMuted).Shrink(0)
+			elapsed = formatStageTime(end.Sub(start))
+		}
+		showElapsed := func() {
+			if elapsed != "" {
+				ui.Text(c, elapsed).FontSize(11).Font("monospace").TextColor(t.TextMuted).Shrink(0)
+			}
+		}
+		ui.Column(c).Grow(1).MinWidth(0).Gap(1).Children(func() {
+			ui.Row(c).Gap(8).AlignItems(ui.Start).Children(func() {
+				label := ui.Text(c, st.label()).Grow(1).MinWidth(0)
+				switch {
+				case i == at:
+					label.FontWeight(600)
+				case i > at:
+					label.TextColor(t.TextMuted)
+				}
+				// On a phone the time goes by the stage's name, so its
+				// functions' names below get the row's width and aren't
+				// broken inside a word.
+				if phoneUI {
+					showElapsed()
+				}
+			})
+			if st.fn != "" {
+				ui.Text(c, st.fn).FontSize(11).Font("monospace").TextColor(t.TextMuted).Tooltip(st.id)
+			}
+		})
+		if !phoneUI {
+			showElapsed()
 		}
 	})
 }

@@ -410,7 +410,9 @@ func (g *gui) taskPill(c *ui.Context) {
 	if task == nil || g.dl.open {
 		return
 	}
-	ui.Row(c).Absolute().Left(0).Right(0).Bottom(20).Justify(ui.Center).PassThrough().Children(func() {
+	// Clear of what covers a phone's edges; nothing does on desktops.
+	_, sr, sb, sl := c.SafeArea()
+	ui.Row(c).Absolute().Left(sl).Right(sr).Bottom(20 + sb).Justify(ui.Center).PassThrough().Children(func() {
 		ui.Row(c).Padding(8, 16).Gap(10).Radius(20).Material(glass.Glass{}).Children(func() {
 			ui.Spinner(c).Size(16, 16)
 			ui.Text(c, taskText(task)).FontSize(13).SingleLine()

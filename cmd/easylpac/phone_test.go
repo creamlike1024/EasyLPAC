@@ -19,6 +19,7 @@ import (
 
 	"EasyLPAC/internal/app"
 	"EasyLPAC/internal/lpa"
+	"EasyLPAC/internal/registry"
 	"EasyLPAC/internal/settings"
 	"EasyLPAC/internal/transport"
 	"EasyLPAC/locales"
@@ -436,5 +437,64 @@ func TestPhoneManualFields(t *testing.T) {
 	}
 	if code.Bounds.H < 1.5*id.Bounds.H {
 		t.Fatalf("activation code field %v high, want two lines at least", code.Bounds.H)
+	}
+}
+
+// The About page fits a phone, a snapshot's long version too, and the
+// names of a download's functions aren't broken inside a word.
+func TestPhoneAboutAndStages(t *testing.T) {
+	old := Version
+	Version = "0.9.3.r20.ge812fbc.dirty"
+	t.Cleanup(func() { Version = old })
+	f := newPhoneFixture(t)
+	about := ui.NewTester(f.g.pageView(pageAbout), 360, 720)
+	about.SetPreferences(ui.Preferences{TextScale: 16.0 / 13})
+	f.tabs[pageAbout] = about
+	f.tab(pageAbout)
+	f.shot(t, "phone-about")
+	r, ok := f.tt.Find(locales.AboutVersion(Version))
+	if !ok || r.X+r.W > 360-phonePadding {
+		t.Fatalf("version at %+v, past the card; texts %q", r, f.tt.Texts())
+	}
+	date, ok1 := f.tt.Find(registry.DataVersion)
+	mygoName, ok2 := f.tt.Find("MyGo")
+	if !ok1 || !ok2 || date.H > 1.5*mygoName.H {
+		t.Fatalf("data version %+v, a line is %v high: want it on one line", date, mygoName.H)
+	}
+
+	f.tab(pageProfiles)
+	at := time.Now()
+	var marks []app.StageMark
+	for i, st := range downloadStages[:3] {
+		marks = append(marks, app.StageMark{Name: st.id, At: at.Add(time.Duration(i-3) * 450 * time.Millisecond)})
+	}
+	f.g.dl = download{open: true, step: dlRunning}
+	f.g.app.Task = &app.Task{Kind: app.TaskDownload, Stage: marks[2].Name, Stages: marks}
+	f.tt.Frame()
+	f.shot(t, "phone-download-stages")
+	long, ok1 := f.tt.Find("ES9+.InitiateAuthentication")
+	short, ok2 := f.tt.Find("ES10b.PrepareDownload")
+	if !ok1 || !ok2 || long.H > 1.5*short.H {
+		t.Fatalf("function name %+v, a line is %v high: want it on one line; texts %q", long, short.H, f.tt.Texts())
+	}
+	f.g.app.Task = nil
+}
+
+// Sideways, with the navigation bar at the right, the add button keeps
+// clear of it as the page does.
+func TestPhoneAddButtonClearOfBars(t *testing.T) {
+	f := newPhoneFixture(t)
+	f.chooseReader(t, phoneReader)
+	f.tab(pageProfiles)
+	f.tt.SetSize(720, 360)
+	f.tt.SetInsets(0, 48, 0, 0)
+	f.tt.Frame()
+	f.shot(t, "phone-profiles-sideways")
+	b, ok := f.tt.AccessByRole(ui.RoleButton, "Add eSIM")
+	if !ok {
+		t.Fatalf("no add button; texts %q", f.tt.Texts())
+	}
+	if b.Bounds.X+b.Bounds.W > 720-48 {
+		t.Fatalf("add button at %+v, under the navigation bar at x 672", b.Bounds)
 	}
 }

@@ -186,7 +186,11 @@ func (g *gui) phoneFrame(c *ui.Context, page string) {
 		}
 	})
 	if fab {
-		ui.Box(c).Absolute().Right(phonePadding).Bottom(bottom).Children(func() {
+		// Placed in the root's padding box, which takes in what covers
+		// the window's edges (a navigation bar at a side): it keeps clear
+		// of that as the page does.
+		_, sr, sb, _ := c.SafeArea()
+		ui.Box(c).Absolute().Right(phonePadding + sr).Bottom(bottom + sb).Children(func() {
 			fab := mobile.FloatingButton(c, locales.ActionAddEsim(), nil).Center().Children(func() {
 				ui.Icon(c, iconPlus).Size(24, 24).TextColor(t.AccentText)
 			})
