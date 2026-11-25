@@ -18,6 +18,9 @@ func TestCertificateDialogBrainpool(t *testing.T) {
 		t.Fatal("GSMA test CI c0bc70 has no certificate")
 	}
 	f.g.openCertificate(ci, keyID)
+	if phoneUI {
+		t.Skip("phones show it in a page: TestPhoneCertificatePage")
+	}
 	f.g.page = pageAbout
 	f.tt.Frame()
 	if !f.g.certOpen || !f.tt.HasText(ci.Name) || !f.tt.HasText("Copy PEM") || !f.tt.HasText("Key ID "+keyID) {

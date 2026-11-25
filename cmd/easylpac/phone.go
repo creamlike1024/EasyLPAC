@@ -59,9 +59,10 @@ var phoneTabs = []phoneTab{
 // phoneState is the frame's own: what the tabs and stack show.
 type phoneState struct {
 	tabs *mygo.Tabs
-	// pushed are the pages pushed over the settings tab, the last in
-	// front.
-	pushed []string
+	// pushed are the pages pushed over the tabs' pages, in the order
+	// pushed; pushWins are their windows.
+	pushed   []string
+	pushWins map[string]*mygo.Window
 	// pull is the pull to refresh of each page that reads the card.
 	pull map[string]*ui.RefreshState
 	// badge is the notifications tab's badge, as last set.
@@ -107,16 +108,38 @@ func (g *gui) openWindows(string) {
 }
 
 // shownWins are the windows on screen: the chosen tab's, or the page
-// pushed last over the settings tab, while that tab is chosen.
+// pushed last over it.
 func (g *gui) shownWins() []*mygo.Window {
 	i := tabIndex(g.page)
 	if i < 0 || i >= len(g.wins) {
 		return nil
 	}
-	if g.page == pageSettings && len(g.phone.pushed) > 0 && len(g.wins) > len(phoneTabs) {
-		return g.wins[len(g.wins)-1:]
+	if ps := g.pushedOn(g.page); len(ps) > 0 {
+		if w := g.phone.pushWins[ps[len(ps)-1]]; w != nil {
+			return []*mygo.Window{w}
+		}
 	}
 	return g.wins[i : i+1]
+}
+
+// pushTab is the page of the tab page is pushed over: a certificate over
+// the card's, the log and about over the settings'.
+func pushTab(page string) string {
+	if page == pageCertificate {
+		return pageCard
+	}
+	return pageSettings
+}
+
+// pushedOn are the pages pushed over tab's page, the last in front.
+func (g *gui) pushedOn(tab string) []string {
+	var ps []string
+	for _, p := range g.phone.pushed {
+		if pushTab(p) == tab {
+			ps = append(ps, p)
+		}
+	}
+	return ps
 }
 
 // tabChosen makes page's tab the one shown, as the user chose it, unless
@@ -153,10 +176,10 @@ func tabIcon(s *ui.SVG) []byte {
 // front reports whether page is the one in front, which takes what is
 // shown once: toasts, dialogs.
 func (g *gui) front(page string) bool {
-	// The pages pushed over the settings tab cover it alone: on another
-	// tab, that tab's own page is in front.
-	if n := len(g.phone.pushed); n > 0 && g.page == pageSettings {
-		return g.phone.pushed[n-1] == page
+	// The pages pushed over a tab's page cover that tab alone: on
+	// another tab, that tab's own page is in front.
+	if ps := g.pushedOn(g.page); len(ps) > 0 {
+		return ps[len(ps)-1] == page
 	}
 	return g.page == page
 }
@@ -295,7 +318,13 @@ func (g *gui) morePages(c *ui.Context) {
 			if i > 0 {
 				ui.Divider(c)
 			}
-			row := mobile.ListRow(c.Key(page), mobile.RowOptions{Title: pageTitle(page), Disclosure: true})
+			// Disclosure draws a chevron on Cupertino only: on Material,
+			// Android's, the row draws its own, to say it leads to a page.
+			o := mobile.RowOptions{Title: pageTitle(page), Disclosure: true}
+			if mobile.Current() == mobile.Material {
+				o.Trailing = func() { ui.Icon(c, iconChevron).Size(18, 18).TextColor(t.TextMuted) }
+			}
+			row := mobile.ListRow(c.Key(page), o)
 			if row.Clicked() {
 				g.push(page)
 			}
@@ -323,16 +352,17 @@ func (g *gui) retitle() {
 	for i, tab := range phoneTabs {
 		g.wins[i].SetTitle(tab.title())
 	}
-	// The pushed windows follow the tabs', in the order pushed.
-	for i, page := range g.phone.pushed {
-		if j := len(phoneTabs) + i; j < len(g.wins) {
-			g.wins[j].SetTitle(pageTitle(page))
-		}
+	for page, w := range g.phone.pushWins {
+		w.SetTitle(pageTitle(page))
 	}
 	g.setBarItems()
 }
 
-// push shows page in a window over the settings tab's, which the
+// showCertificate shows the certificate opened, in a page over the card
+// tab's: a dialog is too small for it.
+func (g *gui) showCertificate() { g.push(pageCertificate) }
+
+// push shows page in a window over its tab's (pushTab), which the
 // system's back button takes away.
 func (g *gui) push(page string) {
 	if slices.Contains(g.phone.pushed, page) {
@@ -344,14 +374,26 @@ func (g *gui) push(page string) {
 	}
 	w := mygo.NewWindow(mygo.WindowOptions{Title: pageTitle(page), Hidden: true, Content: ui.View(g.pageView(page))})
 	g.wins = append(g.wins, w)
+	if g.phone.pushWins == nil {
+		g.phone.pushWins = map[string]*mygo.Window{}
+	}
+	g.phone.pushWins[page] = w
+	tab := pushTab(page)
 	w.OnClosed(func() {
 		g.wins = slices.DeleteFunc(g.wins, func(x *mygo.Window) bool { return x == w })
+		// It goes with the pages pushed over it on its tab.
 		if i := slices.Index(g.phone.pushed, page); i >= 0 {
-			g.phone.pushed = g.phone.pushed[:i]
+			g.phone.pushed = slices.Concat(g.phone.pushed[:i], slices.DeleteFunc(slices.Clone(g.phone.pushed[i:]), func(p string) bool {
+				if pushTab(p) != tab {
+					return false
+				}
+				delete(g.phone.pushWins, p)
+				return true
+			}))
 		}
 		g.invalidate()
 	})
-	g.wins[tabIndex(pageSettings)].Push(w)
+	g.wins[tabIndex(tab)].Push(w)
 	g.invalidate()
 }
 

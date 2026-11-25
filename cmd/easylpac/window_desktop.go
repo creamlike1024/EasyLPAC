@@ -24,5 +24,8 @@ func (g *gui) openWindows(title string) {
 	g.lead.Store(g.win)
 }
 
+// showCertificate shows the certificate opened, in a dialog.
+func (g *gui) showCertificate() { g.certOpen = true }
+
 // shownWins are the windows on screen: the desktop's one.
 func (g *gui) shownWins() []*mygo.Window { return g.wins }

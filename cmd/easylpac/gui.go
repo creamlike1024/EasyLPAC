@@ -26,6 +26,9 @@ const (
 	pageSettings      = "settings"
 	pageLog           = "log"
 	pageAbout         = "about"
+	// pageCertificate is a CI's certificate, on phones: desktops show it
+	// in a dialog.
+	pageCertificate = "certificate"
 )
 
 // gui is the state of the window: what the app layer does not own.
@@ -191,6 +194,8 @@ func (g *gui) pageBody(c *ui.Context, page string) {
 		g.logPage(c)
 	case pageAbout:
 		g.aboutPage(c)
+	case pageCertificate:
+		g.certificatePage(c)
 	default:
 		g.profilesPage(c)
 	}
@@ -237,6 +242,8 @@ func pageTitle(p string) string {
 		return locales.NavLog()
 	case pageAbout:
 		return locales.NavAbout()
+	case pageCertificate:
+		return locales.CardViewCertificate()
 	}
 	return locales.NavEsims()
 }

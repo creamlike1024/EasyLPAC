@@ -11,11 +11,13 @@ import (
 	"os"
 	"path/filepath"
 	"strconv"
+	"strings"
 	"sync/atomic"
 	"testing"
 	"time"
 
 	"github.com/egoist/mygo/ui"
+	"github.com/egoist/mygo/ui/mobile"
 	"github.com/makiuchi-d/gozxing"
 	"github.com/makiuchi-d/gozxing/qrcode"
 
@@ -578,11 +580,23 @@ func TestPhoneShownWins(t *testing.T) {
 			t.Fatalf("on %s, shown %v", tab.page, s)
 		}
 	}
+	log := new(mygo.Window)
 	g.phone.pushed = []string{pageLog}
-	g.wins = append(g.wins, new(mygo.Window))
+	g.phone.pushWins = map[string]*mygo.Window{pageLog: log}
+	g.wins = append(g.wins, log)
 	g.page = pageSettings
-	if s := g.shownWins(); len(s) != 1 || s[0] != g.wins[len(phoneTabs)] {
+	if s := g.shownWins(); len(s) != 1 || s[0] != log {
 		t.Fatal("with Log pushed, its window isn't the one shown")
+	}
+	cert := new(mygo.Window)
+	g.phone.pushed = append(g.phone.pushed, pageCertificate)
+	g.phone.pushWins[pageCertificate] = cert
+	if s := g.shownWins(); len(s) != 1 || s[0] != log {
+		t.Fatal("on the settings tab, the certificate pushed over Card is shown")
+	}
+	g.page = pageCard
+	if s := g.shownWins(); len(s) != 1 || s[0] != cert {
+		t.Fatal("on the card tab, the certificate's window isn't the one shown")
 	}
 	g.page = pageProfiles
 	if s := g.shownWins(); len(s) != 1 || s[0] != g.wins[tabIndex(pageProfiles)] {
@@ -590,31 +604,86 @@ func TestPhoneShownWins(t *testing.T) {
 	}
 }
 
-// The certificate dialog's buttons are all on the screen, upright and
-// sideways.
-func TestPhoneCertificateButtons(t *testing.T) {
+// A CI's certificate opens in a page pushed over the card tab, which
+// is in front there alone; on phones there is no dialog of it.
+func TestPhoneCertificatePage(t *testing.T) {
 	f := newPhoneFixture(t)
 	f.chooseReader(t, phoneReader)
 	f.tab(pageCard)
-	const keyID = "81370f5125d0b1d408d4c3b232e6d25e795bebfb"
+	const keyID = "c0bc70ba36929d43b467ff57570530e57ab8fcd8"
 	ci := registry.LookupIssuer(keyID)
 	if ci == nil || ci.Certificate == nil {
-		t.Fatal("GSMA CI 81370f has no certificate")
+		t.Fatal("GSMA test CI c0bc70 has no certificate")
 	}
 	f.g.openCertificate(ci, keyID)
-	for _, size := range [][2]int{{360, 720}, {720, 360}} {
-		f.tt.SetSize(size[0], size[1])
-		f.tt.Frame()
-		f.shot(t, "phone-certificate-"+strconv.Itoa(size[0]))
-		for _, name := range []string{"Expand all", "Collapse all", "Copy PEM", "Close"} {
-			b, ok := f.tt.AccessByRole(ui.RoleButton, name)
-			if !ok {
-				t.Fatalf("%v: no %s button; texts %q", size, name, f.tt.Texts())
+	if f.g.certOpen || f.g.dialogOpen() {
+		t.Fatal("the certificate opened in a dialog")
+	}
+	if !f.g.front(pageCertificate) || f.g.front(pageCard) {
+		t.Fatalf("pushed %q: the certificate should be in front on the card tab", f.g.phone.pushed)
+	}
+	f.g.page = pageSettings
+	if f.g.front(pageCertificate) || !f.g.front(pageSettings) {
+		t.Fatal("the certificate is in front on the settings tab")
+	}
+	f.g.page = pageCard
+	page := ui.NewTester(f.g.pageView(pageCertificate), 360, 720)
+	setTreeOpen(f.g.certTree, f.g.certTreeOpen, true)
+	page.Frame()
+	f.shot(t, "phone-certificate")
+	for _, text := range []string{ci.Name, "Key ID " + keyID, "brainpoolP256r1"} {
+		if !page.HasText(text) {
+			t.Fatalf("no %q; texts %q", text, page.Texts())
+		}
+	}
+	for _, name := range []string{"Expand all", "Collapse all", "Copy PEM"} {
+		b, ok := page.AccessByRole(ui.RoleButton, name)
+		if !ok {
+			t.Fatalf("no %s button; texts %q", name, page.Texts())
+		}
+		if r := b.Bounds; r.X < 0 || r.X+r.W > 360 {
+			t.Errorf("%s at %+v, not all on the screen", name, r)
+		}
+	}
+	if err := page.Click("Copy PEM"); err != nil {
+		t.Fatal(err)
+	}
+	page.Frame()
+	if clip := f.g.clip.(*memClipboard).text; !strings.HasPrefix(clip, "-----BEGIN CERTIFICATE-----") {
+		t.Fatalf("clipboard %q", clip)
+	}
+}
+
+// The rows of Settings that lead to a page show a chevron.
+func TestPhoneMorePagesChevron(t *testing.T) {
+	// Cupertino draws its own: Android's look is Material.
+	mobile.SetLook(mobile.Material)
+	t.Cleanup(func() { mobile.SetLook(mobile.Automatic) })
+	f := newPhoneFixture(t)
+	f.tab(pageSettings)
+	f.tt.Scroll(180, 360, 0, 5000)
+	f.tt.Frame()
+	f.shot(t, "phone-settings-end")
+	for _, name := range []string{"Log", "About"} {
+		row, ok := f.tt.AccessByRole(ui.RoleButton, name)
+		if !ok {
+			t.Fatalf("no %s row; texts %q", name, f.tt.Texts())
+		}
+		// Something is drawn at the row's end, where it has only its
+		// background without the chevron.
+		img, r := f.tt.Image(), row.Bounds
+		scale := float32(img.Bounds().Dx()) / 360
+		bg := img.RGBAAt(int((r.X+4)*scale), int((r.Y+r.H/2)*scale))
+		var ink int
+		for y := int((r.Y + 12) * scale); y < int((r.Y+r.H-12)*scale); y++ {
+			for x := int((r.X + r.W - 48) * scale); x < int((r.X+r.W-8)*scale); x++ {
+				if img.RGBAAt(x, y) != bg {
+					ink++
+				}
 			}
-			r := b.Bounds
-			if r.X < 0 || r.Y < 0 || r.X+r.W > float32(size[0]) || r.Y+r.H > float32(size[1]) || r.W < 40 || r.H < 30 {
-				t.Errorf("%v: %s at %+v, not all on the screen", size, name, r)
-			}
+		}
+		if ink < 10 {
+			t.Errorf("%s row at %+v: nothing drawn at its end, want a chevron", name, r)
 		}
 	}
 }
