@@ -1,10 +1,11 @@
 // Package ccidusb is the card transport of USB CCID readers driven by
-// go-ccid, without PC/SC: for systems that have none, as Android, and
-// for Linux without pcscd.
+// go-ccid, without PC/SC: for Android, which has none. Desktops read
+// cards through their systems' PC/SC, and their builds leave this package
+// out (internal/app).
 //
-// How readers are found and opened depends on the platform, and is a
-// Source: on Linux (not Android), the readers of usbfs; on Android, the
-// app hands the file descriptors of the readers it was allowed to open.
+// How readers are found and opened is a Source: on Android, the app
+// hands the file descriptors of the readers it was allowed to open.
+// Elsewhere there is none, but for the Sources tests give New.
 package ccidusb
 
 import (
@@ -37,7 +38,8 @@ type Backend struct {
 }
 
 // New returns the backend of the readers of src, or of the platform's
-// source when src is nil (none outside Linux: Available is then false).
+// source when src is nil (none outside Android: Available is then
+// false).
 func New(src Source) *Backend {
 	if src == nil {
 		src = platformSource()

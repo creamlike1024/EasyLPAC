@@ -18,7 +18,6 @@ import (
 	"EasyLPAC/internal/settings"
 	"EasyLPAC/internal/transport"
 	"EasyLPAC/internal/transport/at"
-	"EasyLPAC/internal/transport/ccidusb"
 	"EasyLPAC/internal/transport/pcsc"
 )
 
@@ -79,7 +78,7 @@ func newService(cfg *settings.Config, onStage func(string), logger *slog.Logger)
 		if b.Reader == "" {
 			return nil, ErrDeviceNotConfigured
 		}
-		svcCfg.Backend = ccidusb.New(nil)
+		svcCfg.Backend = newCCIDBackend()
 		svcCfg.Device = transport.DeviceConfig{
 			BackendID: settings.BackendCCID,
 			CCID: &transport.CCIDConfig{
@@ -115,7 +114,9 @@ func DiscoverDevices(ctx context.Context, backend string) ([]transport.Device, e
 	case settings.BackendAT:
 		b = at.New()
 	case settings.BackendCCID:
-		b = ccidusb.New(nil)
+		if b = newCCIDBackend(); b == nil {
+			return nil, fmt.Errorf("%w: %s", ErrBackendUnsupported, backend)
+		}
 	default:
 		return nil, fmt.Errorf("%w: %s", ErrBackendUnsupported, backend)
 	}

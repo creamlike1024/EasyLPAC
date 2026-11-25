@@ -6,6 +6,7 @@ import (
 	"EasyLPAC/assets"
 	"EasyLPAC/internal/app"
 	"EasyLPAC/internal/registry"
+	"EasyLPAC/internal/settings"
 	"EasyLPAC/locales"
 )
 
@@ -53,7 +54,7 @@ func (g *gui) aboutPage(c *ui.Context) {
 
 	// Each component under its own license: EasyLPAC's, and the static
 	// libeuicc's with what the LGPL asks of a static link. go-ccid is in
-	// every build, the USB CCID backend's or not.
+	// the builds of the USB CCID backend alone: Android's.
 	sectionTitle(c, locales.AboutLicense())
 	card(c, func() {
 		licenseRow(c, "EasyLPAC", "MIT", "https://github.com/"+author+"/EasyLPAC/blob/master/LICENSE")
@@ -62,8 +63,10 @@ func (g *gui) aboutPage(c *ui.Context) {
 		ui.Divider(c)
 		licenseRow(c, "cJSON", "MIT", "https://github.com/DaveGamble/cJSON/blob/master/LICENSE")
 		ui.Divider(c)
-		licenseRow(c, "go-ccid", "MIT", "https://github.com/"+author+"/go-ccid/blob/main/LICENSE")
-		ui.Divider(c)
+		if app.IsSupportedBackend(settings.BackendCCID) {
+			licenseRow(c, "go-ccid", "MIT", "https://github.com/"+author+"/go-ccid/blob/main/LICENSE")
+			ui.Divider(c)
+		}
 		licenseRow(c, "MyGo", "MIT", "https://github.com/egoist/mygo/blob/main/LICENSE")
 	})
 }

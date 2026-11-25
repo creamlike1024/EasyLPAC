@@ -1,4 +1,4 @@
-//go:build linux
+//go:build android
 
 package ccidusb
 
@@ -10,7 +10,8 @@ import (
 	"EasyLPAC/internal/transport"
 )
 
-// usbKind gives the errors of usbfs their kind.
+// usbKind gives the errors of usbfs, which Android's readers are
+// reached through, their kind.
 func usbKind(err error) error {
 	if errors.Is(err, usbfs.ErrDisconnected) {
 		return transport.Kind(transport.ErrDeviceGone, err)
