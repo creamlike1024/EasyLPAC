@@ -515,3 +515,48 @@ func TestPhoneAddButtonClearOfBars(t *testing.T) {
 		t.Fatalf("add button at %+v, under the navigation bar at x 672", b.Bounds)
 	}
 }
+
+// With Log pushed over the settings tab, a dialog opened on the eSIM tab
+// shows there, not in the hidden Log page.
+func TestPhoneDialogWithPagePushed(t *testing.T) {
+	f := newPhoneFixture(t)
+	f.chooseReader(t, phoneReader)
+	f.g.push(pageLog)
+	log := ui.NewTester(f.g.pageView(pageLog), 360, 720)
+	f.tab(pageProfiles)
+	if !f.g.front(pageProfiles) || f.g.front(pageLog) {
+		t.Fatal("the Log page pushed over Settings is in front on the eSIM tab")
+	}
+	f.g.renameICCID, f.g.renaming = "8985200012345678901", true
+	f.tt.Frame()
+	log.Frame()
+	if !f.tt.HasText("Rename eSIM") {
+		t.Fatalf("no rename dialog on the eSIM tab; texts %q", f.tt.Texts())
+	}
+	if log.HasText("Rename eSIM") {
+		t.Fatal("the rename dialog shows in the Log page")
+	}
+	// On the settings tab the pushed page is in front again.
+	f.g.renaming = false
+	f.tab(pageSettings)
+	if !f.g.front(pageLog) || f.g.front(pageSettings) {
+		t.Fatal("on the settings tab, Log isn't in front")
+	}
+}
+
+// While a dialog is open, choosing another tab goes back to the dialog's.
+func TestPhoneDialogKeepsItsTab(t *testing.T) {
+	f := newPhoneFixture(t)
+	f.chooseReader(t, phoneReader)
+	f.tab(pageProfiles)
+	f.click(t, "Add eSIM")
+	f.tt.Frame()
+	if back := f.g.tabChosen(pageCard); back != pageProfiles || f.g.page != pageProfiles {
+		t.Fatalf("chose Card with a dialog open: back %q, page %q", back, f.g.page)
+	}
+	f.g.dl.open = false
+	f.tt.Frame()
+	if back := f.g.tabChosen(pageCard); back != "" || f.g.page != pageCard {
+		t.Fatalf("chose Card with no dialog: back %q, page %q", back, f.g.page)
+	}
+}

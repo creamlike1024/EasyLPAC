@@ -66,6 +66,9 @@ type phoneState struct {
 	pull map[string]*ui.RefreshState
 	// badge is the notifications tab's badge, as last set.
 	badge string
+	// dialogTab is the page of the tab a dialog opened on, while it is
+	// open: it stays on that tab.
+	dialogTab string
 }
 
 // openWindows shows the bar of tabs, a window of a page in each.
@@ -89,7 +92,9 @@ func (g *gui) openWindows(string) {
 	mygo.App.OnLocaleChanged(func(string) { g.retitle() })
 	g.phone.tabs = tabs
 	tabs.OnSelect(func(i int) {
-		g.page = phoneTabs[i].page
+		if back := g.tabChosen(phoneTabs[i].page); back != "" {
+			tabs.Select(tabIndex(back))
+		}
 		g.invalidate()
 	})
 	g.selectTab = func(page string) {
@@ -98,6 +103,17 @@ func (g *gui) openWindows(string) {
 			g.invalidate()
 		}
 	}
+}
+
+// tabChosen makes page's tab the one shown, as the user chose it, unless
+// a dialog is open on another tab: a dialog keeps the screen to itself,
+// as Android's do, and the tab to go back to is returned.
+func (g *gui) tabChosen(page string) (back string) {
+	if g.dialogOpen() && g.phone.dialogTab != "" && g.phone.dialogTab != page {
+		return g.phone.dialogTab
+	}
+	g.page = page
+	return ""
 }
 
 // tabIndex is the index of page's tab, -1 if it has none.
@@ -123,7 +139,9 @@ func tabIcon(s *ui.SVG) []byte {
 // front reports whether page is the one in front, which takes what is
 // shown once: toasts, dialogs.
 func (g *gui) front(page string) bool {
-	if n := len(g.phone.pushed); n > 0 {
+	// The pages pushed over the settings tab cover it alone: on another
+	// tab, that tab's own page is in front.
+	if n := len(g.phone.pushed); n > 0 && g.page == pageSettings {
 		return g.phone.pushed[n-1] == page
 	}
 	return g.page == page
@@ -144,6 +162,12 @@ func (g *gui) pageView(page string) func(*ui.Context) {
 func (g *gui) phoneFrame(c *ui.Context, page string) {
 	t := c.Theme()
 	c.Root().Background(t.Background)
+	// The tab a dialog opens on is the one in front.
+	if !g.dialogOpen() {
+		g.phone.dialogTab = ""
+	} else if g.phone.dialogTab == "" {
+		g.phone.dialogTab = g.page
+	}
 	front := g.front(page)
 	if front {
 		g.showNotices(c)
