@@ -28,6 +28,9 @@ const (
 
 type download struct {
 	open bool
+	// foot are the buttons of the step shown, which phones keep at the
+	// dialog's foot: set as the step builds, each frame.
+	foot func()
 	step int
 	// mode is 0 for an activation code, 1 for the fields typed in.
 	mode                         int
@@ -117,10 +120,17 @@ func (g *gui) downloadModal(c *ui.Context) {
 			body()
 			return
 		}
-		// Taller than a phone's window: what it holds scrolls.
+		// Taller than a phone's window: what it holds scrolls, but for the
+		// step's buttons, at the foot as Android's dialogs keep theirs.
 		_, wh := c.Size()
 		panel.MaxHeight(wh - 2*top).Clip()
-		ui.Scroll(c).Shrink(1).MinHeight(0).Padding(24).Children(body)
+		ui.Column(c).MaxHeight(wh - 2*top).Shrink(1).MinHeight(0).Children(func() {
+			d.foot = nil
+			ui.Scroll(c).Shrink(1).MinHeight(0).Padding(24, 24, 12).Children(body)
+			if foot := d.foot; foot != nil {
+				ui.Row(c).Gap(8).Justify(ui.End).Padding(12, 24, 20).Children(foot)
+			}
+		})
 	})
 	// The dialog stays while the card is written.
 	if m.Dismissed() && d.step == dlRunning {
@@ -248,7 +258,7 @@ func (g *gui) downloadInput(c *ui.Context) {
 		} else if err != nil && err.Error() != "" {
 			ui.Text(c, err.Error()).FontSize(13).TextColor(t.TextMuted)
 		}
-		ui.Row(c).Gap(8).Justify(ui.End).Children(func() {
+		g.dlActions(c, func() {
 			if ui.Button(c, locales.CommonCancel()).Clicked() {
 				d.open = false
 			}
@@ -383,7 +393,7 @@ func (g *gui) downloadRunning(c *ui.Context) {
 		}
 	})
 	writing := at >= 5 // from preparing the download on, the card is being written
-	ui.Row(c).Gap(8).Justify(ui.End).Children(func() {
+	g.dlActions(c, func() {
 		if writing {
 			ui.Text(c, locales.DlKeepConnected()).FontSize(12).TextColor(t.TextMuted).Grow(1)
 		}
@@ -479,7 +489,7 @@ func (g *gui) downloadPreview(c *ui.Context, meta lpa.ProfileMetadata) {
 			ui.Badge(c, meta.ProfileClass)
 		}
 	})
-	ui.Row(c).Gap(8).Justify(ui.End).Children(func() {
+	g.dlActions(c, func() {
 		if ui.Button(c, locales.CommonCancel()).Clicked() {
 			g.app.AnswerConfirm(false)
 		}
@@ -512,7 +522,7 @@ func (g *gui) downloadDone(c *ui.Context) {
 			ui.Text(c, locales.DlNotifyWaiting()).FontSize(12).TextColor(t.TextMuted)
 		}
 	})
-	ui.Row(c).Gap(8).Justify(ui.End).Children(func() {
+	g.dlActions(c, func() {
 		if ui.Button(c, locales.CommonDone()).Clicked() {
 			d.open = false
 		}
@@ -541,7 +551,7 @@ func (g *gui) downloadFailed(c *ui.Context) {
 		}
 		ui.Text(c, msg).Selectable().TextColor(t.TextMuted)
 	}
-	ui.Row(c).Gap(8).Justify(ui.End).Children(func() {
+	g.dlActions(c, func() {
 		if ui.Button(c, locales.CommonClose()).Clicked() {
 			d.open = false
 		}
@@ -549,6 +559,16 @@ func (g *gui) downloadFailed(c *ui.Context) {
 			d.step = dlInput
 		}
 	})
+}
+
+// dlActions are a step's buttons, under it; on phones, at the dialog's
+// foot, where they show while the step scrolls.
+func (g *gui) dlActions(c *ui.Context, fn func()) {
+	if phoneUI {
+		g.dl.foot = fn
+		return
+	}
+	ui.Row(c).Gap(8).Justify(ui.End).Children(fn)
 }
 
 // pasteActivation takes an activation code from the clipboard: as text,

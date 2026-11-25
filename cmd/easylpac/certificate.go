@@ -45,19 +45,20 @@ func (g *gui) certificateDialog(c *ui.Context) {
 			if ci.IssuedByCI {
 				ui.Text(c, locales.CertIssuedByCi()).FontSize(12).TextColor(t.Warning)
 			}
-			ui.Scroll(c).MaxHeight(440).Padding(6).Radius(12).Background(t.Surface).Border(1, t.Border).Children(func() {
+			ui.Scroll(c).MaxHeight(certTreeHeight(c)).Padding(6).Radius(12).Background(t.Surface).Border(1, t.Border).Children(func() {
 				if g.certTree != nil {
 					g.jsonTree(c, g.certTree, g.certTreeOpen, nil, nil)
 				}
 			})
-			ui.Row(c).Gap(8).Children(func() {
+			tree := func() {
 				if ui.Button(c, locales.CardExpandAll()).Radius(14).Clicked() {
 					setTreeOpen(g.certTree, g.certTreeOpen, true)
 				}
 				if ui.Button(c, locales.CardCollapseAll()).Radius(14).Clicked() {
 					setTreeOpen(g.certTree, g.certTreeOpen, false)
 				}
-				ui.Spacer(c)
+			}
+			end := func() {
 				if ui.Button(c, locales.CertCopyPem()).Radius(14).Clicked() {
 					g.clip.WriteText(string(pem.EncodeToMemory(&pem.Block{Type: "CERTIFICATE", Bytes: ci.Certificate})))
 					c.Toast(locales.CertPemCopied())
@@ -65,9 +66,31 @@ func (g *gui) certificateDialog(c *ui.Context) {
 				if ui.PrimaryButton(c, locales.CommonClose()).Clicked() {
 					g.certOpen = false
 				}
+			}
+			if phoneUI {
+				// The four are wider than a phone: the tree's go on a row
+				// of their own, the dialog's under them.
+				ui.Row(c).Gap(8).Children(tree)
+				ui.Row(c).Gap(8).Justify(ui.End).Children(end)
+				return
+			}
+			ui.Row(c).Gap(8).Children(func() {
+				tree()
+				ui.Spacer(c)
+				end()
 			})
 		})
 	})
+}
+
+// certTreeHeight is the most the certificate's tree takes: on phones,
+// what the screen leaves it under the title and over the buttons.
+func certTreeHeight(c *ui.Context) float32 {
+	if !phoneUI {
+		return 440
+	}
+	_, h := c.Size()
+	return max(min(440, h-320), 120)
 }
 
 // categoryLabel says what kind of CI it is.

@@ -10,6 +10,7 @@ import (
 	"image/png"
 	"os"
 	"path/filepath"
+	"strconv"
 	"sync/atomic"
 	"testing"
 	"time"
@@ -586,5 +587,62 @@ func TestPhoneShownWins(t *testing.T) {
 	g.page = pageProfiles
 	if s := g.shownWins(); len(s) != 1 || s[0] != g.wins[tabIndex(pageProfiles)] {
 		t.Fatal("on the eSIM tab, the pushed Log window is shown")
+	}
+}
+
+// The certificate dialog's buttons are all on the screen, upright and
+// sideways.
+func TestPhoneCertificateButtons(t *testing.T) {
+	f := newPhoneFixture(t)
+	f.chooseReader(t, phoneReader)
+	f.tab(pageCard)
+	const keyID = "81370f5125d0b1d408d4c3b232e6d25e795bebfb"
+	ci := registry.LookupIssuer(keyID)
+	if ci == nil || ci.Certificate == nil {
+		t.Fatal("GSMA CI 81370f has no certificate")
+	}
+	f.g.openCertificate(ci, keyID)
+	for _, size := range [][2]int{{360, 720}, {720, 360}} {
+		f.tt.SetSize(size[0], size[1])
+		f.tt.Frame()
+		f.shot(t, "phone-certificate-"+strconv.Itoa(size[0]))
+		for _, name := range []string{"Expand all", "Collapse all", "Copy PEM", "Close"} {
+			b, ok := f.tt.AccessByRole(ui.RoleButton, name)
+			if !ok {
+				t.Fatalf("%v: no %s button; texts %q", size, name, f.tt.Texts())
+			}
+			r := b.Bounds
+			if r.X < 0 || r.Y < 0 || r.X+r.W > float32(size[0]) || r.Y+r.H > float32(size[1]) || r.W < 40 || r.H < 30 {
+				t.Errorf("%v: %s at %+v, not all on the screen", size, name, r)
+			}
+		}
+	}
+}
+
+// The Add eSIM dialog's buttons stay on the screen while the form above
+// them scrolls, upright and sideways.
+func TestPhoneAddDialogButtons(t *testing.T) {
+	f := newPhoneFixture(t)
+	f.chooseReader(t, phoneReader)
+	f.tab(pageProfiles)
+	f.click(t, "Add eSIM")
+	// With Advanced open and an error under the code, the form is taller
+	// than a phone.
+	f.g.dl.advanced = true
+	f.g.dl.inputError = "The activation code isn't valid."
+	for _, size := range [][2]int{{360, 720}, {411, 652}, {720, 360}} {
+		f.tt.SetSize(size[0], size[1])
+		f.tt.Frame()
+		f.shot(t, "phone-add-"+strconv.Itoa(size[0]))
+		for _, name := range []string{"Cancel", "Download"} {
+			b, ok := f.tt.AccessByRole(ui.RoleButton, name)
+			if !ok {
+				t.Fatalf("%v: no %s button; texts %q", size, name, f.tt.Texts())
+			}
+			r := b.Bounds
+			if r.X < 0 || r.Y < 0 || r.X+r.W > float32(size[0]) || r.Y+r.H > float32(size[1]) || r.W < 40 || r.H < 30 {
+				t.Errorf("%v: %s at %+v, not all on the screen", size, name, r)
+			}
+		}
 	}
 }
