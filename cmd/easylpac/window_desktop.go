@@ -21,4 +21,8 @@ func (g *gui) openWindows(title string) {
 		Content:        ui.View(g.view),
 	})
 	g.wins = []*mygo.Window{g.win}
+	g.lead.Store(g.win)
 }
+
+// shownWins are the windows on screen: the desktop's one.
+func (g *gui) shownWins() []*mygo.Window { return g.wins }

@@ -5,6 +5,7 @@ package main
 import (
 	"context"
 	"errors"
+	"github.com/egoist/mygo"
 	"image"
 	"image/png"
 	"os"
@@ -558,5 +559,32 @@ func TestPhoneDialogKeepsItsTab(t *testing.T) {
 	f.tt.Frame()
 	if back := f.g.tabChosen(pageCard); back != "" || f.g.page != pageCard {
 		t.Fatalf("chose Card with no dialog: back %q, page %q", back, f.g.page)
+	}
+}
+
+// Only the window on screen redraws: the chosen tab's, or the page pushed
+// last over Settings while Settings is chosen.
+func TestPhoneShownWins(t *testing.T) {
+	f := newPhoneFixture(t)
+	g := f.g
+	for range phoneTabs {
+		g.wins = append(g.wins, new(mygo.Window))
+	}
+	t.Cleanup(func() { g.wins = nil })
+	for i, tab := range phoneTabs {
+		g.page = tab.page
+		if s := g.shownWins(); len(s) != 1 || s[0] != g.wins[i] {
+			t.Fatalf("on %s, shown %v", tab.page, s)
+		}
+	}
+	g.phone.pushed = []string{pageLog}
+	g.wins = append(g.wins, new(mygo.Window))
+	g.page = pageSettings
+	if s := g.shownWins(); len(s) != 1 || s[0] != g.wins[len(phoneTabs)] {
+		t.Fatal("with Log pushed, its window isn't the one shown")
+	}
+	g.page = pageProfiles
+	if s := g.shownWins(); len(s) != 1 || s[0] != g.wins[tabIndex(pageProfiles)] {
+		t.Fatal("on the eSIM tab, the pushed Log window is shown")
 	}
 }

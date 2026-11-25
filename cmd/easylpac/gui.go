@@ -2,6 +2,7 @@ package main
 
 import (
 	"errors"
+	"sync/atomic"
 
 	"github.com/egoist/mygo"
 	"github.com/egoist/mygo/plugins/glass"
@@ -33,6 +34,9 @@ type gui struct {
 	// windows showing the state, which update redraws.
 	win  *mygo.Window
 	wins []*mygo.Window
+	// lead is a window on screen, which update runs its changes through:
+	// goroutines read it, the main thread sets it.
+	lead atomic.Pointer[mygo.Window]
 	app  *app.App
 	// page is the page shown: the sidebar's choice, or the tab chosen.
 	page string
@@ -106,23 +110,32 @@ func newGUI(clip clipboard) *gui {
 	return &gui{page: pageProfiles, chrome: frameChrome, clip: clip, notifSort: ui.SortOrder{Column: "seq", Descending: true}}
 }
 
-// update runs fn on the main thread, then redraws every window: it is
-// the app's Dispatch, and how goroutines change the state.
+// update runs fn on the main thread, then redraws the windows on screen:
+// it is the app's Dispatch, and how goroutines change the state.
 func (g *gui) update(fn func()) {
-	if len(g.wins) == 0 {
+	w := g.lead.Load()
+	if w == nil {
 		return
 	}
-	g.wins[0].Update(func() {
+	w.Update(func() {
 		fn()
-		for _, w := range g.wins[1:] {
-			w.Invalidate()
+		for _, x := range g.shownWins() {
+			if x != w {
+				x.Invalidate()
+			}
 		}
 	})
 }
 
-// invalidate redraws every window; safe from any goroutine.
+// invalidate redraws the windows on screen, on the main thread. A hidden
+// one draws when it shows: on phones, drawing the hidden tabs' windows
+// too made every change several frames that the screen waits on.
 func (g *gui) invalidate() {
-	for _, w := range g.wins {
+	shown := g.shownWins()
+	if len(shown) > 0 {
+		g.lead.Store(shown[0])
+	}
+	for _, w := range shown {
 		w.Invalidate()
 	}
 }

@@ -103,6 +103,20 @@ func (g *gui) openWindows(string) {
 			g.invalidate()
 		}
 	}
+	g.invalidate()
+}
+
+// shownWins are the windows on screen: the chosen tab's, or the page
+// pushed last over the settings tab, while that tab is chosen.
+func (g *gui) shownWins() []*mygo.Window {
+	i := tabIndex(g.page)
+	if i < 0 || i >= len(g.wins) {
+		return nil
+	}
+	if g.page == pageSettings && len(g.phone.pushed) > 0 && len(g.wins) > len(phoneTabs) {
+		return g.wins[len(g.wins)-1:]
+	}
+	return g.wins[i : i+1]
 }
 
 // tabChosen makes page's tab the one shown, as the user chose it, unless
@@ -338,6 +352,7 @@ func (g *gui) push(page string) {
 		g.invalidate()
 	})
 	g.wins[tabIndex(pageSettings)].Push(w)
+	g.invalidate()
 }
 
 // syncBadge counts the notifications on their tab.
