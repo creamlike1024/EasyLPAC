@@ -66,7 +66,7 @@ func (s *simSource) Open(_ context.Context, id string) (ccid.Transport, ccid.Des
 
 func openSession(t *testing.T, card *euiccCard, o ccidtest.Options, cfg transport.CCIDConfig) (transport.CardSession, *simSource) {
 	t.Helper()
-	src := &simSource{sim: ccidtest.NewReader(card, o)}
+	src := &simSource{sim: ccidtest.NewReader(card, &o)}
 	if cfg.Reader == "" {
 		cfg.Reader = "sim0"
 	}
@@ -169,7 +169,7 @@ func TestSelectFailureClosesChannel(t *testing.T) {
 }
 
 func TestOpenErrors(t *testing.T) {
-	b := New(&simSource{sim: ccidtest.NewReader(nil, ccidtest.Options{})})
+	b := New(&simSource{sim: ccidtest.NewReader(nil, nil)})
 	ctx := context.Background()
 	if _, err := b.Open(ctx, transport.DeviceConfig{}); err == nil {
 		t.Error("Open without a reader configured")
@@ -193,7 +193,7 @@ func TestOpenErrors(t *testing.T) {
 // No card in the reader, before or after the session opens, is told by
 // its kind, which the interface explains.
 func TestNoCardKind(t *testing.T) {
-	src := &simSource{sim: ccidtest.NewReader(nil, ccidtest.Options{})}
+	src := &simSource{sim: ccidtest.NewReader(nil, nil)}
 	_, err := New(src).Open(context.Background(), transport.DeviceConfig{BackendID: "ccid", CCID: &transport.CCIDConfig{Reader: "sim0"}})
 	if !errors.Is(err, transport.ErrNoCard) {
 		t.Fatalf("open with no card: %v", err)

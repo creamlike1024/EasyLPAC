@@ -75,7 +75,7 @@ func (s *freshSource) List(context.Context) ([]ccidusb.Reader, error) {
 }
 
 func (s *freshSource) Open(context.Context, string) (ccid.Transport, ccid.Descriptor, error) {
-	sim := ccidtest.NewReader(s.card, s.o)
+	sim := ccidtest.NewReader(s.card, &s.o)
 	return sim, sim.Descriptor(), nil
 }
 
