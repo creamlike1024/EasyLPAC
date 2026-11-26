@@ -13,7 +13,13 @@ cp "$ROOT/LICENSE" "$DIR/LICENSE"
 cp "$ROOT/third_party/lpac/euicc/LICENSE" "$DIR/LICENSE-libeuicc"
 cp "$ROOT/third_party/go-ccid/LICENSE" "$DIR/LICENSE-go-ccid"
 cp "$ROOT/third_party/lpac/LICENSES/MIT.txt" "$DIR/LICENSE-cjson-ext"
-CJSON=$(find "$ROOT"/third_party/libeuicc -path '*/cjson/LICENSE' | head -n 1)
+# cJSON's source is fetched by CMake into scripts/build-libeuicc.sh's
+# build directory.
+CJSON=$(find "$ROOT/build/libeuicc" -path '*/cjson/LICENSE' 2>/dev/null | head -n 1)
+if [ -z "$CJSON" ]; then
+	echo "collect-licenses.sh: no cJSON LICENSE under build/libeuicc: run scripts/build-libeuicc.sh first" >&2
+	exit 1
+fi
 cp "$CJSON" "$DIR/LICENSE-cjson"
 cat >"$DIR/LICENSE-euicc-manual-data" <<NOTICE
 eUICC reference data bundled in EasyLPAC
