@@ -1,7 +1,8 @@
 package main
 
 import (
-	"fmt"
+	"errors"
+	"sync/atomic"
 
 	"github.com/egoist/mygo"
 	"github.com/egoist/mygo/plugins/glass"
@@ -10,16 +11,14 @@ import (
 	"EasyLPAC/internal/app"
 	"EasyLPAC/internal/registry"
 	"EasyLPAC/internal/settings"
+	"EasyLPAC/internal/transport"
 	"EasyLPAC/locales"
 )
 
-const (
-	titleBarHeight = 52
-	sidebarWidth   = 232
-	headerHeight   = 48
-)
+// titleBarHeight is the height of a desktop window's title bar.
+const titleBarHeight = 52
 
-// The pages, which are the sidebar's ids.
+// The pages, by their ids.
 const (
 	pageProfiles      = "profiles"
 	pageNotifications = "notifications"
@@ -27,13 +26,30 @@ const (
 	pageSettings      = "settings"
 	pageLog           = "log"
 	pageAbout         = "about"
+	// pageCertificate is a CI's certificate, on phones: desktops show it
+	// in a dialog.
+	pageCertificate = "certificate"
 )
 
 // gui is the state of the window: what the app layer does not own.
 type gui struct {
+	// win is the window dialogs of the system belong to; wins are all the
+	// windows showing the state, which update redraws.
 	win  *mygo.Window
+	wins []*mygo.Window
+	// lead is a window on screen, which update runs its changes through:
+	// goroutines read it, the main thread sets it.
+	lead atomic.Pointer[mygo.Window]
 	app  *app.App
+	// page is the page shown: the sidebar's choice, or the tab chosen.
 	page string
+	// selectTab, set on phones, chooses the tab of a page.
+	selectTab func(page string)
+	// phone is the phone frame's state.
+	phone phoneState
+	// chrome is the height the frame takes from a page: the header and the
+	// paddings above and below it.
+	chrome float32
 
 	// Profiles page.
 	renaming    bool
@@ -94,15 +110,61 @@ type clipboard interface {
 }
 
 func newGUI(clip clipboard) *gui {
-	return &gui{page: pageProfiles, clip: clip, notifSort: ui.SortOrder{Column: "seq", Descending: true}}
+	return &gui{page: pageProfiles, chrome: frameChrome, clip: clip, notifSort: ui.SortOrder{Column: "seq", Descending: true}}
 }
 
-// view builds the window from the state, every frame.
-func (g *gui) view(c *ui.Context) {
-	if g.app == nil {
+// update runs fn on the main thread, then redraws the windows on screen:
+// it is the app's Dispatch, and how goroutines change the state.
+func (g *gui) update(fn func()) {
+	w := g.lead.Load()
+	if w == nil {
 		return
 	}
-	t := c.Theme()
+	w.Update(func() {
+		fn()
+		for _, x := range g.shownWins() {
+			if x != w {
+				x.Invalidate()
+			}
+		}
+	})
+}
+
+// invalidate redraws the windows on screen, on the main thread. A hidden
+// one draws when it shows: on phones, drawing the hidden tabs' windows
+// too made every change several frames that the screen waits on.
+func (g *gui) invalidate() {
+	shown := g.shownWins()
+	if len(shown) > 0 {
+		g.lead.Store(shown[0])
+	}
+	for _, w := range shown {
+		w.Invalidate()
+	}
+}
+
+// show goes to a page: the sidebar's item, or on phones its tab.
+func (g *gui) show(page string) {
+	g.page = page
+	if g.selectTab != nil {
+		g.selectTab(page)
+	}
+}
+
+// canRefresh reports whether the card can be read now.
+func (g *gui) canRefresh() bool {
+	return g.app.CurrentDevice() != "" && !g.app.Busy()
+}
+
+func (g *gui) refresh() {
+	if !g.canRefresh() {
+		return
+	}
+	_ = g.app.Refresh()
+}
+
+// showNotices shows what tasks and goroutines left to say, as toasts.
+func (g *gui) showNotices(c *ui.Context) {
 	for _, n := range g.app.TakeNotices() {
 		c.Toast(noticeText(n))
 	}
@@ -110,84 +172,40 @@ func (g *gui) view(c *ui.Context) {
 		c.Toast(g.toast)
 		g.toast = ""
 	}
+}
 
-	vibrant := c.Vibrancy()
-	if vibrant {
-		c.Root().Background(ui.Transparent)
-	} else {
-		c.Root().Background(t.Background)
-	}
-	ui.Row(c).Fill().AlignItems(ui.Stretch).Children(func() {
-		side := ui.Column(c).Width(sidebarWidth).Shrink(0)
-		if !vibrant {
-			side.Background(t.Surface)
-		}
-		side.Children(func() { g.sidebar(c, vibrant) })
-		ui.Box(c).Width(1).Background(t.Border)
-		ui.Box(c).Grow(1).MinWidth(0).Background(t.Background).Clip().Children(func() {
-			g.pane(c)
-		})
-	})
+// dialogs builds the dialogs that any page may have open.
+func (g *gui) dialogs(c *ui.Context) {
 	g.downloadModal(c)
 	g.certificateDialog(c)
 	g.profileDialogs(c)
+}
 
-	// Cmd/Ctrl+R reads the card again, Cmd/Ctrl+N adds an eSIM.
-	if c.Shortcut(ui.Cmd, ui.KeyR) {
-		g.refresh()
-	}
-	if c.Shortcut(ui.Cmd, ui.KeyN) && g.app.Loaded {
-		g.openDownload()
+// pageBody builds what a page holds, without the frame around it.
+func (g *gui) pageBody(c *ui.Context, page string) {
+	switch page {
+	case pageNotifications:
+		g.notificationsPage(c)
+	case pageCard:
+		g.cardPage(c)
+	case pageSettings:
+		g.settingsPage(c)
+	case pageLog:
+		g.logPage(c)
+	case pageAbout:
+		g.aboutPage(c)
+	case pageCertificate:
+		g.certificatePage(c)
+	default:
+		g.profilesPage(c)
 	}
 }
 
-func (g *gui) refresh() {
-	if g.app.CurrentDevice() == "" || g.app.Busy() {
-		return
-	}
-	_ = g.app.Refresh()
-}
-
-// sidebar shows the device and the pages.
-func (g *gui) sidebar(c *ui.Context, vibrant bool) {
-	ui.Box(c).Height(titleBarHeight).Shrink(0).DragWindow()
-	g.deviceCard(c)
-	nProfiles, nNotif := "", ""
-	if g.app.Loaded {
-		nProfiles = fmt.Sprint(len(g.app.Profiles))
-		if n := len(g.app.Notifications); n > 0 {
-			nNotif = fmt.Sprint(n)
-		}
-	}
-	list := ui.Sidebar(c, &g.page, func() {
-		ui.SidebarSection(c, locales.NavSectionEuicc(), nil, func() {
-			item := ui.SidebarItem(c, pageProfiles, iconSIM, locales.NavEsims())
-			if nProfiles != "" {
-				item.Children(func() { ui.Badge(c, nProfiles) })
-			}
-			item = ui.SidebarItem(c, pageNotifications, iconBell, locales.NavNotifications())
-			if nNotif != "" {
-				item.Children(func() { ui.Badge(c, nNotif) })
-			}
-			ui.SidebarItem(c, pageCard, iconChip, locales.NavCard())
-		})
-		ui.SidebarSection(c, locales.NavSectionApp(), nil, func() {
-			ui.SidebarItem(c, pageSettings, iconSettings, locales.NavSettings())
-			ui.SidebarItem(c, pageLog, iconLog, locales.NavLog())
-			ui.SidebarItem(c, pageAbout, iconInfo, locales.NavAbout())
-		})
-	}).Grow(1).Label(locales.NavPages())
-	if vibrant {
-		list.Background(ui.Transparent)
-	}
-}
-
-// deviceCard shows which device is used and its state; it opens the
-// connection settings.
-func (g *gui) deviceCard(c *ui.Context) {
+// deviceState names the device in use and says how it is.
+func (g *gui) deviceState(c *ui.Context) (name, status string, color ui.Color) {
 	t := c.Theme()
-	name := g.app.CurrentDevice()
-	status, color := locales.DeviceNotConnected(), t.TextMuted
+	name = g.app.CurrentDevice()
+	status, color = locales.DeviceNotConnected(), t.TextMuted
 	switch {
 	case name == "":
 		name, status = locales.DeviceNone(), locales.DeviceChooseInSettings()
@@ -200,68 +218,16 @@ func (g *gui) deviceCard(c *ui.Context) {
 	case g.app.LastError != nil:
 		status, color = locales.DeviceError(), t.Danger
 	}
-	card := ui.ButtonBase(c).Margin(0, 12, 10).Padding(10, 12).Gap(10).Radius(12).Label(locales.DeviceLabel(name))
-	if t.Dark {
-		card.Material(glass.Glass{Clarity: 0.4})
-	} else {
-		// Glass over the light sidebar material reads as a gray smudge.
-		card.Background(t.Background).Border(1, t.Border).Shadow(0, 1, 2, 0, ui.RGBA(0, 0, 0, 0.05))
-	}
-	card.Children(func() {
-		ui.Icon(c, deviceIcon(g.app.Settings.Backend)).Size(18, 18).TextColor(t.TextMuted)
-		ui.Column(c).Grow(1).MinWidth(0).Gap(2).Children(func() {
-			ui.Row(c).Gap(6).Children(func() {
-				ui.Text(c, name).FontSize(12).Bold().SingleLine().MinWidth(0)
-				if g.demo {
-					ui.Badge(c, locales.DeviceDemo())
-				}
-			})
-			ui.Row(c).Gap(6).Children(func() {
-				ui.Box(c).Size(7, 7).Radius(4).Background(color)
-				ui.Text(c, status).FontSize(11).TextColor(t.TextMuted).SingleLine()
-			})
-		})
-	})
-	if card.Clicked() {
-		g.page = pageSettings
-	}
+	return name, status, color
 }
 
-// pane is the page under its floating glass header.
-func (g *gui) pane(c *ui.Context) {
-	t := c.Theme()
-	bar := c.TitleBar()
-	top := float32(8) + headerHeight + 12
-	bottom := float32(28)
-	if g.app.Task != nil {
-		bottom = 76 // the task pill floats there
+// taskText says what a running task does, and its stage.
+func taskText(task *app.Task) string {
+	label := taskLabel(task.Kind)
+	if task.Stage != "" {
+		label = locales.TaskWithStage(label, stageLabel(task.Stage))
 	}
-	ui.Scroll(c).Fill().Padding(top, 28, bottom).Gap(16).ScrollbarInsets(top, 0, 0).Children(func() {
-		switch g.page {
-		case pageNotifications:
-			g.notificationsPage(c)
-		case pageCard:
-			g.cardPage(c)
-		case pageSettings:
-			g.settingsPage(c)
-		case pageLog:
-			g.logPage(c)
-		case pageAbout:
-			g.aboutPage(c)
-		default:
-			g.profilesPage(c)
-		}
-	})
-	// Content scrolls under the header, faded by the scroll edge.
-	ui.Box(c).Absolute().Top(0).Left(0).Right(0).Height(top + 8).PassThrough().Material(glass.ScrollEdge{})
-	header := ui.Row(c).Absolute().Top(8).Left(12).Right(bar.Right+12).Height(headerHeight).
-		Radius(headerHeight/2).Padding(0, 8, 0, 18).Gap(6).Material(glass.Glass{}).DragWindow()
-	header.Children(func() {
-		ui.Text(c, pageTitle(g.page)).FontSize(15).Bold().SingleLine().Grow(1).MinWidth(0)
-		g.headerActions(c)
-	})
-	_ = t
-	g.taskPill(c)
+	return label
 }
 
 func pageTitle(p string) string {
@@ -276,52 +242,10 @@ func pageTitle(p string) string {
 		return locales.NavLog()
 	case pageAbout:
 		return locales.NavAbout()
+	case pageCertificate:
+		return locales.CardViewCertificate()
 	}
 	return locales.NavEsims()
-}
-
-func (g *gui) headerActions(c *ui.Context) {
-	switch g.page {
-	case pageProfiles, pageNotifications, pageCard:
-		canRead := g.app.CurrentDevice() != "" && !g.app.Busy()
-		if iconButton(c, iconRefresh, locales.ActionRefresh()).Disabled(!canRead).Clicked() {
-			g.refresh()
-		}
-	}
-	switch g.page {
-	case pageProfiles:
-		add := ui.PrimaryButton(c, "").Radius(16).Disabled(!g.app.Loaded || g.app.Busy()).Children(func() {
-			ui.Icon(c, iconPlus).Size(16, 16)
-			ui.Text(c, locales.ActionAddEsim()).SingleLine()
-		})
-		if add.Clicked() {
-			g.openDownload()
-		}
-	case pageNotifications:
-		g.notificationActions(c)
-	case pageLog:
-		g.logActions(c)
-	}
-}
-
-// taskPill floats at the bottom while a card task runs.
-func (g *gui) taskPill(c *ui.Context) {
-	task := g.app.Task
-	if task == nil || g.dl.open {
-		return
-	}
-	t := c.Theme()
-	ui.Row(c).Absolute().Left(0).Right(0).Bottom(20).Justify(ui.Center).PassThrough().Children(func() {
-		ui.Row(c).Padding(8, 16).Gap(10).Radius(20).Material(glass.Glass{}).Children(func() {
-			ui.Spinner(c).Size(16, 16)
-			label := taskLabel(task.Kind)
-			if task.Stage != "" {
-				label = locales.TaskWithStage(label, stageLabel(task.Stage))
-			}
-			ui.Text(c, label).FontSize(13).SingleLine()
-			_ = t
-		})
-	})
 }
 
 // iconButton is a button showing only an icon.
@@ -383,7 +307,7 @@ func (g *gui) connectionHint(c *ui.Context) bool {
 		}
 		emptyState(c, deviceIcon(g.app.Settings.Backend), title, locales.HintChooseBody(), func() {
 			if ui.PrimaryButton(c, locales.HintOpenSettings()).Clicked() {
-				g.page = pageSettings
+				g.show(pageSettings)
 			}
 		})
 	case g.app.Busy():
@@ -392,15 +316,15 @@ func (g *gui) connectionHint(c *ui.Context) bool {
 			ui.Text(c, locales.HintReading()).TextColor(c.Theme().TextMuted)
 		})
 	case g.app.LastError != nil:
-		emptyState(c, iconAlert, locales.HintReadFailed(), app.DescribeError(g.app.LastError), func() {
+		emptyState(c, iconAlert, locales.HintReadFailed(), readErrorText(g.app.LastError), func() {
 			if ui.PrimaryButton(c, locales.HintTryAgain()).Clicked() {
 				g.refresh()
 			}
 		})
 	case !g.app.DevicePresent():
-		emptyState(c, deviceIcon(g.app.Settings.Backend), locales.HintDeviceGone(g.app.CurrentDevice()), locales.HintDeviceGoneBody(), func() {
+		emptyState(c, deviceIcon(g.app.Settings.Backend), locales.HintDeviceGone(g.deviceLabel(g.app.CurrentDevice())), locales.HintDeviceGoneBody(), func() {
 			if ui.PrimaryButton(c, locales.HintOpenSettings()).Clicked() {
-				g.page = pageSettings
+				g.show(pageSettings)
 			}
 		})
 	default:
@@ -440,6 +364,9 @@ func taskLabel(k app.TaskKind) string {
 
 // errorText explains an error, an SM-DP+ one by its codes' meaning.
 func errorText(err error) string {
+	if s := deviceErrorText(err); s != "" {
+		return s
+	}
 	if summary, codes, ok := app.ServerError(err); ok {
 		return locales.NoticeServerError(summary, codes)
 	}
@@ -495,4 +422,64 @@ func copyButton(c *ui.Context, key, label string) ui.Element {
 	}
 	b.Children(func() { ui.Icon(c, iconCopy).Size(13, 13).TextColor(t.TextMuted) })
 	return b
+}
+
+// taskPill floats at the bottom while a card task runs.
+func (g *gui) taskPill(c *ui.Context) {
+	task := g.app.Task
+	if task == nil || g.dl.open {
+		return
+	}
+	// Clear of what covers a phone's edges; nothing does on desktops.
+	_, sr, sb, sl := c.SafeArea()
+	ui.Row(c).Absolute().Left(sl).Right(sr).Bottom(20 + sb).Justify(ui.Center).PassThrough().Children(func() {
+		ui.Row(c).Padding(8, 16).Gap(10).Radius(20).Material(glass.Glass{}).Children(func() {
+			ui.Spinner(c).Size(16, 16)
+			ui.Text(c, taskText(task)).FontSize(13).SingleLine()
+		})
+	})
+}
+
+// dialogWidth is the width of a dialog's content: w, or on phones what
+// the window leaves of it beside the panel's margins and padding (the
+// panel stays 20 from each edge, and pads 20 within).
+func dialogWidth(c *ui.Context, w float32) float32 {
+	if !phoneUI {
+		return w
+	}
+	ww, _ := c.Size()
+	return max(min(w, ww-80), 0)
+}
+
+// autoFocus focuses e as it shows, on desktops: on phones that would
+// bring the keyboard up over a dialog before the user chose to type.
+func autoFocus(e ui.Element) ui.Element {
+	if !phoneUI {
+		e.AutoFocus()
+	}
+	return e
+}
+
+// deviceErrorText explains what went wrong with the reader or the card,
+// or is "" for other errors.
+func deviceErrorText(err error) string {
+	switch {
+	case errors.Is(err, transport.ErrAccessDenied):
+		return locales.ErrorAccessDenied()
+	case errors.Is(err, transport.ErrDeviceGone):
+		return locales.ErrorDeviceGone()
+	case errors.Is(err, transport.ErrNoCard):
+		return locales.ErrorNoCard()
+	case errors.Is(err, transport.ErrCardMute):
+		return locales.ErrorCardMute()
+	}
+	return ""
+}
+
+// readErrorText explains why the card could not be read.
+func readErrorText(err error) string {
+	if s := deviceErrorText(err); s != "" {
+		return s
+	}
+	return app.DescribeError(err)
 }

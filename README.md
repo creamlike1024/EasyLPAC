@@ -26,6 +26,10 @@ You can turn this off with **Send notifications** in Settings. The pending notif
 
 Handling notifications by hand does not follow the GSMA specifications, so leaving this on is recommended.
 
+## Android (experimental)
+
+On Android, EasyLPAC reads the card through a USB smart card reader (CCID) plugged in with an OTG adapter, without PC/SC: it speaks to the reader itself, through [go-ccid](https://github.com/creamlike1024/go-ccid). Allow USB access when Android asks. The phone's own eSIM, and SIM slots, are not supported.
+
 # Screenshots
 <p>
 <a href="./screenshots/profile.png"><img src="./screenshots/profile.png" height="240px"/></a>
@@ -43,30 +47,6 @@ cd EasyLPAC
 ```
 
 lpac is a git submodule at `third_party/lpac`. If you cloned without `--recursive`, run `git submodule update --init` first.
-
-## Versions
-
-`mygo.json` holds no real version (it says `0.0.0-dev`): the build scripts take it from the git tags, with `scripts/version.sh`. A build of a release tag has its version, as `0.9.3` of the tag `v0.9.3`; a build of a later commit is a snapshot, as `0.9.3.r12.ga4e79e0` (12 commits after 0.9.3, at commit a4e79e0), with `.dirty` at the end when there are uncommitted changes. A snapshot sorts after the release it follows and before the next one, for dpkg, rpm and pacman alike, so it is also the `pkgver` of an Arch Linux `-git` package as it is:
-
-```sh
-pkgver() {
-  cd "$srcdir/EasyLPAC"
-  ./scripts/version.sh
-}
-```
-
-The history and the tags are needed: a shallow clone (`--depth 1`) has no tag to count from. `EASYLPAC_VERSION=0.9.3 ./scripts/build-app.sh` sets the version by hand.
-
-## Releases
-
-Development happens on `master`. CI tests and builds every push and pull request, and keeps the packages as the run's artifacts. To release, tag a commit of `master` whose CI passed as `vx.y.z` (`vx.y.z-rc.1` for a pre-release; the `v` is what MyGo's updater expects), and push the tag:
-
-```sh
-git tag v0.9.3
-git push origin v0.9.3
-```
-
-The tag's run builds the packages with that version and publishes the GitHub Release. A fix for an older release is made on `master`, cherry-picked to a `release/x.y` branch made from that release's tag (`git switch -c release/0.9 v0.9.3`), and tagged there.
 
 ## Linux
 
@@ -103,8 +83,17 @@ Start the service with `sudo systemctl enable --now pcscd.socket`.
 
 The release has a `.deb`, which depends on `libpcsclite1` and `pcscd`, an `.rpm`, which depends on `libpcsclite.so.1` and `pcsc-lite`, and a `PKGBUILD`, which depends on `pcsclite` and `ccid`: put it next to the release's `.tar.gz` and its two icons (`easylpac-256x256.png`, `easylpac-512x512.png`), then run `makepkg -si`. Packagers for other distributions should map these to their own packages, and keep pcsc-lite linked dynamically: a statically linked client may speak a protocol version the system's `pcscd` refuses.
 
+## Android
+
+Requirements, besides Go and CMake: the Android SDK (Platform 36, Build-Tools 35.0.0, an NDK) and JDK 17 (Gradle 8.14 runs on Java 24 at most).
+
+```sh
+./scripts/build-android.sh          # build/android/: the APK and the AAB, arm64
+```
+
 # License
 
 - EasyLPAC: [MIT](./LICENSE)
 - libeuicc (from lpac), statically linked: [LGPL-2.1-only](https://github.com/estkme-group/lpac/blob/main/euicc/LICENSE). Each release ships `EasyLPAC-source.tar.gz`, the complete source including libeuicc and the scripts that build it, so the library can be modified and the app rebuilt.
+- go-ccid, the USB CCID driver: [MIT](https://github.com/creamlike1024/go-ccid/blob/main/LICENSE)
 - eUICC manufacturer and CI data from the [eUICC Manual](https://euicc-manual.osmocom.org/): CC BY-NC-SA 4.0

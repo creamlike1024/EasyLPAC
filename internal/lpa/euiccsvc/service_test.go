@@ -32,6 +32,8 @@ type mockCard struct {
 	closed   bool
 	channels []uint8
 	failEID  bool
+	// gone fails every exchange as an unplugged reader does.
+	gone error
 }
 
 func (m *mockCard) OpenLogicalChannel(_ context.Context, aid []byte) (uint8, error) {
@@ -50,6 +52,9 @@ func (m *mockCard) CloseLogicalChannel(_ context.Context, ch uint8) error {
 func (m *mockCard) Close() error { m.closed = true; return nil }
 
 func (m *mockCard) Transmit(_ context.Context, apdu []byte) ([]byte, error) {
+	if m.gone != nil {
+		return nil, m.gone
+	}
 	m.card.FailEID = m.failEID
 	return m.card.Respond(apdu)
 }
@@ -194,6 +199,22 @@ func TestChipInfoEIDFailureClosesSession(t *testing.T) {
 	}
 	if !card.closed {
 		t.Fatal("session must be released after failed operation")
+	}
+}
+
+// An exchange the transport failed, as with the reader unplugged, comes
+// out of libeuicc with the transport's error, which says what went wrong.
+func TestTransportErrorSurvivesLibeuicc(t *testing.T) {
+	gone := transport.Kind(transport.ErrDeviceGone, errors.New("usbfs: device disconnected"))
+	card := &mockCard{gone: gone}
+	svc := newService(t, &mockBackend{card: card})
+	_, err := svc.ProfileList(context.Background())
+	if !errors.Is(err, transport.ErrDeviceGone) {
+		t.Fatalf("err = %v, not the reader gone", err)
+	}
+	var opErr *lpa.OpError
+	if !errors.As(err, &opErr) || opErr.Stage != lpa.StageProfileList {
+		t.Fatalf("err = %v, not the stage's", err)
 	}
 }
 

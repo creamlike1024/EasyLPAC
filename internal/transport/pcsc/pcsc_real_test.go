@@ -1,3 +1,5 @@
+//go:build !android && !ios
+
 package pcsc
 
 import (

@@ -26,6 +26,10 @@
 
 手動處理通知不符合 GSMA 規範，因此建議保持開啟。
 
+## Android（實驗性）
+
+在 Android 上，EasyLPAC 透過以 OTG 轉接頭連接的 USB 智慧卡讀卡機（CCID）讀取晶片，不經 PC/SC，而是由 [go-ccid](https://github.com/creamlike1024/go-ccid) 直接與讀卡機通訊。系統詢問時，請允許 USB 存取。不支援手機內建的 eSIM 與 SIM 卡槽。
+
 # 截圖
 <p>
 <a href="./screenshots/profile.png"><img src="./screenshots/profile.png" height="240px"/></a>
@@ -43,30 +47,6 @@ cd EasyLPAC
 ```
 
 lpac 是位於 `third_party/lpac` 的 git 子模組。若複製時未加 `--recursive`，請先執行 `git submodule update --init`。
-
-## 版本號
-
-`mygo.json` 不記錄實際版本號（內容為 `0.0.0-dev`）：建置腳本會以 `scripts/version.sh` 從 git 標籤取得版本號。在發行標籤上建置即為該版本，如標籤 `v0.9.3` 的 `0.9.3`；在之後的提交上建置則為快照版本，如 `0.9.3.r12.ga4e79e0`（0.9.3 之後第 12 個提交，commit 為 a4e79e0），有未提交的變更時結尾再加上 `.dirty`。對 dpkg、rpm 與 pacman 而言，快照版本都排在其前一個發行版本之後、下一個發行版本之前，因此也可直接作為 Arch Linux `-git` 套件的 `pkgver`：
-
-```sh
-pkgver() {
-  cd "$srcdir/EasyLPAC"
-  ./scripts/version.sh
-}
-```
-
-需要完整的歷史與標籤：淺複製（`--depth 1`）沒有可供計算的標籤。`EASYLPAC_VERSION=0.9.3 ./scripts/build-app.sh` 可手動指定版本號。
-
-## 發行流程
-
-開發在 `master` 上進行。CI 會測試並建置每次推送與 pull request，並將套件保存為該次執行的 artifact。發行時，在 CI 已通過的 `master` 提交上打 `vx.y.z` 標籤（預發行版本為 `vx.y.z-rc.1`；開頭的 `v` 是 MyGo 自動更新所要求的），並推送該標籤：
-
-```sh
-git tag v0.9.3
-git push origin v0.9.3
-```
-
-該標籤的 CI 會以此版本號建置套件並發布 GitHub Release。舊版本的修正先提交到 `master`，再 cherry-pick 到從該版本標籤建立的 `release/x.y` 分支（`git switch -c release/0.9 v0.9.3`），並在該分支上打標籤。
 
 ## Linux
 
@@ -103,8 +83,17 @@ export CGO_LDFLAGS="-L$(pkg-config --variable=libdir libpcsclite) -Wl,--allow-sh
 
 發行版本提供 `.deb`（相依於 `libpcsclite1` 與 `pcscd`）、`.rpm`（相依於 `libpcsclite.so.1` 與 `pcsc-lite`）及 `PKGBUILD`（相依於 `pcsclite` 與 `ccid`）：將 `PKGBUILD` 與發行版本中的 `.tar.gz` 及兩個圖示（`easylpac-256x256.png`、`easylpac-512x512.png`）放在同一目錄，再執行 `makepkg -si`。其他發行版的打包者應將其對應為各自的套件，並維持以動態連結使用 pcsc-lite：靜態連結的用戶端可能使用系統 `pcscd` 不接受的協定版本。
 
+## Android
+
+除 Go 與 CMake 外，另需 Android SDK（Platform 36、Build-Tools 35.0.0、NDK）與 JDK 17（Gradle 8.14 最高支援 Java 24）。
+
+```sh
+./scripts/build-android.sh          # build/android/：APK 與 AAB，arm64
+```
+
 # 授權
 
 - EasyLPAC：[MIT](./LICENSE)
 - libeuicc（來自 lpac，靜態連結）：[LGPL-2.1-only](https://github.com/estkme-group/lpac/blob/main/euicc/LICENSE)。每個發行版本都附有 `EasyLPAC-source.tar.gz`，包含 libeuicc 在內的完整原始碼與建置腳本，可修改函式庫並重新建置程式。
+- USB CCID 驅動程式 go-ccid：[MIT](https://github.com/creamlike1024/go-ccid/blob/main/LICENSE)
 - 來自 [eUICC Manual](https://euicc-manual.osmocom.org/) 的 eUICC 製造商與 CI 資料：CC BY-NC-SA 4.0

@@ -33,19 +33,10 @@ func (g *gui) settingsPage(c *ui.Context) {
 
 	sectionTitle(c, locales.SettingsConnection())
 	card(c, func() {
-		kind := 0
-		if cfg.Backend == settings.BackendAT {
-			kind = 1
+		// Phones read cards only through USB readers: nothing to choose.
+		if !phoneUI {
+			g.backendChoice(c, busy)
 		}
-		ui.Field(c, locales.SettingsConnectThrough(), func() {
-			if ui.Segmented(c, &kind, locales.SettingsBackendPcsc(), locales.SettingsBackendAt()).AlignSelf(ui.Start).Disabled(busy).Changed() {
-				if kind == 1 {
-					g.app.SelectBackend(settings.BackendAT)
-				} else {
-					g.app.SelectBackend(settings.BackendPCSC)
-				}
-			}
-		})
 		switch cfg.Backend {
 		case settings.BackendAT:
 			g.atSettings(c, busy)
@@ -91,15 +82,22 @@ func (g *gui) settingsPage(c *ui.Context) {
 func (g *gui) readerSettings(c *ui.Context, busy bool) {
 	t := c.Theme()
 	cfg := g.app.Settings
-	b := cfg.Backends[settings.BackendPCSC]
+	backend := cfg.Backend // PC/SC, or USB CCID on phones
+	b := cfg.Backends[backend]
+	// The readers by their labels, which PC/SC's are their names and USB
+	// readers' a product's name rather than a device path.
 	var names []string
 	for _, d := range g.app.Devices {
-		names = append(names, d.ID)
+		names = append(names, d.Label)
 	}
-	current := b.Reader
-	if current != "" && !slices.Contains(names, current) {
-		names = append(names, current)
+	current := ""
+	if b.Reader != "" {
+		current = g.deviceLabel(b.Reader)
+		if !slices.Contains(names, current) {
+			names = append(names, current)
+		}
 	}
+	choose := func(label string) { g.app.SelectDevice(g.deviceID(label)) }
 	ui.Field(c, locales.SettingsReader(), func() {
 		ui.Row(c).Gap(8).Children(func() {
 			switch {
@@ -111,10 +109,10 @@ func (g *gui) readerSettings(c *ui.Context, busy bool) {
 				// Nothing chosen yet: a prompt as the select's value.
 				pick := locales.SettingsChooseReader()
 				if ui.Select(c, &pick, append([]string{pick}, names...)).Label(locales.SettingsReader()).Disabled(busy).Grow(1).Changed() && pick != locales.SettingsChooseReader() {
-					g.app.SelectDevice(pick)
+					choose(pick)
 				}
 			case ui.Select(c, &current, names).Label(locales.SettingsReader()).Disabled(busy).Grow(1).Changed():
-				g.app.SelectDevice(current)
+				choose(current)
 			}
 			g.findDevicesButton(c, locales.SettingsFindReaders())
 		})
@@ -122,14 +120,43 @@ func (g *gui) readerSettings(c *ui.Context, busy bool) {
 	if current != "" && !g.app.DevicePresent() {
 		ui.Text(c, locales.SettingsReaderAbsent(current)).FontSize(12).TextColor(t.Warning)
 	}
+	update := func(fn func(*settings.Backend)) {
+		g.app.UpdateSettings(func(s *settings.Config) {
+			bb := s.Backends[backend]
+			fn(&bb)
+			s.Backends[backend] = bb
+		})
+	}
 	on := !b.DisableTerminalCapability
 	toggleRow(c, locales.SettingsTerminalCap(), locales.SettingsTerminalCapBody(), on, func(on bool) {
-		g.app.UpdateSettings(func(s *settings.Config) {
-			bb := s.Backends[settings.BackendPCSC]
-			bb.DisableTerminalCapability = !on
-			s.Backends[settings.BackendPCSC] = bb
-		})
+		update(func(bb *settings.Backend) { bb.DisableTerminalCapability = !on })
 	})
+	if backend == settings.BackendCCID {
+		toggleRow(c, locales.SettingsPps(), locales.SettingsPpsBody(), !b.NoPPS, func(on bool) {
+			update(func(bb *settings.Backend) { bb.NoPPS = !on })
+		})
+	}
+}
+
+// deviceLabel names the device id as the list of devices does, or by its
+// id when it is not in the list.
+func (g *gui) deviceLabel(id string) string {
+	for _, d := range g.app.Devices {
+		if d.ID == id {
+			return d.Label
+		}
+	}
+	return id
+}
+
+// deviceID is the id of the device labelled label, or label itself.
+func (g *gui) deviceID(label string) string {
+	for _, d := range g.app.Devices {
+		if d.Label == label {
+			return d.ID
+		}
+	}
+	return label
 }
 
 func (g *gui) atSettings(c *ui.Context, busy bool) {
@@ -203,36 +230,63 @@ func (g *gui) aidSettings(c *ui.Context, busy bool) {
 	}
 	custom := g.aidCustomMode
 	_, aidErr := app.ParseAID(g.customAID)
-	ui.Field(c, locales.SettingsAid(), func() {
-		ui.Row(c).Gap(8).Children(func() {
-			if ui.Select(c, &choice, names).Label(locales.SettingsAid()).Disabled(busy).Width(200).Shrink(0).Changed() {
-				if choice == aidCustom {
-					// Custom starts from what the field shows.
-					g.aidCustomMode = true
-				} else {
-					g.aidCustomMode = false
-					for _, p := range aidPresets {
-						if p.label() == choice {
-							g.app.UpdateSettings(func(s *settings.Config) { s.AID = p.aid })
-							g.customAID = p.aid
-						}
+	pick := func() {
+		sel := ui.Select(c, &choice, names).Label(locales.SettingsAid()).Disabled(busy)
+		if !phoneUI {
+			sel.Width(200).Shrink(0)
+		}
+		if sel.Changed() {
+			if choice == aidCustom {
+				// Custom starts from what the field shows.
+				g.aidCustomMode = true
+			} else {
+				g.aidCustomMode = false
+				for _, p := range aidPresets {
+					if p.label() == choice {
+						g.app.UpdateSettings(func(s *settings.Config) { s.AID = p.aid })
+						g.customAID = p.aid
 					}
 				}
 			}
-			in := ui.TextInput(c, &g.customAID).Placeholder(locales.SettingsAidPlaceholder()).Label(locales.SettingsCustomAid()).
-				Font("monospace").MaxLength(32).Disabled(busy || !custom).Grow(1)
-			if custom && aidErr != nil && g.customAID != "" {
-				in.Invalid(true)
+		}
+	}
+	entry := func() {
+		in := ui.TextInput(c, &g.customAID).Placeholder(locales.SettingsAidPlaceholder()).Label(locales.SettingsCustomAid()).
+			Font("monospace").MaxLength(32).Disabled(busy || !custom)
+		if phoneUI {
+			// The 32 digits in the phone's 16 don't fit its width.
+			in.FontSize(13)
+		} else {
+			in.Grow(1)
+		}
+		if custom && aidErr != nil && g.customAID != "" {
+			in.Invalid(true)
+		}
+		if !custom {
+			return
+		}
+		applyButton := func() {
+			apply := ui.Button(c, locales.SettingsApply()).Radius(14).Disabled(busy || aidErr != nil || strings.EqualFold(g.customAID, cfg.AID))
+			if apply.Clicked() || (in.Submitted() && aidErr == nil) {
+				aid := strings.ToUpper(g.customAID)
+				g.app.UpdateSettings(func(s *settings.Config) { s.AID = aid })
+				c.Toast(locales.SettingsAidSaved())
 			}
-			if custom {
-				apply := ui.Button(c, locales.SettingsApply()).Radius(14).Disabled(busy || aidErr != nil || strings.EqualFold(g.customAID, cfg.AID))
-				if apply.Clicked() || (in.Submitted() && aidErr == nil) {
-					aid := strings.ToUpper(g.customAID)
-					g.app.UpdateSettings(func(s *settings.Config) { s.AID = aid })
-					c.Toast(locales.SettingsAidSaved())
-				}
-			}
-		})
+		}
+		if phoneUI {
+			ui.Row(c).Justify(ui.End).Children(applyButton)
+		} else {
+			applyButton()
+		}
+	}
+	ui.Field(c, locales.SettingsAid(), func() {
+		if !phoneUI {
+			ui.Row(c).Gap(8).Children(func() { pick(); entry() })
+			return
+		}
+		// A phone is too narrow for one row: the AID's 32 digits get a
+		// row of their own, the button its own below them.
+		ui.Column(c).Gap(8).Children(func() { pick(); entry() })
 	})
 	switch {
 	case custom && aidErr != nil && g.customAID != "":
@@ -321,4 +375,22 @@ func (g *gui) findDevicesButton(c *ui.Context, label string) {
 	if b.Clicked() {
 		g.app.RefreshDevices()
 	}
+}
+
+// backendChoice chooses how the desktop reaches the card: a reader or a
+// modem.
+func (g *gui) backendChoice(c *ui.Context, busy bool) {
+	kind := 0
+	if g.app.Settings.Backend == settings.BackendAT {
+		kind = 1
+	}
+	ui.Field(c, locales.SettingsConnectThrough(), func() {
+		if ui.Segmented(c, &kind, locales.SettingsBackendPcsc(), locales.SettingsBackendAt()).AlignSelf(ui.Start).Disabled(busy).Changed() {
+			if kind == 1 {
+				g.app.SelectBackend(settings.BackendAT)
+			} else {
+				g.app.SelectBackend(settings.BackendPCSC)
+			}
+		}
+	})
 }

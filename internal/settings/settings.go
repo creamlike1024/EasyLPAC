@@ -7,6 +7,7 @@ package settings
 const (
 	BackendPCSC = "pcsc"
 	BackendAT   = "at"
+	BackendCCID = "ccid"
 )
 
 // Defaults.
@@ -27,7 +28,8 @@ const (
 // Backend holds the per-backend settings. Fields are the union of all
 // backend options; a backend uses only its own fields.
 type Backend struct {
-	// Reader is the exact PC/SC reader name (pcsc).
+	// Reader is the exact PC/SC reader name (pcsc), or the USB device's
+	// name (ccid).
 	Reader string
 	// Port is the serial port path (at).
 	Port string
@@ -36,8 +38,10 @@ type Backend struct {
 	// Timeout is the data-command timeout in seconds (at).
 	Timeout int
 	// DisableTerminalCapability skips the TERMINAL CAPABILITY
-	// announcement (pcsc).
+	// announcement (pcsc, ccid).
 	DisableTerminalCapability bool
+	// NoPPS keeps the card at the default rate (ccid).
+	NoPPS bool
 }
 
 // Config is the settings of the current run.
@@ -60,6 +64,7 @@ func Default() *Config {
 		Backend: BackendPCSC,
 		Backends: map[string]Backend{
 			BackendPCSC: {},
+			BackendCCID: {},
 			BackendAT:   {Baud: DefaultATBaud, Timeout: DefaultATTimeout},
 		},
 		AutoNotify: true,

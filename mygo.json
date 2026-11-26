@@ -11,6 +11,10 @@
     "dir": "locales",
     "source": "en"
   },
+  "android": {
+    "minSdk": 26,
+    "versionCode": 1
+  },
   "linux": {
     "depends": {
       "deb": ["libpcsclite1", "pcscd"],

@@ -26,6 +26,10 @@
 
 通知を手動で操作することは GSMA の仕様に沿わないため、オンのままにすることをお勧めします。
 
+## Android（試験的）
+
+Android では、EasyLPAC は OTG アダプターで接続した USB スマートカードリーダー（CCID）を通じてチップを読み取ります。PC/SC は使わず、[go-ccid](https://github.com/creamlike1024/go-ccid) がリーダーと直接通信します。Android に確認されたら USB へのアクセスを許可してください。端末内蔵の eSIM や SIM スロットには対応していません。
+
 # スクリーンショット
 <p>
 <a href="./screenshots/profile.png"><img src="./screenshots/profile.png" height="240px"/></a>
@@ -43,30 +47,6 @@ cd EasyLPAC
 ```
 
 lpac は `third_party/lpac` にある git サブモジュールです。`--recursive` を付けずにクローンした場合は、先に `git submodule update --init` を実行してください。
-
-## バージョン
-
-`mygo.json` には実際のバージョンを記録しません（`0.0.0-dev` のままです）。ビルドスクリプトが `scripts/version.sh` で git のタグからバージョンを求めます。リリースタグ上のビルドはそのバージョン（例：タグ `v0.9.3` なら `0.9.3`）、それ以降のコミットのビルドはスナップショット（例：`0.9.3.r12.ga4e79e0`、0.9.3 から 12 コミット後のコミット a4e79e0）になり、未コミットの変更があれば末尾に `.dirty` が付きます。スナップショットは dpkg・rpm・pacman のいずれでも直前のリリースより新しく、次のリリースより古いと判定されるため、Arch Linux の `-git` パッケージの `pkgver` としてそのまま使えます：
-
-```sh
-pkgver() {
-  cd "$srcdir/EasyLPAC"
-  ./scripts/version.sh
-}
-```
-
-履歴とタグが必要です。シャロークローン（`--depth 1`）には数え始めるタグがありません。`EASYLPAC_VERSION=0.9.3 ./scripts/build-app.sh` でバージョンを手動で指定できます。
-
-## リリース
-
-開発は `master` で行います。CI はすべての push と pull request をテスト・ビルドし、パッケージをその実行の artifact として残します。リリースするには、CI が通った `master` のコミットに `vx.y.z`（プレリリースは `vx.y.z-rc.1`。先頭の `v` は MyGo の自動アップデートが前提とする形式です）のタグを付けて push します：
-
-```sh
-git tag v0.9.3
-git push origin v0.9.3
-```
-
-タグの CI がそのバージョンでパッケージをビルドし、GitHub Release を公開します。古いリリースの修正は `master` にコミットしたうえで、そのリリースのタグから作った `release/x.y` ブランチ（`git switch -c release/0.9 v0.9.3`）に cherry-pick し、そこでタグを付けます。
 
 ## Linux
 
@@ -103,8 +83,17 @@ export CGO_LDFLAGS="-L$(pkg-config --variable=libdir libpcsclite) -Wl,--allow-sh
 
 リリースには `.deb`（`libpcsclite1` と `pcscd` に依存）、`.rpm`（`libpcsclite.so.1` と `pcsc-lite` に依存）、`PKGBUILD`（`pcsclite` と `ccid` に依存）があります。`PKGBUILD` はリリースの `.tar.gz` と 2 つのアイコン（`easylpac-256x256.png`、`easylpac-512x512.png`）と同じディレクトリに置き、`makepkg -si` を実行してください。他のディストリビューションのパッケージ作成者は、これらを各ディストリビューションのパッケージに置き換え、pcsc-lite は動的リンクのままにしてください。静的リンクしたクライアントは、システムの `pcscd` が受け付けないプロトコルバージョンを使う可能性があります。
 
+## Android
+
+Go と CMake のほかに、Android SDK（Platform 36、Build-Tools 35.0.0、NDK）と JDK 17 が必要です（Gradle 8.14 が動くのは Java 24 まで）。
+
+```sh
+./scripts/build-android.sh          # build/android/：APK と AAB、arm64
+```
+
 # ライセンス
 
 - EasyLPAC：[MIT](./LICENSE)
 - libeuicc（lpac 由来、静的リンク）：[LGPL-2.1-only](https://github.com/estkme-group/lpac/blob/main/euicc/LICENSE)。各リリースには libeuicc を含む完全なソースコードとビルドスクリプト `EasyLPAC-source.tar.gz` が付属しており、ライブラリを変更してアプリを再ビルドできます。
+- USB CCID ドライバー go-ccid：[MIT](https://github.com/creamlike1024/go-ccid/blob/main/LICENSE)
 - [eUICC Manual](https://euicc-manual.osmocom.org/) の eUICC 製造元および CI データ：CC BY-NC-SA 4.0

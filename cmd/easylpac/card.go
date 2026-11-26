@@ -42,7 +42,11 @@ func (g *gui) cardPage(c *ui.Context) {
 	// The figures that matter most, as tiles: the EUM by the EID, and the
 	// production site by the SAS accreditation number, each on its own.
 	free := info.ExtCardResource.FreeNonVolatileMemory
-	ui.Grid(c).ColumnTracks(ui.Fr(1), ui.Fr(1), ui.Fr(1), ui.Fr(1)).Gap(12).Children(func() {
+	tracks := []ui.Track{ui.Fr(1), ui.Fr(1), ui.Fr(1), ui.Fr(1)}
+	if phoneUI {
+		tracks = tracks[:2] // two by two
+	}
+	ui.Grid(c).ColumnTracks(tracks...).Gap(12).Children(func() {
 		tile(c, locales.CardFreeSpace(), formatBytes(free), locales.CardEsimsInstalled(len(g.app.Profiles)))
 		tile(c, "SGP.22", orDash(info.Svn), locales.CardRspVersion())
 		eum := eumTile(chip.EidValue)
@@ -66,10 +70,10 @@ func (g *gui) cardPage(c *ui.Context) {
 	g.euiccInfo2(c, info)
 
 	ui.Modal(c, &g.editSMDP, func() {
-		ui.Column(c).Width(380).Gap(12).Children(func() {
+		ui.Column(c).Width(dialogWidth(c, 380)).Gap(12).Children(func() {
 			ui.Text(c, locales.CardDefaultSmdp()).FontSize(16).Bold()
 			ui.Text(c, locales.CardSmdpBody()).FontSize(13).TextColor(t.TextMuted)
-			submit := ui.TextInput(c, &g.smdpText).Placeholder("smdp.example.com").Label(locales.CardAddress()).AutoFocus().Submitted()
+			submit := autoFocus(ui.TextInput(c, &g.smdpText).Placeholder("smdp.example.com").Label(locales.CardAddress())).Submitted()
 			ui.Row(c).Gap(8).Justify(ui.End).Children(func() {
 				if ui.Button(c, locales.CommonCancel()).Clicked() {
 					g.editSMDP = false
@@ -95,8 +99,18 @@ func (g *gui) euiccInfo2(c *ui.Context, info lpa.EUICCInfo2) {
 			g.infoOpen = map[string]bool{"$.extCardResource": true}
 		}
 	}
-	ui.Row(c).Gap(8).Padding(8, 4, 0).Children(func() {
-		ui.Text(c, "EUICCInfo2").FontSize(13).FontWeight(600).TextColor(t.TextMuted).Grow(1)
+	var buttons ui.Element
+	if phoneUI {
+		// The buttons go under the title: the three are wider than a phone.
+		ui.Text(c, "EUICCInfo2").FontSize(13).FontWeight(600).TextColor(t.TextMuted).Padding(8, 4, 0)
+		buttons = ui.Row(c).Gap(8).Wrap()
+	} else {
+		buttons = ui.Row(c).Gap(8).Padding(8, 4, 0)
+	}
+	buttons.Children(func() {
+		if !phoneUI {
+			ui.Text(c, "EUICCInfo2").FontSize(13).FontWeight(600).TextColor(t.TextMuted).Grow(1)
+		}
 		if ui.Button(c, locales.CardExpandAll()).Radius(14).Clicked() {
 			setTreeOpen(g.infoTree, g.infoOpen, true)
 		}
@@ -203,9 +217,22 @@ func tile(c *ui.Context, title, value, sub string) ui.Element {
 	})
 }
 
-// kv is a labeled value with an optional trailing control.
+// kv is a labeled value with an optional trailing control: the label
+// beside the value, or on phones above it.
 func kv(c *ui.Context, key, value string, trailing func()) {
 	t := c.Theme()
+	if phoneUI {
+		ui.Column(c).Gap(2).Children(func() {
+			ui.Text(c, key).FontSize(12).TextColor(t.TextMuted)
+			ui.Row(c).Gap(12).Children(func() {
+				ui.Text(c, value).Grow(1).MinWidth(0).Selectable()
+				if trailing != nil {
+					trailing()
+				}
+			})
+		})
+		return
+	}
 	ui.Row(c).Gap(12).Children(func() {
 		ui.Text(c, key).TextColor(t.TextMuted).Width(160).Shrink(0)
 		ui.Text(c, value).Grow(1).MinWidth(0).Selectable()

@@ -6,6 +6,7 @@ import (
 	"EasyLPAC/assets"
 	"EasyLPAC/internal/app"
 	"EasyLPAC/internal/registry"
+	"EasyLPAC/internal/settings"
 	"EasyLPAC/locales"
 )
 
@@ -22,33 +23,38 @@ func (g *gui) aboutPage(c *ui.Context) {
 			if g.appIcon != nil {
 				ui.Image(c, g.appIcon).Size(64, 64).Shrink(0)
 			}
-			ui.Column(c).Gap(3).Children(func() {
+			ui.Column(c).Grow(1).MinWidth(0).Gap(3).Children(func() {
 				ui.Text(c, "EasyLPAC").FontSize(22).Bold()
 				externalLink(c, locales.AboutRepo(), "https://github.com/"+author+"/EasyLPAC").AlignSelf(ui.Start)
-				ui.Row(c).Gap(16).Children(func() {
-					ui.Text(c, locales.AboutAuthor(author)).TextColor(t.TextMuted)
-					ui.Text(c, locales.AboutVersion(Version)).TextColor(t.TextMuted)
-				})
+				if !phoneUI {
+					ui.Row(c).Gap(16).Children(func() {
+						ui.Text(c, locales.AboutAuthor(author)).TextColor(t.TextMuted)
+						ui.Text(c, locales.AboutVersion(Version)).TextColor(t.TextMuted)
+					})
+				}
 			})
 		})
+		if phoneUI {
+			// Beside the icon a phone has no room for a snapshot's long
+			// version: each line gets the card's width.
+			ui.Column(c).Gap(2).Children(func() {
+				ui.Text(c, locales.AboutAuthor(author)).FontSize(13).TextColor(t.TextMuted)
+				ui.Text(c, locales.AboutVersion(Version)).FontSize(13).TextColor(t.TextMuted)
+			})
+		}
 	})
 
 	sectionTitle(c, locales.AboutComponents())
 	card(c, func() {
 		commit := app.LpacCommit()
-		kv(c, "libeuicc", locales.AboutLibeuicc(app.LibeuiccVersion()), func() {
-			externalLink(c, "estkme-group/lpac", "https://github.com/estkme-group/lpac/commit/"+commit)
-		})
-		kv(c, locales.AboutEuiccData(), registry.DataVersion, func() {
-			externalLink(c, "euicc-manual.osmocom.org", "https://euicc-manual.osmocom.org/docs/pki/eum/")
-		})
-		kv(c, locales.AboutInterface(), "MyGo", func() {
-			externalLink(c, "github.com/egoist/mygo", "https://github.com/egoist/mygo")
-		})
+		componentRow(c, "libeuicc", locales.AboutLibeuicc(app.LibeuiccVersion()), "estkme-group/lpac", "https://github.com/estkme-group/lpac/commit/"+commit)
+		componentRow(c, locales.AboutEuiccData(), registry.DataVersion, "euicc-manual.osmocom.org", "https://euicc-manual.osmocom.org/docs/pki/eum/")
+		componentRow(c, locales.AboutInterface(), "MyGo", "github.com/egoist/mygo", "https://github.com/egoist/mygo")
 	})
 
 	// Each component under its own license: EasyLPAC's, and the static
-	// libeuicc's with what the LGPL asks of a static link.
+	// libeuicc's with what the LGPL asks of a static link. go-ccid is in
+	// the builds of the USB CCID backend alone: Android's.
 	sectionTitle(c, locales.AboutLicense())
 	card(c, func() {
 		licenseRow(c, "EasyLPAC", "MIT", "https://github.com/"+author+"/EasyLPAC/blob/master/LICENSE")
@@ -57,7 +63,27 @@ func (g *gui) aboutPage(c *ui.Context) {
 		ui.Divider(c)
 		licenseRow(c, "cJSON", "MIT", "https://github.com/DaveGamble/cJSON/blob/master/LICENSE")
 		ui.Divider(c)
+		if app.IsSupportedBackend(settings.BackendCCID) {
+			licenseRow(c, "go-ccid", "MIT", "https://github.com/"+author+"/go-ccid/blob/main/LICENSE")
+			ui.Divider(c)
+		}
 		licenseRow(c, "MyGo", "MIT", "https://github.com/egoist/mygo/blob/main/LICENSE")
+	})
+}
+
+// componentRow is a component, what of it is built in, and a link to
+// where it comes from. A phone's row is too narrow for the link beside
+// the value: it goes below.
+func componentRow(c *ui.Context, key, value, link, url string) {
+	if !phoneUI {
+		kv(c, key, value, func() { externalLink(c, link, url) })
+		return
+	}
+	t := c.Theme()
+	ui.Column(c).Gap(2).Children(func() {
+		ui.Text(c, key).FontSize(12).TextColor(t.TextMuted)
+		ui.Text(c, value).Selectable()
+		externalLink(c, link, url).AlignSelf(ui.Start)
 	})
 }
 

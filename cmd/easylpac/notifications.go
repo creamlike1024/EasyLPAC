@@ -24,9 +24,30 @@ func (g *gui) notificationsPage(c *ui.Context) {
 	ui.Text(c, locales.NotifIntro()).
 		FontSize(13).TextColor(t.TextMuted)
 
+	rows := g.sortedNotifications()
+	if phoneUI {
+		g.notificationList(c, rows)
+	} else {
+		g.notificationTable(c, rows)
+	}
+
+	switch ui.AlertDialog(c, &g.removeAll, locales.NotifRemoveAllTitle(len(ns)), locales.NotifRemoveAllBody(),
+		locales.CommonCancel(), locales.NotifRemoveConfirm()) {
+	case 1:
+		seqs := make([]int, len(ns))
+		for i, n := range ns {
+			seqs[i] = n.SeqNumber
+		}
+		_ = g.app.RemoveNotifications(seqs)
+	}
+}
+
+// notificationTable is the desktop's table of notifications, which the
+// modifier keys choose several of.
+func (g *gui) notificationTable(c *ui.Context, rows []*lpa.Notification) {
+	t := c.Theme()
 	ui.Text(c, locales.NotifSelectHint(selectModifier())).FontSize(12).TextColor(t.TextMuted)
 
-	rows := g.sortedNotifications()
 	g.notifList.Sort = &g.notifSort
 	g.notifList.Selection = &g.notifSel
 	g.notifList.Key = func(i int) any { return rows[i].SeqNumber }
@@ -56,31 +77,73 @@ func (g *gui) notificationsPage(c *ui.Context) {
 			ui.Text(c, n.NotificationAddress).SingleLine().TextColor(muted)
 		}
 	}).Height(min(float32(len(rows))*36+40, 460)).Radius(12).Border(1, t.Border).
-		ContextMenu(func(m *ui.Menu) {
-			seqs := g.selectedNotifications()
-			if len(seqs) == 0 {
-				return
-			}
-			busy := g.app.Busy()
-			if m.Item(locales.NotifSend()).Disabled(busy).Chosen() {
-				_ = g.app.ProcessNotifications(seqs, true)
-			}
-			if m.Item(locales.NotifSendKeep()).Disabled(busy).Chosen() {
-				_ = g.app.ProcessNotifications(seqs, false)
-			}
-			m.Separator()
-			if m.Item(locales.NotifRemove()).Danger().Disabled(busy).Chosen() {
-				_ = g.app.RemoveNotifications(seqs)
-			}
-		})
+		ContextMenu(func(m *ui.Menu) { g.notificationMenu(m, g.selectedNotifications()) })
+}
 
-	switch ui.AlertDialog(c, &g.removeAll, locales.NotifRemoveAllTitle(len(ns)), locales.NotifRemoveAllBody(),
-		locales.CommonCancel(), locales.NotifRemoveConfirm()) {
-	case 1:
-		seqs := make([]int, len(ns))
-		for i, n := range ns {
-			seqs[i] = n.SeqNumber
+// notificationList is the phones' list of notifications: a row each,
+// which a tap checks, and a long press offers what to do with.
+func (g *gui) notificationList(c *ui.Context, rows []*lpa.Notification) {
+	t := c.Theme()
+	ui.Column(c).Gap(8).Children(func() {
+		for _, n := range rows {
+			seq := n.SeqNumber
+			on := g.notifSel.Has(seq)
+			row := ui.Row(c.Key(seq)).Padding(12, 14).Gap(12).Radius(12).Background(t.Surface).Border(1, t.Border)
+			if on {
+				row.Border(1, t.Accent.Alpha(0.6))
+			}
+			row.Children(func() {
+				check := on
+				if ui.Checkbox(c, &check, "").Label(locales.NotifSelectOne(seq)).Changed() {
+					g.toggleNotification(seq, check)
+				}
+				ui.Column(c).Grow(1).MinWidth(0).Gap(2).Children(func() {
+					ui.Row(c).Gap(8).Children(func() {
+						ui.Textf(c, "#%d", seq).Font("monospace").TextColor(t.TextMuted)
+						ui.Text(c, operationLabel(n.ProfileManagementOperation)).Bold().SingleLine()
+					})
+					ui.Text(c, g.notificationProfile(n)).SingleLine()
+					ui.Text(c, n.NotificationAddress).FontSize(12).TextColor(t.TextMuted).SingleLine()
+					ui.Text(c, g.identifier(n.Iccid)).Font("monospace").FontSize(12).TextColor(t.TextMuted).SingleLine()
+				})
+			})
+			if row.Clicked() {
+				g.toggleNotification(seq, !on)
+			}
+			// What is chosen, or else this one.
+			row.ContextMenu(func(m *ui.Menu) {
+				seqs := g.selectedNotifications()
+				if !g.notifSel.Has(seq) {
+					seqs = []int{seq}
+				}
+				g.notificationMenu(m, seqs)
+			})
 		}
+	})
+}
+
+func (g *gui) toggleNotification(seq int, on bool) {
+	if on {
+		g.notifSel.Add(seq)
+	} else {
+		g.notifSel.Remove(seq)
+	}
+}
+
+// notificationMenu offers what to do with the notifications seqs.
+func (g *gui) notificationMenu(m *ui.Menu, seqs []int) {
+	if len(seqs) == 0 {
+		return
+	}
+	busy := g.app.Busy()
+	if m.Item(locales.NotifSend()).Disabled(busy).Chosen() {
+		_ = g.app.ProcessNotifications(seqs, true)
+	}
+	if m.Item(locales.NotifSendKeep()).Disabled(busy).Chosen() {
+		_ = g.app.ProcessNotifications(seqs, false)
+	}
+	m.Separator()
+	if m.Item(locales.NotifRemove()).Danger().Disabled(busy).Chosen() {
 		_ = g.app.RemoveNotifications(seqs)
 	}
 }
@@ -172,4 +235,13 @@ func selectModifier() string {
 		return "⌘"
 	}
 	return "Ctrl"
+}
+
+// shortcutLabel names the shortcut of key with Cmd or Ctrl, as each
+// system writes it: ⌘R on macOS, Ctrl+R elsewhere.
+func shortcutLabel(key string) string {
+	if runtime.GOOS == "darwin" {
+		return "⌘" + key
+	}
+	return "Ctrl+" + key
 }

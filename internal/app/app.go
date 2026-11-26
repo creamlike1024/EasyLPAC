@@ -202,7 +202,7 @@ func (a *App) notice(n Notice) {
 func (a *App) CurrentDevice() string {
 	b := a.Settings.Backends[a.Settings.Backend]
 	switch a.Settings.Backend {
-	case settings.BackendPCSC:
+	case settings.BackendPCSC, settings.BackendCCID:
 		return b.Reader
 	case settings.BackendAT:
 		return b.Port
@@ -302,7 +302,7 @@ func (a *App) RefreshDevices() {
 // never chooses a device: that is the user's to do.
 func (a *App) syncDevice() {
 	cur := a.CurrentDevice()
-	if cur != "" && a.Loaded && a.Settings.Backend == settings.BackendPCSC &&
+	if cur != "" && a.Loaded && a.Settings.Backend != settings.BackendAT &&
 		!slices.Contains(deviceIDs(a.Devices), cur) {
 		a.Logger.Info("reader removed", "reader", cur)
 		a.clearCard()
@@ -343,7 +343,7 @@ func (a *App) SelectDevice(id string) {
 	}
 	b := a.Settings.Backends[a.Settings.Backend]
 	switch a.Settings.Backend {
-	case settings.BackendPCSC:
+	case settings.BackendPCSC, settings.BackendCCID:
 		b.Reader = id
 	case settings.BackendAT:
 		b.Port = id

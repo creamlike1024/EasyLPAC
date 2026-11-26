@@ -11,3 +11,4 @@ __debug_bin*
 /third_party/libeuicc/
 /docs/
 -.o
+/.mygo/

@@ -50,7 +50,7 @@ jobs:
     steps:
       - uses: actions/checkout@v7
         with:
-          submodules: true # third_party/lpac
+          submodules: true # third_party/lpac and third_party/go-ccid
           fetch-depth: 0 # the tags and history scripts/version.sh reads
       # A release tag, without its "v", is the version, checked for the
       # form x.y.z[-pre] by scripts/version.sh; anything else is a snapshot
@@ -87,6 +87,7 @@ jobs:
           go vet ./...
           go test -race ./...
           go test -race -tags demo ./cmd/...
+          go test -race -tags phone ./cmd/...
 
   build-linux-windows:
     needs: test
@@ -96,7 +97,7 @@ jobs:
     steps:
       - uses: actions/checkout@v7
         with:
-          submodules: true # third_party/lpac
+          submodules: true # third_party/lpac and third_party/go-ccid
       - uses: actions/setup-go@v7
         with:
           go-version-file: go.mod
@@ -152,7 +153,7 @@ jobs:
     steps:
       - uses: actions/checkout@v7
         with:
-          submodules: true # third_party/lpac
+          submodules: true # third_party/lpac and third_party/go-ccid
       - uses: actions/setup-go@v7
         with:
           go-version-file: go.mod
@@ -176,9 +177,72 @@ jobs:
             build/darwin-arm64/*.dmg
             build/darwin-amd64/*.dmg
 
+  # The APK, arm64. libeuicc is built with the NDK, the app with mygo and
+  # Gradle on JDK 17 (Gradle 8.14 runs on Java 24 at most). Tag builds
+  # alone run in the environment "release", whose secrets hold the release
+  # key: ANDROID_KEYSTORE_BASE64 (the keystore, in base64),
+  # ANDROID_KEY_ALIAS, ANDROID_KEYSTORE_PASSWORD and, if it differs,
+  # ANDROID_KEY_PASSWORD. The environment lets only v* tags in, so pushes
+  # and pull requests never see the key: their APKs are signed with a
+  # debug key of the runner's, which no other build's updates. A tag
+  # without the key fails rather than release a debug-signed APK.
+  build-android:
+    needs: test
+    runs-on: ubuntu-26.04
+    environment: ${{ github.ref_type == 'tag' && 'release' || '' }}
+    env:
+      EASYLPAC_VERSION: ${{ needs.test.outputs.version }}
+      ANDROID_NDK_VERSION: 30.0.16248370
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          submodules: true # third_party/lpac and third_party/go-ccid
+      - uses: actions/setup-go@v7
+        with:
+          go-version-file: go.mod
+      - uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: '17'
+      - name: Android SDK packages
+        run: |
+          yes | "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" --install \
+            "platforms;android-36" "build-tools;35.0.0" "ndk;$ANDROID_NDK_VERSION" > /dev/null
+          echo "ANDROID_NDK_HOME=$ANDROID_HOME/ndk/$ANDROID_NDK_VERSION" >> "$GITHUB_ENV"
+      - name: Upload key
+        env:
+          KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
+          KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
+        run: |
+          if [ -z "$KEYSTORE_BASE64" ]; then
+            if [ "$GITHUB_REF_TYPE" = tag ]; then
+              echo "::error::No ANDROID_KEYSTORE_BASE64 secret in the environment release: a tag's APK needs the release key"
+              exit 1
+            fi
+            echo "::notice::Not a tag: the APK is signed with a debug key"
+            exit 0
+          fi
+          printf '%s' "$KEYSTORE_BASE64" | base64 -d > "$RUNNER_TEMP/upload.jks"
+          echo "EASYLPAC_ANDROID_KEYSTORE=$RUNNER_TEMP/upload.jks" >> "$GITHUB_ENV"
+          echo "EASYLPAC_ANDROID_KEY_ALIAS=$KEY_ALIAS" >> "$GITHUB_ENV"
+      - name: Build Android (arm64)
+        env:
+          MYGO_ANDROID_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+          MYGO_ANDROID_KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
+        run: |
+          ./scripts/build-android.sh
+          mv build/android/*.apk "build/android/easylpac-$EASYLPAC_VERSION-android-arm64.apk"
+      - name: Remove the upload key
+        if: always()
+        run: rm -f "$RUNNER_TEMP/upload.jks"
+      - uses: actions/upload-artifact@v7
+        with:
+          name: easylpac-${{ env.EASYLPAC_VERSION }}-android
+          path: build/android/easylpac-*-android-arm64.apk
+
   release:
     if: github.ref_type == 'tag'
-    needs: [build-linux-windows, build-macos]
+    needs: [build-linux-windows, build-macos, build-android]
     runs-on: ubuntu-26.04
     permissions:
       contents: write

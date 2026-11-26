@@ -296,14 +296,32 @@ func (msgs Messages) DeviceDemo() string {
 	return Catalog.Format(msgs.locale, "deviceDemo", nil)
 }
 
-// ActionRefresh says "Refresh (⌘R)"
+// ActionRefresh says "Refresh"
 // in the language the app shows.
 func ActionRefresh() string { return In(i18n.Locale()).ActionRefresh() }
 
-// ActionRefresh says "Refresh (⌘R)"
+// ActionRefresh says "Refresh"
 // in the language of msgs.
 func (msgs Messages) ActionRefresh() string {
 	return Catalog.Format(msgs.locale, "actionRefresh", nil)
+}
+
+// ActionRefreshShortcut says "Refresh ({shortcut})"
+// in the language the app shows.
+//
+// Tooltip of the desktop refresh button; shortcut is ⌘R on macOS, Ctrl+R
+// elsewhere
+func ActionRefreshShortcut(shortcut string) string {
+	return In(i18n.Locale()).ActionRefreshShortcut(shortcut)
+}
+
+// ActionRefreshShortcut says "Refresh ({shortcut})"
+// in the language of msgs.
+//
+// Tooltip of the desktop refresh button; shortcut is ⌘R on macOS, Ctrl+R
+// elsewhere
+func (msgs Messages) ActionRefreshShortcut(shortcut string) string {
+	return Catalog.Format(msgs.locale, "actionRefreshShortcut", map[string]any{"shortcut": shortcut})
 }
 
 // ActionAddEsim says "Add eSIM"
@@ -1530,6 +1548,66 @@ func (msgs Messages) SettingsTerminalCapBody() string {
 	return Catalog.Format(msgs.locale, "settingsTerminalCapBody", nil)
 }
 
+// SettingsPps says "Faster card rate"
+// in the language the app shows.
+func SettingsPps() string { return In(i18n.Locale()).SettingsPps() }
+
+// SettingsPps says "Faster card rate"
+// in the language of msgs.
+func (msgs Messages) SettingsPps() string {
+	return Catalog.Format(msgs.locale, "settingsPps", nil)
+}
+
+// SettingsPpsBody says "Ask the card for a faster rate (PPS) when it allows one; turn it off only if reading fails."
+// in the language the app shows.
+func SettingsPpsBody() string { return In(i18n.Locale()).SettingsPpsBody() }
+
+// SettingsPpsBody says "Ask the card for a faster rate (PPS) when it allows one; turn it off only if reading fails."
+// in the language of msgs.
+func (msgs Messages) SettingsPpsBody() string {
+	return Catalog.Format(msgs.locale, "settingsPpsBody", nil)
+}
+
+// ErrorAccessDenied says "EasyLPAC was not allowed to use the reader. Try again, and allow it when asked."
+// in the language the app shows.
+func ErrorAccessDenied() string { return In(i18n.Locale()).ErrorAccessDenied() }
+
+// ErrorAccessDenied says "EasyLPAC was not allowed to use the reader. Try again, and allow it when asked."
+// in the language of msgs.
+func (msgs Messages) ErrorAccessDenied() string {
+	return Catalog.Format(msgs.locale, "errorAccessDenied", nil)
+}
+
+// ErrorDeviceGone says "The reader was disconnected. Plug it in again, then read the card."
+// in the language the app shows.
+func ErrorDeviceGone() string { return In(i18n.Locale()).ErrorDeviceGone() }
+
+// ErrorDeviceGone says "The reader was disconnected. Plug it in again, then read the card."
+// in the language of msgs.
+func (msgs Messages) ErrorDeviceGone() string {
+	return Catalog.Format(msgs.locale, "errorDeviceGone", nil)
+}
+
+// ErrorNoCard says "There is no card in the reader."
+// in the language the app shows.
+func ErrorNoCard() string { return In(i18n.Locale()).ErrorNoCard() }
+
+// ErrorNoCard says "There is no card in the reader."
+// in the language of msgs.
+func (msgs Messages) ErrorNoCard() string {
+	return Catalog.Format(msgs.locale, "errorNoCard", nil)
+}
+
+// ErrorCardMute says "The card does not answer. Check that it sits the right way in the reader."
+// in the language the app shows.
+func ErrorCardMute() string { return In(i18n.Locale()).ErrorCardMute() }
+
+// ErrorCardMute says "The card does not answer. Check that it sits the right way in the reader."
+// in the language of msgs.
+func (msgs Messages) ErrorCardMute() string {
+	return Catalog.Format(msgs.locale, "errorCardMute", nil)
+}
+
 // SettingsSerialPort says "Serial port"
 // in the language the app shows.
 func SettingsSerialPort() string { return In(i18n.Locale()).SettingsSerialPort() }
@@ -1788,6 +1866,36 @@ func DlCodeHint() string { return In(i18n.Locale()).DlCodeHint() }
 // in the language of msgs.
 func (msgs Messages) DlCodeHint() string {
 	return Catalog.Format(msgs.locale, "dlCodeHint", nil)
+}
+
+// DlCodeHintPhone says "Paste the activation code, or scan its QR code."
+// in the language the app shows.
+func DlCodeHintPhone() string { return In(i18n.Locale()).DlCodeHintPhone() }
+
+// DlCodeHintPhone says "Paste the activation code, or scan its QR code."
+// in the language of msgs.
+func (msgs Messages) DlCodeHintPhone() string {
+	return Catalog.Format(msgs.locale, "dlCodeHintPhone", nil)
+}
+
+// DlScanQr says "Scan QR code"
+// in the language the app shows.
+func DlScanQr() string { return In(i18n.Locale()).DlScanQr() }
+
+// DlScanQr says "Scan QR code"
+// in the language of msgs.
+func (msgs Messages) DlScanQr() string {
+	return Catalog.Format(msgs.locale, "dlScanQr", nil)
+}
+
+// DlChoosePhoto says "Choose photo"
+// in the language the app shows.
+func DlChoosePhoto() string { return In(i18n.Locale()).DlChoosePhoto() }
+
+// DlChoosePhoto says "Choose photo"
+// in the language of msgs.
+func (msgs Messages) DlChoosePhoto() string {
+	return Catalog.Format(msgs.locale, "dlChoosePhoto", nil)
 }
 
 // DlPaste says "Paste"
@@ -2334,6 +2442,20 @@ func NotifSelectHint(key string) string { return In(i18n.Locale()).NotifSelectHi
 // How to choose several notifications; key is ⌘ on macOS, Ctrl elsewhere
 func (msgs Messages) NotifSelectHint(key string) string {
 	return Catalog.Format(msgs.locale, "notifSelectHint", map[string]any{"key": key})
+}
+
+// NotifSelectOne says "Choose notification {seq}"
+// in the language the app shows.
+//
+// Accessibility label of a notification's checkbox on phones
+func NotifSelectOne(seq int) string { return In(i18n.Locale()).NotifSelectOne(seq) }
+
+// NotifSelectOne says "Choose notification {seq}"
+// in the language of msgs.
+//
+// Accessibility label of a notification's checkbox on phones
+func (msgs Messages) NotifSelectOne(seq int) string {
+	return Catalog.Format(msgs.locale, "notifSelectOne", map[string]any{"seq": seq})
 }
 
 // ProfileIccidCopied says "ICCID copied"

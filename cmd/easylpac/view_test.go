@@ -249,6 +249,7 @@ func (f *fixture) shot(t *testing.T, name string) {
 }
 
 func TestPagesAndProfileFlow(t *testing.T) {
+	skipOnPhone(t)
 	card := newFakeCard()
 	f := newFixture(t, card)
 	f.tt.Frame()
@@ -448,10 +449,15 @@ func TestSettingsAIDCustomAndManualNotify(t *testing.T) {
 			t.Fatalf("license %q missing; texts %q", want, f.tt.Texts())
 		}
 	}
+	// go-ccid is built in with the USB CCID backend alone: Android's.
+	if ccid := app.IsSupportedBackend(settings.BackendCCID); f.tt.HasText("go-ccid") != ccid {
+		t.Errorf("go-ccid listed %v, built in %v", f.tt.HasText("go-ccid"), ccid)
+	}
 	f.shot(t, "about")
 }
 
 func TestNotificationsNewestFirstAndMultiSelect(t *testing.T) {
+	skipOnPhone(t)
 	card := newFakeCard()
 	card.add("enable", "8985200012345678901")
 	card.add("disable", "8944100098765432109")
@@ -505,5 +511,14 @@ func TestEUMAndSiteTiles(t *testing.T) {
 	}
 	if m := siteTile(""); m.name != "Unknown" {
 		t.Fatalf("unknown site %+v", m)
+	}
+}
+
+// skipOnPhone skips a test of the desktop's layout where pages take the
+// phones' (-tags phone).
+func skipOnPhone(t *testing.T) {
+	t.Helper()
+	if phoneUI {
+		t.Skip("the desktop's layout")
 	}
 }

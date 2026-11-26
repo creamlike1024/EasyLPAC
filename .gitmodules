@@ -1,3 +1,6 @@
 [submodule "third_party/lpac"]
 	path = third_party/lpac
 	url = https://github.com/estkme-group/lpac.git
+[submodule "third_party/go-ccid"]
+	path = third_party/go-ccid
+	url = https://github.com/creamlike1024/go-ccid.git

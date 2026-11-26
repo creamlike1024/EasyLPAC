@@ -44,7 +44,16 @@
   "@deviceDemo": {
     "description": "Badge of demo builds"
   },
-  "actionRefresh": "Refresh (⌘R)",
+  "actionRefresh": "Refresh",
+  "actionRefreshShortcut": "Refresh ({shortcut})",
+  "@actionRefreshShortcut": {
+    "description": "Tooltip of the desktop refresh button; shortcut is ⌘R on macOS, Ctrl+R elsewhere",
+    "placeholders": {
+      "shortcut": {
+        "type": "String"
+      }
+    }
+  },
   "actionAddEsim": "Add eSIM",
   "hintChooseReader": "Choose a card reader",
   "hintChoosePort": "Choose a modem port",
@@ -302,6 +311,12 @@
   },
   "settingsTerminalCap": "Announce terminal capabilities",
   "settingsTerminalCapBody": "Some cards need it; turn it off only if reading fails.",
+  "settingsPps": "Faster card rate",
+  "settingsPpsBody": "Ask the card for a faster rate (PPS) when it allows one; turn it off only if reading fails.",
+  "errorAccessDenied": "EasyLPAC was not allowed to use the reader. Try again, and allow it when asked.",
+  "errorDeviceGone": "The reader was disconnected. Plug it in again, then read the card.",
+  "errorNoCard": "There is no card in the reader.",
+  "errorCardMute": "The card does not answer. Check that it sits the right way in the reader.",
   "settingsSerialPort": "Serial port",
   "settingsDetectedPorts": "Detected ports",
   "settingsPort": "Port",
@@ -342,6 +357,9 @@
   "dlTitle": "Add eSIM",
   "dlModeCode": "Activation code",
   "dlCodeHint": "Paste the activation code, or drop the QR code image here.",
+  "dlCodeHintPhone": "Paste the activation code, or scan its QR code.",
+  "dlScanQr": "Scan QR code",
+  "dlChoosePhoto": "Choose photo",
   "dlPaste": "Paste",
   "dlOpenImage": "Open QR image…",
   "dlSmdp": "SM-DP+",
@@ -457,6 +475,15 @@
     "placeholders": {
       "key": {
         "type": "String"
+      }
+    }
+  },
+  "notifSelectOne": "Choose notification {seq}",
+  "@notifSelectOne": {
+    "description": "Accessibility label of a notification's checkbox on phones",
+    "placeholders": {
+      "seq": {
+        "type": "int"
       }
     }
   },

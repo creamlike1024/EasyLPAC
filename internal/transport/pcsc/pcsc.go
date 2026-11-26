@@ -1,12 +1,10 @@
+//go:build !android && !ios
+
 // Package pcsc implements the PC/SC card transport on top of
 // github.com/ebfe/scard (BSD-3-Clause).
 //
-// Channel logic follows ISO/IEC 7816-4 and ETSI TS 102 221: MANAGE
-// CHANNEL (open P1=00 / close P1=80) plus SELECT by AID on the opened
-// channel. libeuicc addresses channels with the low nibble of CLA, so
-// only standard channels 1-3 are accepted here; an extended channel
-// (4-19) is closed again and reported as unsupported instead of being
-// silently truncated.
+// Logical channels are opened and closed by transport.OpenChannel and
+// transport.CloseChannel, as for every backend.
 package pcsc
 
 import (
@@ -125,7 +123,7 @@ func (b *Backend) Open(ctx context.Context, cfg transport.DeviceConfig) (transpo
 	crd, err := cl.Connect(cfg.PCSC.Reader, scard.ShareExclusive, scard.ProtocolAny)
 	if err != nil {
 		_ = cl.Release()
-		return nil, fmt.Errorf("pcsc: connect %q: %w", cfg.PCSC.Reader, err)
+		return nil, kind(fmt.Errorf("pcsc: connect %q: %w", cfg.PCSC.Reader, err))
 	}
 
 	s := &session{client: cl, card: crd}
@@ -145,10 +143,11 @@ type session struct {
 }
 
 const (
-	apduTerminalCapabilities = "\x80\xAA\x00\x00\x0A\xA9\x08\x81\x00\x82\x01\x01\x83\x01\x07"
-	insManageChannel         = 0x70
-	insSelect                = 0xA4
+	insManageChannel = transport.InsManageChannel
+	insSelect        = transport.InsSelect
 )
+
+var apduTerminalCapabilities = string(transport.TerminalCapabilities)
 
 func (s *session) Transmit(ctx context.Context, apdu []byte) ([]byte, error) {
 	if err := ctx.Err(); err != nil {
@@ -163,7 +162,7 @@ func (s *session) transmitRaw(apdu string) ([]byte, error) {
 	}
 	resp, err := s.card.Transmit([]byte(apdu))
 	if err != nil {
-		return nil, fmt.Errorf("pcsc: transmit: %w", err)
+		return nil, kind(fmt.Errorf("pcsc: transmit: %w", err))
 	}
 	return resp, nil
 }
@@ -174,65 +173,17 @@ func (s *session) OpenLogicalChannel(ctx context.Context, aid []byte) (uint8, er
 	if err := ctx.Err(); err != nil {
 		return 0, err
 	}
-	if len(aid) == 0 || len(aid) > 32 {
-		return 0, fmt.Errorf("pcsc: invalid AID length %d", len(aid))
-	}
-
-	resp, err := s.transmitRaw(string([]byte{0x00, insManageChannel, 0x00, 0x00, 0x01}))
-	if err != nil {
-		return 0, err
-	}
-	if len(resp) != 3 || transport.SW(resp) != 0x9000 {
-		return 0, fmt.Errorf("pcsc: MANAGE CHANNEL open failed: %x", resp)
-	}
-	channel := resp[0]
-
-	// libeuicc encodes the channel in the CLA low nibble; extended
-	// channels (4-19) cannot be represented that way.
-	if channel < 1 || channel > 3 {
-		_, _ = s.closeChannelRaw(channel)
-		return 0, fmt.Errorf("pcsc: card opened unsupported logical channel %d (only 1-3 supported)", channel)
-	}
-
-	selectApdu := make([]byte, 0, 5+len(aid)+1)
-	selectApdu = append(selectApdu, channel, insSelect, 0x04, 0x00, byte(len(aid)))
-	selectApdu = append(selectApdu, aid...)
-	selectApdu = append(selectApdu, 0x00) // Le: request full FCI
-
-	resp, err = s.transmitRaw(string(selectApdu))
-	if err != nil {
-		_, _ = s.closeChannelRaw(channel)
-		return 0, err
-	}
-	// T=0 cards answer 61xx (response bytes available) instead of
-	// returning the FCI inline. The FCI is not needed, so 61xx counts
-	// as success without a GET RESPONSE.
-	if sw := transport.SW(resp); sw != 0x9000 && sw>>8 != 0x61 {
-		_, _ = s.closeChannelRaw(channel)
-		return 0, fmt.Errorf("pcsc: SELECT AID failed: SW=%04X", sw)
-	}
-	return channel, nil
-}
-
-// closeChannelRaw closes a logical channel; the response SW is checked
-// by the caller.
-func (s *session) closeChannelRaw(channel uint8) ([]byte, error) {
-	return s.transmitRaw(string([]byte{0x00, insManageChannel, 0x80, channel, 0x00}))
+	return transport.OpenChannel(s.tx, aid, "pcsc")
 }
 
 func (s *session) CloseLogicalChannel(ctx context.Context, channel uint8) error {
 	if err := ctx.Err(); err != nil {
 		return err
 	}
-	resp, err := s.closeChannelRaw(channel)
-	if err != nil {
-		return err
-	}
-	if sw := transport.SW(resp); sw != 0x9000 {
-		return fmt.Errorf("pcsc: MANAGE CHANNEL close failed: SW=%04X", sw)
-	}
-	return nil
+	return transport.CloseChannel(s.tx, channel, "pcsc")
 }
+
+func (s *session) tx(apdu []byte) ([]byte, error) { return s.transmitRaw(string(apdu)) }
 
 func (s *session) Close() error {
 	if s.closed {
@@ -249,6 +200,21 @@ func (s *session) Close() error {
 		if rerr := s.client.Release(); rerr != nil && err == nil {
 			err = rerr
 		}
+	}
+	return err
+}
+
+// kind gives err the kind of failure the interface explains: the reader
+// gone, no card, a card that does not answer.
+func kind(err error) error {
+	switch {
+	case errors.Is(err, scard.ErrNoSmartcard), errors.Is(err, scard.ErrRemovedCard):
+		return transport.Kind(transport.ErrNoCard, err)
+	case errors.Is(err, scard.ErrUnknownReader), errors.Is(err, scard.ErrReaderUnavailable),
+		errors.Is(err, scard.ErrNoReadersAvailable):
+		return transport.Kind(transport.ErrDeviceGone, err)
+	case errors.Is(err, scard.ErrUnresponsiveCard):
+		return transport.Kind(transport.ErrCardMute, err)
 	}
 	return err
 }

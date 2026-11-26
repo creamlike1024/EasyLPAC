@@ -28,6 +28,9 @@ const (
 
 type download struct {
 	open bool
+	// foot are the buttons of the step shown, which phones keep at the
+	// dialog's foot: set as the step builds, each frame.
+	foot func()
 	step int
 	// mode is 0 for an activation code, 1 for the fields typed in.
 	mode                         int
@@ -87,10 +90,14 @@ func (g *gui) downloadModal(c *ui.Context) {
 	// Anchored at the top rather than centered: the dialog grows and
 	// shrinks downwards between steps and input modes, so what is near
 	// its top (the mode switch) stays under the pointer.
-	m := ui.DialogBase(c, &d.open, func(backdrop, panel ui.Element) {
-		backdrop.Background(ui.RGBA(0, 0, 0, 0.32)).Justify(ui.Start).Padding(96, 0, 0)
-		panel.Width(508).Padding(24).Radius(16).Background(t.Background).
-			Shadow(0, 12, 40, 0, ui.RGBA(0, 0, 0, 0.22)).Border(1, t.Border)
+	top, width := float32(96), float32(508)
+	if phoneUI {
+		// Near the top, as wide as the window leaves: room for the
+		// keyboard below.
+		ww, _ := c.Size()
+		top, width = 16, min(width, ww-32)
+	}
+	body := func() {
 		ui.Column(c).Gap(14).Children(func() {
 			switch d.step {
 			case dlInput:
@@ -101,6 +108,27 @@ func (g *gui) downloadModal(c *ui.Context) {
 				g.downloadDone(c)
 			case dlFailed:
 				g.downloadFailed(c)
+			}
+		})
+	}
+	m := ui.DialogBase(c, &d.open, func(backdrop, panel ui.Element) {
+		backdrop.Background(ui.RGBA(0, 0, 0, 0.32)).Justify(ui.Start).Padding(top, 0, 0)
+		panel.Width(width).Radius(16).Background(t.Background).
+			Shadow(0, 12, 40, 0, ui.RGBA(0, 0, 0, 0.22)).Border(1, t.Border)
+		if !phoneUI {
+			panel.Padding(24)
+			body()
+			return
+		}
+		// Taller than a phone's window: what it holds scrolls, but for the
+		// step's buttons, at the foot as Android's dialogs keep theirs.
+		_, wh := c.Size()
+		panel.MaxHeight(wh - 2*top).Clip()
+		ui.Column(c).MaxHeight(wh - 2*top).Shrink(1).MinHeight(0).Children(func() {
+			d.foot = nil
+			ui.Scroll(c).Shrink(1).MinHeight(0).Padding(24, 24, 12).Children(body)
+			if foot := d.foot; foot != nil {
+				ui.Row(c).Gap(8).Justify(ui.End).Padding(12, 24, 20).Children(foot)
 			}
 		})
 	})
@@ -131,20 +159,46 @@ func (g *gui) downloadInput(c *ui.Context) {
 		})
 		ui.Column(c).Gap(14).Children(func() {
 			if d.mode == 0 {
-				ui.Field(c, locales.DlModeCode(), func() {
-					in := ui.TextInput(c, &d.code).Placeholder("LPA:1$smdp.example.com$MATCHING-ID").
-						Label(locales.DlModeCode()).Font("monospace").AutoFocus()
+				// Keyed apart from the fields typed in, which take this place:
+				// what an element keeps follows its place otherwise, and the
+				// code's taller field would hand its height on.
+				ui.Field(c.Key("dl-code"), locales.DlModeCode(), func() {
+					var in ui.Element
+					if phoneUI {
+						// Too narrow for a code on one line: it wraps, so the
+						// whole of it shows, and the lines it breaks into
+						// aren't part of it.
+						in = ui.TextArea(c, &d.code).Lines(2, 4)
+						if strings.ContainsAny(d.code, "\r\n") {
+							d.code = strings.NewReplacer("\r", "", "\n", "").Replace(d.code)
+						}
+					} else {
+						in = autoFocus(ui.TextInput(c, &d.code))
+					}
+					in.Placeholder("LPA:1$smdp.example.com$MATCHING-ID").Label(locales.DlModeCode()).Font("monospace")
 					if err != nil && err.Error() != "" {
 						in.Invalid(true)
 					}
 				})
-				ui.Text(c, locales.DlCodeHint()).FontSize(12).TextColor(t.TextMuted)
-				ui.Row(c).Gap(8).Children(func() {
+				hint := locales.DlCodeHint()
+				if phoneUI {
+					hint = locales.DlCodeHintPhone() // no images to drop
+				}
+				ui.Text(c, hint).FontSize(12).TextColor(t.TextMuted)
+				buttons := ui.Row(c).Gap(8)
+				if phoneUI {
+					buttons.Wrap()
+				}
+				buttons.Children(func() {
 					if ui.Button(c, "").Radius(14).Children(func() {
 						ui.Icon(c, iconPaste).Size(16, 16)
 						ui.Text(c, locales.DlPaste()).SingleLine()
 					}).Clicked() {
 						g.pasteActivation(c)
+					}
+					if phoneUI {
+						g.phoneQRButtons(c)
+						return
 					}
 					if ui.Button(c, "").Radius(14).Children(func() {
 						ui.Icon(c, iconImage).Size(16, 16)
@@ -162,8 +216,8 @@ func (g *gui) downloadInput(c *ui.Context) {
 					})
 				}
 			} else {
-				ui.Field(c, locales.DlSmdpAddress(), func() {
-					ui.TextInput(c, &d.smdp).Placeholder("smdp.example.com").Label(locales.DlSmdpAddress()).AutoFocus()
+				ui.Field(c.Key("dl-smdp"), locales.DlSmdpAddress(), func() {
+					autoFocus(ui.TextInput(c, &d.smdp).Placeholder("smdp.example.com").Label(locales.DlSmdpAddress()))
 				})
 				ui.Field(c, locales.DlMatchingId(), func() {
 					ui.TextInput(c, &d.matchID).Placeholder(locales.CommonOptional()).Label(locales.DlMatchingId())
@@ -182,6 +236,16 @@ func (g *gui) downloadInput(c *ui.Context) {
 				g.demoCodes(c)
 			}
 			ui.Collapsible(c, locales.DlAdvanced(), &d.advanced, func() {
+				if phoneUI {
+					// Too narrow for the label and the long placeholder on
+					// one row: the label goes above, what the field is for
+					// below, where it wraps.
+					ui.Field(c, "IMEI", func() {
+						ui.TextInput(c, &d.imei).Placeholder(locales.CommonOptional()).Label("IMEI").Font("monospace")
+						ui.Text(c, locales.DlImeiPlaceholder()).FontSize(12).TextColor(t.TextMuted)
+					})
+					return
+				}
 				// The label before the field, on its row.
 				ui.Row(c).Gap(12).Children(func() {
 					ui.Text(c, "IMEI").FontWeight(600).Shrink(0)
@@ -194,7 +258,7 @@ func (g *gui) downloadInput(c *ui.Context) {
 		} else if err != nil && err.Error() != "" {
 			ui.Text(c, err.Error()).FontSize(13).TextColor(t.TextMuted)
 		}
-		ui.Row(c).Gap(8).Justify(ui.End).Children(func() {
+		g.dlActions(c, func() {
 			if ui.Button(c, locales.CommonCancel()).Clicked() {
 				d.open = false
 			}
@@ -306,6 +370,18 @@ func (g *gui) downloadRunning(c *ui.Context) {
 	})
 	ui.Progress(c, float64(at+1)/float64(len(stages)))
 	ui.Column(c).Gap(2).Radius(12).Padding(6).Background(t.Surface).Border(1, t.Border).Children(func() {
+		if phoneUI {
+			// A phone shows the stage under way alone; the bar above
+			// tells how far along it is.
+			switch {
+			case cancelling:
+				g.stageRow(c, cancelStage, at+1, at+1, began, marks, now)
+			default:
+				cur := max(at, 0)
+				g.stageRow(c, stages[cur], cur, cur, began, marks, now)
+			}
+			return
+		}
 		for i, st := range stages {
 			if cancelling && i > at {
 				break
@@ -317,7 +393,7 @@ func (g *gui) downloadRunning(c *ui.Context) {
 		}
 	})
 	writing := at >= 5 // from preparing the download on, the card is being written
-	ui.Row(c).Gap(8).Justify(ui.End).Children(func() {
+	g.dlActions(c, func() {
 		if writing {
 			ui.Text(c, locales.DlKeepConnected()).FontSize(12).TextColor(t.TextMuted).Grow(1)
 		}
@@ -340,24 +416,41 @@ func (g *gui) stageRow(c *ui.Context, st dlStage, i, at int, began map[string]ti
 				ui.Spinner(c).Size(14, 14)
 			}
 		})
-		ui.Column(c).Grow(1).MinWidth(0).Gap(1).Children(func() {
-			label := ui.Text(c, st.label())
-			switch {
-			case i == at:
-				label.FontWeight(600)
-			case i > at:
-				label.TextColor(t.TextMuted)
-			}
-			if st.fn != "" {
-				ui.Text(c, st.fn).FontSize(11).Font("monospace").TextColor(t.TextMuted).Tooltip(st.id)
-			}
-		})
+		elapsed := ""
 		if start, ok := began[st.id]; ok && i <= at {
 			end := now
 			if i < at {
 				end = stageEnd(marks, st.id, now)
 			}
-			ui.Text(c, formatStageTime(end.Sub(start))).FontSize(11).Font("monospace").TextColor(t.TextMuted).Shrink(0)
+			elapsed = formatStageTime(end.Sub(start))
+		}
+		showElapsed := func() {
+			if elapsed != "" {
+				ui.Text(c, elapsed).FontSize(11).Font("monospace").TextColor(t.TextMuted).Shrink(0)
+			}
+		}
+		ui.Column(c).Grow(1).MinWidth(0).Gap(1).Children(func() {
+			ui.Row(c).Gap(8).AlignItems(ui.Start).Children(func() {
+				label := ui.Text(c, st.label()).Grow(1).MinWidth(0)
+				switch {
+				case i == at:
+					label.FontWeight(600)
+				case i > at:
+					label.TextColor(t.TextMuted)
+				}
+				// On a phone the time goes by the stage's name, so its
+				// functions' names below get the row's width and aren't
+				// broken inside a word.
+				if phoneUI {
+					showElapsed()
+				}
+			})
+			if st.fn != "" {
+				ui.Text(c, st.fn).FontSize(11).Font("monospace").TextColor(t.TextMuted).Tooltip(st.id)
+			}
+		})
+		if !phoneUI {
+			showElapsed()
 		}
 	})
 }
@@ -396,7 +489,7 @@ func (g *gui) downloadPreview(c *ui.Context, meta lpa.ProfileMetadata) {
 			ui.Badge(c, meta.ProfileClass)
 		}
 	})
-	ui.Row(c).Gap(8).Justify(ui.End).Children(func() {
+	g.dlActions(c, func() {
 		if ui.Button(c, locales.CommonCancel()).Clicked() {
 			g.app.AnswerConfirm(false)
 		}
@@ -429,7 +522,7 @@ func (g *gui) downloadDone(c *ui.Context) {
 			ui.Text(c, locales.DlNotifyWaiting()).FontSize(12).TextColor(t.TextMuted)
 		}
 	})
-	ui.Row(c).Gap(8).Justify(ui.End).Children(func() {
+	g.dlActions(c, func() {
 		if ui.Button(c, locales.CommonDone()).Clicked() {
 			d.open = false
 		}
@@ -458,7 +551,7 @@ func (g *gui) downloadFailed(c *ui.Context) {
 		}
 		ui.Text(c, msg).Selectable().TextColor(t.TextMuted)
 	}
-	ui.Row(c).Gap(8).Justify(ui.End).Children(func() {
+	g.dlActions(c, func() {
 		if ui.Button(c, locales.CommonClose()).Clicked() {
 			d.open = false
 		}
@@ -466,6 +559,16 @@ func (g *gui) downloadFailed(c *ui.Context) {
 			d.step = dlInput
 		}
 	})
+}
+
+// dlActions are a step's buttons, under it; on phones, at the dialog's
+// foot, where they show while the step scrolls.
+func (g *gui) dlActions(c *ui.Context, fn func()) {
+	if phoneUI {
+		g.dl.foot = fn
+		return
+	}
+	ui.Row(c).Gap(8).Justify(ui.End).Children(fn)
 }
 
 // pasteActivation takes an activation code from the clipboard: as text,
@@ -480,13 +583,24 @@ func (g *gui) pasteActivation(c *ui.Context) {
 	if img := g.clip.ReadImage(); img != nil {
 		text, err := activation.ScanQRCodeBytes(img)
 		if err != nil {
-			d.inputError = locales.DlNoQrClipboard()
+			g.codeError(locales.DlNoQrClipboard())
 			return
 		}
 		d.code = text
 		return
 	}
-	d.inputError = locales.DlClipboardEmpty()
+	g.codeError(locales.DlClipboardEmpty())
+}
+
+// codeError says why the code could not be taken from where the user
+// looked for it: under the form on desktops, in a toast on phones, where
+// the form's end is out of sight below the buttons the user pressed.
+func (g *gui) codeError(msg string) {
+	if phoneUI {
+		g.toast = msg
+		return
+	}
+	g.dl.inputError = msg
 }
 
 func (g *gui) chooseQRFile() {
@@ -498,7 +612,7 @@ func (g *gui) chooseQRFile() {
 	if err != nil || len(paths) == 0 {
 		return
 	}
-	g.win.Update(func() { g.scanQRFile(paths[0]) })
+	g.update(func() { g.scanQRFile(paths[0]) })
 }
 
 func (g *gui) scanQRFile(path string) {
@@ -524,3 +638,49 @@ func lastN(s string, n int) string {
 	}
 	return s[len(s)-n:]
 }
+
+// scanQRPhoto decodes the QR code of a photo a phone's picker or camera
+// gave, off the main thread, and removes the photo. err is the picker's.
+func (g *gui) scanQRPhoto(path string, err error) {
+	if err == nil && path == "" {
+		return // the user went back
+	}
+	text, err := readQRPhoto(path, err)
+	g.update(func() { g.foundQR(text, err) })
+}
+
+// readQRPhoto reads the QR code of the photo at path, then removes the
+// photo: a copy of the app's, which holds the activation code.
+func readQRPhoto(path string, err error) (string, error) {
+	if err != nil {
+		return "", err
+	}
+	defer os.Remove(path)
+	f, err := os.Open(path)
+	if err != nil {
+		return "", err
+	}
+	defer f.Close()
+	text, err := activation.ScanQRCode(f)
+	if err != nil {
+		return "", errNoQR
+	}
+	return text, nil
+}
+
+// foundQR puts the activation code read from a QR code in the form, or
+// says why there is none.
+func (g *gui) foundQR(text string, err error) {
+	d := &g.dl
+	switch {
+	case errors.Is(err, errNoQR):
+		g.codeError(locales.DlNoQrImage())
+	case err != nil:
+		g.codeError(err.Error())
+	default:
+		d.mode, d.code, d.inputError = 0, text, ""
+	}
+}
+
+// errNoQR is a photo without a QR code to read.
+var errNoQR = errors.New("no QR code")
