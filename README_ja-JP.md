@@ -30,8 +30,6 @@
 
 Android では、EasyLPAC は OTG アダプターで接続した USB スマートカードリーダー（CCID）を通じてチップを読み取ります。PC/SC は使わず、[go-ccid](https://github.com/creamlike1024/go-ccid) がリーダーと直接通信します。Android に確認されたら USB へのアクセスを許可してください。端末内蔵の eSIM や SIM スロットには対応していません。
 
-現時点でテストしたのは 1 台のリーダー（ACS ACR38U）でのチップの読み取りだけです。Android での eSIM のインストールや変更はまだテストしていません。
-
 # スクリーンショット
 <p>
 <a href="./screenshots/profile.png"><img src="./screenshots/profile.png" height="240px"/></a>
@@ -49,30 +47,6 @@ cd EasyLPAC
 ```
 
 lpac は `third_party/lpac` にある git サブモジュールです。`--recursive` を付けずにクローンした場合は、先に `git submodule update --init` を実行してください。
-
-## バージョン
-
-`mygo.json` には実際のバージョンを記録しません（`0.0.0-dev` のままです）。ビルドスクリプトが `scripts/version.sh` で git のタグからバージョンを求めます。リリースタグ上のビルドはそのバージョン（例：タグ `v0.9.3` なら `0.9.3`）、それ以降のコミットのビルドはスナップショット（例：`0.9.3.r12.ga4e79e0`、0.9.3 から 12 コミット後のコミット a4e79e0）になり、未コミットの変更があれば末尾に `.dirty` が付きます。スナップショットは dpkg・rpm・pacman のいずれでも直前のリリースより新しく、次のリリースより古いと判定されるため、Arch Linux の `-git` パッケージの `pkgver` としてそのまま使えます：
-
-```sh
-pkgver() {
-  cd "$srcdir/EasyLPAC"
-  ./scripts/version.sh
-}
-```
-
-履歴とタグが必要です。シャロークローン（`--depth 1`）には数え始めるタグがありません。`EASYLPAC_VERSION=0.9.3 ./scripts/build-app.sh` でバージョンを手動で指定できます。
-
-## リリース
-
-開発は `master` で行います。CI はすべての push と pull request をテスト・ビルドし、パッケージをその実行の artifact として残します。リリースするには、CI が通った `master` のコミットに `vx.y.z`（プレリリースは `vx.y.z-rc.1`。先頭の `v` は MyGo の自動アップデートが前提とする形式です）のタグを付けて push します：
-
-```sh
-git tag v0.9.3
-git push origin v0.9.3
-```
-
-タグの CI がそのバージョンでパッケージをビルドし、GitHub Release を公開します。古いリリースの修正は `master` にコミットしたうえで、そのリリースのタグから作った `release/x.y` ブランチ（`git switch -c release/0.9 v0.9.3`）に cherry-pick し、そこでタグを付けます。
 
 ## Linux
 
@@ -116,8 +90,6 @@ Go と CMake のほかに、Android SDK（Platform 36、Build-Tools 35.0.0、NDK
 ```sh
 ./scripts/build-android.sh          # build/android/：APK と AAB、arm64
 ```
-
-アップロード鍵を指定しない場合、リリースビルドはデバッグ鍵で署名されます。`EASYLPAC_ANDROID_KEYSTORE` と `EASYLPAC_ANDROID_KEY_ALIAS` で鍵を、`MYGO_ANDROID_KEYSTORE_PASSWORD` と `MYGO_ANDROID_KEY_PASSWORD` でそのパスワードを指定します。
 
 # ライセンス
 
