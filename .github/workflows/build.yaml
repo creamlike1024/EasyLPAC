@@ -178,15 +178,18 @@ jobs:
             build/darwin-amd64/*.dmg
 
   # The APK, arm64. libeuicc is built with the NDK, the app with mygo and
-  # Gradle on JDK 17 (Gradle 8.14 runs on Java 24 at most). Release
-  # builds are signed with the upload key of the secrets when they are
-  # set: ANDROID_KEYSTORE_BASE64 (the keystore, in base64),
-  # ANDROID_KEY_ALIAS, ANDROID_KEYSTORE_PASSWORD and ANDROID_KEY_PASSWORD.
-  # Without them the APK is signed with a debug key of this runner's,
-  # which no other build's updates.
+  # Gradle on JDK 17 (Gradle 8.14 runs on Java 24 at most). Tag builds
+  # alone run in the environment "release", whose secrets hold the release
+  # key: ANDROID_KEYSTORE_BASE64 (the keystore, in base64),
+  # ANDROID_KEY_ALIAS, ANDROID_KEYSTORE_PASSWORD and, if it differs,
+  # ANDROID_KEY_PASSWORD. The environment lets only v* tags in, so pushes
+  # and pull requests never see the key: their APKs are signed with a
+  # debug key of the runner's, which no other build's updates. A tag
+  # without the key fails rather than release a debug-signed APK.
   build-android:
     needs: test
     runs-on: ubuntu-26.04
+    environment: ${{ github.ref_type == 'tag' && 'release' || '' }}
     env:
       EASYLPAC_VERSION: ${{ needs.test.outputs.version }}
       ANDROID_NDK_VERSION: 30.0.16248370
@@ -212,7 +215,11 @@ jobs:
           KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
         run: |
           if [ -z "$KEYSTORE_BASE64" ]; then
-            echo "::warning::No ANDROID_KEYSTORE_BASE64 secret: the APK is signed with a debug key"
+            if [ "$GITHUB_REF_TYPE" = tag ]; then
+              echo "::error::No ANDROID_KEYSTORE_BASE64 secret in the environment release: a tag's APK needs the release key"
+              exit 1
+            fi
+            echo "::notice::Not a tag: the APK is signed with a debug key"
             exit 0
           fi
           printf '%s' "$KEYSTORE_BASE64" | base64 -d > "$RUNNER_TEMP/upload.jks"
