@@ -296,14 +296,32 @@ func (msgs Messages) DeviceDemo() string {
 	return Catalog.Format(msgs.locale, "deviceDemo", nil)
 }
 
-// ActionRefresh says "Refresh (⌘R)"
+// ActionRefresh says "Refresh"
 // in the language the app shows.
 func ActionRefresh() string { return In(i18n.Locale()).ActionRefresh() }
 
-// ActionRefresh says "Refresh (⌘R)"
+// ActionRefresh says "Refresh"
 // in the language of msgs.
 func (msgs Messages) ActionRefresh() string {
 	return Catalog.Format(msgs.locale, "actionRefresh", nil)
+}
+
+// ActionRefreshShortcut says "Refresh ({shortcut})"
+// in the language the app shows.
+//
+// Tooltip of the desktop refresh button; shortcut is ⌘R on macOS, Ctrl+R
+// elsewhere
+func ActionRefreshShortcut(shortcut string) string {
+	return In(i18n.Locale()).ActionRefreshShortcut(shortcut)
+}
+
+// ActionRefreshShortcut says "Refresh ({shortcut})"
+// in the language of msgs.
+//
+// Tooltip of the desktop refresh button; shortcut is ⌘R on macOS, Ctrl+R
+// elsewhere
+func (msgs Messages) ActionRefreshShortcut(shortcut string) string {
+	return Catalog.Format(msgs.locale, "actionRefreshShortcut", map[string]any{"shortcut": shortcut})
 }
 
 // ActionAddEsim says "Add eSIM"

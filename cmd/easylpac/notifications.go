@@ -236,3 +236,12 @@ func selectModifier() string {
 	}
 	return "Ctrl"
 }
+
+// shortcutLabel names the shortcut of key with Cmd or Ctrl, as each
+// system writes it: ⌘R on macOS, Ctrl+R elsewhere.
+func shortcutLabel(key string) string {
+	if runtime.GOOS == "darwin" {
+		return "⌘" + key
+	}
+	return "Ctrl+" + key
+}

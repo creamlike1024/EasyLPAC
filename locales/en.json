@@ -44,7 +44,16 @@
   "@deviceDemo": {
     "description": "Badge of demo builds"
   },
-  "actionRefresh": "Refresh (⌘R)",
+  "actionRefresh": "Refresh",
+  "actionRefreshShortcut": "Refresh ({shortcut})",
+  "@actionRefreshShortcut": {
+    "description": "Tooltip of the desktop refresh button; shortcut is ⌘R on macOS, Ctrl+R elsewhere",
+    "placeholders": {
+      "shortcut": {
+        "type": "String"
+      }
+    }
+  },
   "actionAddEsim": "Add eSIM",
   "hintChooseReader": "Choose a card reader",
   "hintChoosePort": "Choose a modem port",

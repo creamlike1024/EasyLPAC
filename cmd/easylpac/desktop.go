@@ -147,7 +147,7 @@ func (g *gui) pane(c *ui.Context) {
 func (g *gui) headerActions(c *ui.Context) {
 	switch g.page {
 	case pageProfiles, pageNotifications, pageCard:
-		if iconButton(c, iconRefresh, locales.ActionRefresh()).Disabled(!g.canRefresh()).Clicked() {
+		if iconButton(c, iconRefresh, locales.ActionRefreshShortcut(shortcutLabel("R"))).Disabled(!g.canRefresh()).Clicked() {
 			g.refresh()
 		}
 	}
