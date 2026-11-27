@@ -1,17 +1,10 @@
-// Package at implements the AT (CCHO/CCHC/CGLA) card transport,
-// following 3GPP TS 27.007 §8.46-8.47 semantics:
+// Package at implements the AT card transport in two modes
+// (transport.ATModeCCHO, transport.ATModeCSIM); see ccho.go and csim.go.
 //
-//	AT+CCHO="<aid hex>"            open channel + select AID (modem side)
-//	AT+CGLA=<session>,<len>,"<hex>" exchange one raw APDU
-//	AT+CCHC=<session>              close channel
-//
-// The modem session identifier returned by +CCHO is opaque and is NOT
-// the APDU logical channel number; the session keeps its own mapping
-// from a small channel number (1-3, what libeuicc encodes in the CLA
-// low nibble) to the modem identifier.
-//
-// at_csim is out of scope by decision (Q2): only the CCHO mode is
-// implemented here.
+// Both modes share the port, the AT client, the handshake and the
+// mapping from the APDU logical channel number (1-3, what libeuicc
+// encodes in the CLA low nibble) to what the mode needs to address that
+// channel.
 package at
 
 import (
@@ -42,7 +35,7 @@ func New() *Backend                          { return &Backend{opener: serial.Sy
 func NewWithOpener(o serial.Opener) *Backend { return &Backend{opener: o} }
 
 func (b *Backend) ID() string       { return "at" }
-func (b *Backend) Describe() string { return "AT modem (CCHO/CCHC/CGLA)" }
+func (b *Backend) Describe() string { return "AT modem (CCHO/CGLA or CSIM)" }
 
 // Available is always true: the backend exists on all platforms; a
 // usable port is a per-device property.
@@ -73,15 +66,42 @@ func isIgnoredPort(name string) bool {
 		strings.Contains(name, "debug-console")
 }
 
-// Open connects and runs the non-destructive handshake: "AT", then
-// capability probes for CCHO/CCHC/CGLA. It never resets the modem,
-// changes radio state or touches other applications' channels.
+// ValidateInitCommand reports whether cmd may be sent as an init
+// command: one complete command line starting with AT.
+func ValidateInitCommand(cmd string) error {
+	if strings.ContainsAny(cmd, "\r\n") {
+		return fmt.Errorf("at: init command %q spans lines", cmd)
+	}
+	if len(cmd) < 2 || !strings.EqualFold(cmd[:2], "AT") {
+		return fmt.Errorf("at: init command %q does not start with AT", cmd)
+	}
+	return nil
+}
+
+// Open connects and runs the handshake: "AT", the configured init
+// commands, then the mode's capability probes. Apart from the init
+// commands the user chose, it never resets the modem, changes radio
+// state or touches other applications' channels.
 func (b *Backend) Open(ctx context.Context, cfg transport.DeviceConfig) (transport.CardSession, error) {
 	if cfg.AT == nil || cfg.AT.Port == "" {
 		return nil, errors.New("at: no port configured")
 	}
 	if err := ctx.Err(); err != nil {
 		return nil, err
+	}
+	var m mode
+	switch cfg.AT.Mode {
+	case "", transport.ATModeCCHO:
+		m = &cchoMode{}
+	case transport.ATModeCSIM:
+		m = &csimMode{}
+	default:
+		return nil, fmt.Errorf("at: unknown mode %q", cfg.AT.Mode)
+	}
+	for _, cmd := range cfg.AT.InitCommands {
+		if err := ValidateInitCommand(cmd); err != nil {
+			return nil, err
+		}
 	}
 
 	port, err := b.opener.Open(cfg.AT.Port, serial.OpenOptions{
@@ -100,14 +120,29 @@ func (b *Backend) Open(ctx context.Context, cfg transport.DeviceConfig) (transpo
 	s := &session{
 		client:      atclient.New(port, atclient.Options{Timeout: controlTimeout}),
 		dataTimeout: dataTimeout,
+		mode:        m,
 		byChannel:   make(map[uint8]string),
 	}
+	m.bind(s)
 
-	if err := s.handshake(); err != nil {
+	if err := s.handshake(cfg.AT.InitCommands); err != nil {
 		_ = port.Close()
 		return nil, err
 	}
 	return s, nil
+}
+
+// mode is how a session reaches the card's logical channels.
+type mode interface {
+	bind(s *session)
+	// probes are the commands whose "=?" form the modem must accept.
+	probes() []string
+	// open opens a channel to aid and selects it. free is the channel
+	// to use when the mode chooses it; the card may choose another. It
+	// returns the channel number and the handle that addresses it.
+	open(aid []byte, free uint8) (channel uint8, handle string, err error)
+	transmit(handle string, apdu []byte) ([]byte, error)
+	close(channel uint8, handle string) error
 }
 
 type session struct {
@@ -116,19 +151,25 @@ type session struct {
 	// passed to CommandWithTimeout.
 	client      *atclient.Client
 	dataTimeout time.Duration
+	mode        mode
 
 	mu        sync.Mutex
 	closed    bool
-	byChannel map[uint8]string // channel number -> modem session id
+	byChannel map[uint8]string // channel number -> the mode's handle
 }
 
-func (s *session) handshake() error {
+func (s *session) handshake(initCommands []string) error {
 	if _, err := s.client.Command("AT", ""); err != nil {
 		return fmt.Errorf("at: no response to AT: %w", err)
 	}
-	for _, probe := range []string{"AT+CCHO=?", "AT+CCHC=?", "AT+CGLA=?"} {
-		if _, err := s.client.Command(probe, ""); err != nil {
-			return fmt.Errorf("at: modem does not support %s: %w", strings.TrimSuffix(probe, "=?"), err)
+	for _, cmd := range initCommands {
+		if _, err := s.client.Command(cmd, ""); err != nil {
+			return fmt.Errorf("at: init command %s: %w", cmd, err)
+		}
+	}
+	for _, cmd := range s.mode.probes() {
+		if _, err := s.client.Command(cmd+"=?", ""); err != nil {
+			return fmt.Errorf("at: modem does not support %s: %w", cmd, err)
 		}
 	}
 	return nil
@@ -137,6 +178,9 @@ func (s *session) handshake() error {
 func (s *session) Transmit(ctx context.Context, apdu []byte) ([]byte, error) {
 	if err := ctx.Err(); err != nil {
 		return nil, err
+	}
+	if len(apdu) < 4 {
+		return nil, fmt.Errorf("at: APDU of %d bytes", len(apdu))
 	}
 	s.mu.Lock()
 	defer s.mu.Unlock()
@@ -147,29 +191,18 @@ func (s *session) Transmit(ctx context.Context, apdu []byte) ([]byte, error) {
 	// libeuicc sets the channel in the CLA low nibble; look the
 	// mapping up by that channel number.
 	channel := apdu[0] & 0x0F
-	sessionID, ok := s.byChannel[channel]
+	handle, ok := s.byChannel[channel]
 	if !ok {
 		return nil, fmt.Errorf("at: no open channel for CLA channel %d", channel)
 	}
-
-	hexAPDU := atclient.EncodeHex(apdu)
-	cmd := fmt.Sprintf("AT+CGLA=%s,%d,\"%s\"", sessionID, len(hexAPDU), hexAPDU)
-	res, err := s.client.CommandWithTimeout(cmd, "+CGLA: ", s.dataTimeout)
-	if err != nil {
-		return nil, err
-	}
-	parsed, err := atclient.ParseCGLA(res.Value)
-	if err != nil {
-		return nil, err
-	}
-	return parsed.Response, nil
+	return s.mode.transmit(handle, apdu)
 }
 
 func (s *session) OpenLogicalChannel(ctx context.Context, aid []byte) (uint8, error) {
 	if err := ctx.Err(); err != nil {
 		return 0, err
 	}
-	if len(aid) == 0 || len(aid) > 32 {
+	if len(aid) == 0 || len(aid) > 16 {
 		return 0, fmt.Errorf("at: invalid AID length %d", len(aid))
 	}
 
@@ -179,21 +212,15 @@ func (s *session) OpenLogicalChannel(ctx context.Context, aid []byte) (uint8, er
 		return 0, errors.New("at: session closed")
 	}
 
-	channel, ok := s.nextChannel()
+	free, ok := s.nextChannel()
 	if !ok {
 		return 0, fmt.Errorf("at: no free channel (max %d)", maxChannels)
 	}
-
-	hexAID := atclient.EncodeHex(aid)
-	res, err := s.client.Command(fmt.Sprintf("AT+CCHO=\"%s\"", hexAID), "+CCHO: ")
+	channel, handle, err := s.mode.open(aid, free)
 	if err != nil {
 		return 0, err
 	}
-	sessionID := strings.TrimSpace(res.Value)
-	if sessionID == "" {
-		return 0, errors.New("at: empty session identifier from +CCHO")
-	}
-	s.byChannel[channel] = sessionID
+	s.byChannel[channel] = handle
 	return channel, nil
 }
 
@@ -216,11 +243,11 @@ func (s *session) CloseLogicalChannel(ctx context.Context, channel uint8) error 
 	if s.closed {
 		return errors.New("at: session closed")
 	}
-	sessionID, ok := s.byChannel[channel]
+	handle, ok := s.byChannel[channel]
 	if !ok {
 		return fmt.Errorf("at: channel %d is not open", channel)
 	}
-	if _, err := s.client.Command("AT+CCHC="+sessionID, ""); err != nil {
+	if err := s.mode.close(channel, handle); err != nil {
 		return err
 	}
 	delete(s.byChannel, channel)
@@ -235,8 +262,8 @@ func (s *session) Close() error {
 		return nil
 	}
 	s.closed = true
-	for ch, sessionID := range s.byChannel {
-		_, _ = s.client.Command("AT+CCHC="+sessionID, "")
+	for ch, handle := range s.byChannel {
+		_ = s.mode.close(ch, handle)
 		delete(s.byChannel, ch)
 	}
 	return s.client.Close()

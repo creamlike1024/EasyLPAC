@@ -248,6 +248,24 @@ func TestParseCGLA(t *testing.T) {
 	}
 }
 
+// +CSIM answers as +CGLA does; the lengths and the quotes are optional
+// the same way (#69's modem quotes them).
+func TestParseCSIM(t *testing.T) {
+	got, err := ParseCSIM("6,\"019000\"")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if got.DeclaredLength != 6 || len(got.Response) != 3 || got.Response[0] != 0x01 {
+		t.Fatalf("csim = %+v", got)
+	}
+	if got, err := ParseCSIM("4,6121"); err != nil || got.Response[0] != 0x61 {
+		t.Fatalf("unquoted: %+v, %v", got, err)
+	}
+	if _, err := ParseCSIM("6,\"9000\""); err == nil || !strings.Contains(err.Error(), "CSIM") {
+		t.Fatalf("expected a CSIM length mismatch, got %v", err)
+	}
+}
+
 func TestCloseIsIdempotent(t *testing.T) {
 	p := &fakePort{}
 	c := newTestClient(t, p, nil)
