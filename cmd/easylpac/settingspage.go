@@ -223,11 +223,7 @@ func (g *gui) atSettings(c *ui.Context, busy bool) {
 			update(func(bb *settings.Backend) { bb.ATMode = mode })
 		}
 	})
-	requirement := locales.SettingsAtRequirement()
-	if csim == 1 {
-		requirement = locales.SettingsAtRequirementCsim()
-	}
-	ui.Text(c, requirement).FontSize(12).TextColor(t.TextMuted)
+	ui.Text(c, locales.SettingsAtModeBody()).FontSize(12).TextColor(t.TextMuted)
 
 	toggleRow(c, locales.SettingsAtRefresh(), locales.SettingsAtRefreshBody(), b.RefreshOnSwitch, func(on bool) {
 		update(func(bb *settings.Backend) { bb.RefreshOnSwitch = on })

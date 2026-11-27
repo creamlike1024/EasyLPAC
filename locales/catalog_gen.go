@@ -1658,26 +1658,6 @@ func (msgs Messages) SettingsBaud() string {
 	return Catalog.Format(msgs.locale, "settingsBaud", nil)
 }
 
-// SettingsAtRequirement says "The modem must support AT+CCHO, AT+CCHC and AT+CGLA. If it answers AT+CCHO with an error such as +CME ERROR: 100, try…"
-// in the language the app shows.
-func SettingsAtRequirement() string { return In(i18n.Locale()).SettingsAtRequirement() }
-
-// SettingsAtRequirement says "The modem must support AT+CCHO, AT+CCHC and AT+CGLA. If it answers AT+CCHO with an error such as +CME ERROR: 100, try…"
-// in the language of msgs.
-func (msgs Messages) SettingsAtRequirement() string {
-	return Catalog.Format(msgs.locale, "settingsAtRequirement", nil)
-}
-
-// SettingsAtRequirementCsim says "The modem must support AT+CSIM. EasyLPAC opens and closes the chip's logical channel itself."
-// in the language the app shows.
-func SettingsAtRequirementCsim() string { return In(i18n.Locale()).SettingsAtRequirementCsim() }
-
-// SettingsAtRequirementCsim says "The modem must support AT+CSIM. EasyLPAC opens and closes the chip's logical channel itself."
-// in the language of msgs.
-func (msgs Messages) SettingsAtRequirementCsim() string {
-	return Catalog.Format(msgs.locale, "settingsAtRequirementCsim", nil)
-}
-
 // SettingsAtMode says "APDU commands"
 // in the language the app shows.
 func SettingsAtMode() string { return In(i18n.Locale()).SettingsAtMode() }
@@ -1686,6 +1666,16 @@ func SettingsAtMode() string { return In(i18n.Locale()).SettingsAtMode() }
 // in the language of msgs.
 func (msgs Messages) SettingsAtMode() string {
 	return Catalog.Format(msgs.locale, "settingsAtMode", nil)
+}
+
+// SettingsAtModeBody says "How APDUs reach the chip: AT+CCHO / AT+CGLA lets the modem open the logical channel, AT+CSIM sends every APDU as is a…"
+// in the language the app shows.
+func SettingsAtModeBody() string { return In(i18n.Locale()).SettingsAtModeBody() }
+
+// SettingsAtModeBody says "How APDUs reach the chip: AT+CCHO / AT+CGLA lets the modem open the logical channel, AT+CSIM sends every APDU as is a…"
+// in the language of msgs.
+func (msgs Messages) SettingsAtModeBody() string {
+	return Catalog.Format(msgs.locale, "settingsAtModeBody", nil)
 }
 
 // SettingsAtRefresh says "Refresh after switching profiles"

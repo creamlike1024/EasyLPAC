@@ -536,12 +536,12 @@ func TestSettingsModem(t *testing.T) {
 	f.until(t, func() bool { return f.g.app.Loaded || f.g.app.LastError != nil })
 	at := func() settings.Backend { return f.g.app.Settings.Backends[settings.BackendAT] }
 
-	if !f.tt.HasText(locales.SettingsAtRequirement()) {
-		t.Fatalf("no CCHO requirement; texts %q", f.tt.Texts())
+	if !f.tt.HasText(locales.SettingsAtModeBody()) {
+		t.Fatalf("no APDU commands description; texts %q", f.tt.Texts())
 	}
 	f.click(t, "AT+CSIM")
 	f.tt.Frame()
-	if at().ATMode != settings.ATModeCSIM || !f.tt.HasText(locales.SettingsAtRequirementCsim()) {
+	if at().ATMode != settings.ATModeCSIM {
 		t.Fatalf("mode %q; texts %q", at().ATMode, f.tt.Texts())
 	}
 
