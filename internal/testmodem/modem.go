@@ -43,6 +43,8 @@ type Modem struct {
 	// probe succeeds, as the HP lt4132 of #69 does.
 	RejectCCHO bool
 	FailCSIM   bool // CSIM answers ERROR
+	// FailAPDU makes CSIM answer ERROR for the APDUs it matches.
+	FailAPDU   func(apdu []byte) bool
 	SilentCSIM bool // CSIM never answers (timeout)
 	// SelectSW is what SELECT over CSIM answers (default 6121, as #69's
 	// card does).
@@ -185,6 +187,10 @@ func (m *Modem) csim(args string) {
 		m.enqueue("+CME ERROR: 3\r\n")
 		return
 	}
+	if m.FailAPDU != nil && m.FailAPDU(apdu) {
+		m.enqueue("ERROR\r\n")
+		return
+	}
 	resp, err := m.respondCSIM(apdu)
 	if err != nil {
 		m.enqueue("+CME ERROR: 4\r\n")
@@ -259,6 +265,9 @@ func (m *Modem) Writes() []string {
 type Opener struct {
 	Modem *Modem
 	Ports []string
+	// FailOpens makes the next opens fail, as a port does while the
+	// modem resets the card.
+	FailOpens int
 }
 
 func (o *Opener) Enumerate() ([]string, error) { return o.Ports, nil }
@@ -266,6 +275,10 @@ func (o *Opener) Enumerate() ([]string, error) { return o.Ports, nil }
 func (o *Opener) Open(string, serial.OpenOptions) (serial.Port, error) {
 	if o.Modem == nil {
 		return nil, errors.New("testmodem: no modem")
+	}
+	if o.FailOpens > 0 {
+		o.FailOpens--
+		return nil, errors.New("testmodem: port busy")
 	}
 	o.Modem.reopen()
 	return o.Modem, nil

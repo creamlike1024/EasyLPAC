@@ -19,23 +19,52 @@ func IsUserCancelled(err error) bool { return lpa.IsUserCancelled(err) }
 
 // --- write operations ------------------------------------------------
 
-// Profiles are switched without refresh on every backend, as lpac does
-// by default. With it some eUICCs refuse to enable behind a card reader
-// (#68); SGP.22 v3 requires that while CAT is not initialised (5.7.16:
-// commandError, 7). Without it the device has to activate the card again
-// (3.2.1): PC/SC powers it off on Close, a modem may have to be restarted
-// by the user.
+// Profiles are switched without refresh by default, as lpac does. With
+// it some eUICCs refuse to enable behind a card reader (#68); SGP.22 v3
+// requires that while CAT is not initialised (5.7.16: commandError, 7).
+// Without it the device has to activate the card again (3.2.1): PC/SC
+// powers it off on Close, a modem may have to be restarted by the user.
+//
+// A modem normally initialises CAT and handles the REFRESH, so the AT
+// backend may ask for it (Config.RefreshOnSwitch, #69). A card that
+// refuses the refresh with catBusy or commandError is asked once more
+// without it, in the same session: it answered, so it is known that
+// nothing changed. Any other failure, a transport error above all, is
+// not retried, as the card's state is then unknown.
 
 func (s *Service) ProfileEnable(ctx context.Context, iccid string) error {
-	return s.write(ctx, lpa.StageProfileEnable, "profile-enable", func(c *euicc.Context) error {
-		return c.EnableProfile(iccid, euicc.RefreshNo)
+	return s.switchProfile(ctx, lpa.StageProfileEnable, "profile-enable", func(c *euicc.Context, refresh int) error {
+		return c.EnableProfile(iccid, refresh)
 	})
 }
 
 func (s *Service) ProfileDisable(ctx context.Context, iccid string) error {
-	return s.write(ctx, lpa.StageProfileDisable, "profile-disable", func(c *euicc.Context) error {
-		return c.DisableProfile(iccid, euicc.RefreshNo)
+	return s.switchProfile(ctx, lpa.StageProfileDisable, "profile-disable", func(c *euicc.Context, refresh int) error {
+		return c.DisableProfile(iccid, refresh)
 	})
+}
+
+func (s *Service) switchProfile(ctx context.Context, stage lpa.Stage, op string, fn func(c *euicc.Context, refresh int) error) error {
+	if !s.cfg.RefreshOnSwitch {
+		return s.write(ctx, stage, op, func(c *euicc.Context) error { return fn(c, euicc.RefreshNo) })
+	}
+	refreshed := false
+	err := s.write(ctx, stage, op, func(c *euicc.Context) error {
+		err := fn(c, euicc.RefreshYes)
+		var res *euicc.ResultError
+		if !errors.As(err, &res) || (res.Code != euicc.ResultCatBusy && res.Code != euicc.ResultCommandError) {
+			refreshed = err == nil
+			return err
+		}
+		if l := s.cfg.Logger; l != nil {
+			l.Warn("the card refused the refresh, switching without it", "op", op, "result", res.Code)
+		}
+		return fn(c, euicc.RefreshNo)
+	})
+	if refreshed {
+		s.settleAfterRefresh()
+	}
+	return err
 }
 
 func (s *Service) ProfileDelete(ctx context.Context, iccid string) error {
