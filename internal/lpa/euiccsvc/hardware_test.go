@@ -100,7 +100,8 @@ func mask(s string) string {
 }
 
 // TestHardwareATRead verifies the AT read paths against a real modem
-// port. Requires a modem that supports CCHO/CCHC/CGLA:
+// port. Requires a modem that supports CCHO/CCHC/CGLA, or with
+// EASYLPAC_HW_AT_MODE=csim one that supports AT+CSIM:
 //
 //	EASYLPAC_HW_AT_PORT=/dev/cu.usbmodemXXXX go test ./internal/lpa/euiccsvc/ -run HardwareAT -v
 //
@@ -114,7 +115,7 @@ func TestHardwareATRead(t *testing.T) {
 		Backend: at.New(),
 		Device: transport.DeviceConfig{
 			BackendID: "at",
-			AT:        &transport.ATConfig{Port: port, Baud: 115200, Timeout: 60},
+			AT:        &transport.ATConfig{Port: port, Mode: os.Getenv("EASYLPAC_HW_AT_MODE"), Baud: 115200, Timeout: 60},
 		},
 		AID: defaultAID,
 	})

@@ -9,6 +9,7 @@ import "C"
 import (
 	"encoding/base64"
 	"errors"
+	"fmt"
 	"unsafe"
 )
 
@@ -24,7 +25,7 @@ func (c *Context) EnableProfile(iccid string, refresh int) error {
 	cICCID := C.CString(iccid)
 	defer C.free(unsafe.Pointer(cICCID))
 	if rc := C.elpac_profile_enable(c.h, cICCID, C.int(refresh)); rc != 0 {
-		return c.failed("es10c_enable_profile")
+		return c.resultFailed("es10c_enable_profile", int(rc))
 	}
 	return nil
 }
@@ -34,9 +35,39 @@ func (c *Context) DisableProfile(iccid string, refresh int) error {
 	cICCID := C.CString(iccid)
 	defer C.free(unsafe.Pointer(cICCID))
 	if rc := C.elpac_profile_disable(c.h, cICCID, C.int(refresh)); rc != 0 {
-		return c.failed("es10c_disable_profile")
+		return c.resultFailed("es10c_disable_profile", int(rc))
 	}
 	return nil
+}
+
+// ResultError is a write the card refused with a result code of its
+// own (SGP.22 5.7.16 and 5.7.17: EnableProfileResponse and
+// DisableProfileResponse). The
+// card answered, so its state is known: the operation did not happen.
+type ResultError struct {
+	Func string
+	Code int
+}
+
+// Result codes of EnableProfile and DisableProfile that mean the
+// refresh was the problem.
+const (
+	ResultCatBusy      = 5
+	ResultCommandError = 7 // SGP.22 v3: refresh requested, CAT not initialised
+)
+
+func (e *ResultError) Error() string {
+	return fmt.Sprintf("euicc: %s failed: the card answered result %d", e.Func, e.Code)
+}
+
+// resultFailed reports the failure of a call that returns the card's
+// result code when positive, and -1 for any other failure.
+func (c *Context) resultFailed(fn string, rc int) error {
+	if rc > 0 {
+		c.lastErr = nil
+		return &ResultError{Func: fn, Code: rc}
+	}
+	return c.failed(fn)
 }
 
 // DeleteProfile deletes a disabled profile by ICCID.

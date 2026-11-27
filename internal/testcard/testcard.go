@@ -28,6 +28,10 @@ type Card struct {
 	// WriteResult is the ES10 result code for write operations
 	// (0 = success, nonzero = card-reported failure).
 	WriteResult uint8
+	// RefuseRefresh is the result code for an enable or disable that
+	// requests the refresh (0 = accepted), as a card that has no CAT
+	// session answers commandError (7, #68).
+	RefuseRefresh uint8
 	// DefaultDp overrides the configured default SM-DP+ address
 	// (defaults to smdp.example.com).
 	DefaultDp string
@@ -111,6 +115,9 @@ func (c *Card) Respond(apdu []byte) ([]byte, error) {
 		return respond(c.installationResult())
 	case HasTag(body, 0xBF31) || HasTag(body, 0xBF32) || HasTag(body, 0xBF33): // enable/disable/delete
 		tag := uint16(body[0])<<8 | uint16(body[1]) // echo the request tag
+		if c.RefuseRefresh != 0 && RequestsRefresh(body) {
+			return respond(DER(tag, DER(0x80, []byte{c.RefuseRefresh})))
+		}
 		return respond(DER(tag, DER(0x80, []byte{c.WriteResult})))
 	case HasTag(body, 0xBF29): // SetNickname
 		return respond(DER(0xBF29, DER(0x80, []byte{byte(c.WriteResult)})))
@@ -232,4 +239,11 @@ func GSMBCD(s string) []byte {
 		out[i] = lo<<4 | hi
 	}
 	return out
+}
+
+// RequestsRefresh reports whether an enable or disable request body
+// ends with refreshFlag TRUE (81 01 FF).
+func RequestsRefresh(body []byte) bool {
+	n := len(body)
+	return n >= 3 && body[n-3] == 0x81 && body[n-2] == 0x01 && body[n-1] == 0xFF
 }

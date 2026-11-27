@@ -17,12 +17,16 @@ import (
 )
 
 func newATService(t *testing.T, m *testmodem.Modem) *Service {
+	return newATModeService(t, m, transport.ATModeCCHO)
+}
+
+func newATModeService(t *testing.T, m *testmodem.Modem, mode string) *Service {
 	t.Helper()
 	svc, err := New(Config{
 		Backend: at.NewWithOpener(&testmodem.Opener{Modem: m}),
 		Device: transport.DeviceConfig{
 			BackendID: "at",
-			AT:        &transport.ATConfig{Port: "/dev/fake0", Baud: 115200, Timeout: 5},
+			AT:        &transport.ATConfig{Port: "/dev/fake0", Mode: mode, Baud: 115200, Timeout: 5},
 		},
 		AID: testcard.AID,
 	})
@@ -97,5 +101,42 @@ func TestATTransmitFailureIsStructured(t *testing.T) {
 	}
 	if !m.Closed() {
 		t.Fatal("port must be released after failure")
+	}
+}
+
+// #69: the same read paths and a profile switch over AT+CSIM, with a
+// modem that rejects AT+CCHO.
+func TestATCSIMPaths(t *testing.T) {
+	m := testmodem.New()
+	m.RejectCCHO = true
+	ctx := context.Background()
+
+	if _, err := newATService(t, m).ChipInfo(ctx); err == nil || !strings.Contains(err.Error(), "CME ERROR: 100") {
+		t.Fatalf("CCHO mode on this modem: err = %v", err)
+	}
+
+	svc := newATModeService(t, m, transport.ATModeCSIM)
+	info, err := svc.ChipInfo(ctx)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if info.EidValue != strings.ToLower("890102030405060708090A0B0C0D0E0F") {
+		t.Fatalf("EID = %q", info.EidValue)
+	}
+	profiles, err := svc.ProfileList(ctx)
+	if err != nil || len(profiles) != 2 {
+		t.Fatalf("profiles = %+v, %v", profiles, err)
+	}
+	if err := svc.ProfileEnable(ctx, testcard.ICCID2); err != nil {
+		t.Fatal(err)
+	}
+	if err := svc.ProfileDisable(ctx, testcard.ICCID2); err != nil {
+		t.Fatal(err)
+	}
+	if m.Channels() != 0 {
+		t.Fatalf("%d logical channels left open", m.Channels())
+	}
+	if !m.Closed() {
+		t.Fatal("modem port must be closed after each operation")
 	}
 }

@@ -79,6 +79,11 @@ type gui struct {
 	aidCustomMode bool
 	aidInit       bool
 	atPort        string
+	// The AT init commands being typed (loaded from the settings once),
+	// and whether the modem's advanced settings are open.
+	atInit       string
+	atInitLoaded bool
+	atAdvanced   bool
 	// locale is the language chosen, "" to follow the user's.
 	locale string
 

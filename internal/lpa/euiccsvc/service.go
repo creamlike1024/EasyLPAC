@@ -47,12 +47,28 @@ type Config struct {
 	// HTTPClient overrides the ES9+ HTTP client (nil = default with
 	// environment proxy and no TLS certificate verification).
 	HTTPClient *http.Client
+	// RefreshOnSwitch requests the refresh procedure when enabling or
+	// disabling a profile, for devices that handle the card's REFRESH
+	// command (a modem, not a card reader); see download.go.
+	RefreshOnSwitch bool
 }
 
 // Service implements lpa.Service.
 type Service struct {
 	cfg Config
+	// After a switch with refresh the device resets the card, so until
+	// settleUntil connections that fail are tried again, the first not
+	// before settleFrom. Zero when no refresh is pending.
+	settleFrom, settleUntil time.Time
 }
+
+// How long a device may take to reset the card after a refresh, and how
+// often to try it meanwhile. Variables for the tests.
+var (
+	settleDelay  = 2 * time.Second
+	settleWindow = 30 * time.Second
+	settleRetry  = 2 * time.Second
+)
 
 func New(cfg Config) (*Service, error) {
 	if cfg.Backend == nil {
@@ -72,8 +88,55 @@ func (s *Service) withContext(ctx context.Context, fn func(*euicc.Context) error
 
 // withSecrets is withContext with secrets of the operation (the
 // matching ID of a download) starred in the APDUs and HTTP bodies it
-// logs.
+// logs. After a switch with refresh it waits for the device to bring
+// the card back (settleAfterRefresh).
 func (s *Service) withSecrets(ctx context.Context, secrets *logmask.Set, fn func(*euicc.Context) error) error {
+	if s.settleUntil.IsZero() {
+		return s.connect(ctx, secrets, fn)
+	}
+	if err := sleep(ctx, time.Until(s.settleFrom)); err != nil {
+		return err
+	}
+	for {
+		err := s.connect(ctx, secrets, fn)
+		var opErr *lpa.OpError
+		if !errors.As(err, &opErr) || opErr.Stage != lpa.StageConnect || time.Now().After(s.settleUntil) {
+			// The card answered, or it is time to give up.
+			s.settleFrom, s.settleUntil = time.Time{}, time.Time{}
+			return err
+		}
+		if l := s.cfg.Logger; l != nil {
+			l.Info("card not back after refresh yet, trying again", "err", err)
+		}
+		if err := sleep(ctx, settleRetry); err != nil {
+			return err
+		}
+	}
+}
+
+// settleAfterRefresh starts waiting for the device to reset the card.
+func (s *Service) settleAfterRefresh() {
+	now := time.Now()
+	s.settleFrom, s.settleUntil = now.Add(settleDelay), now.Add(settleWindow)
+}
+
+func sleep(ctx context.Context, d time.Duration) error {
+	if d <= 0 {
+		return ctx.Err()
+	}
+	t := time.NewTimer(d)
+	defer t.Stop()
+	select {
+	case <-ctx.Done():
+		return ctx.Err()
+	case <-t.C:
+		return nil
+	}
+}
+
+// connect opens a card session and a libeuicc context, runs fn and
+// releases both.
+func (s *Service) connect(ctx context.Context, secrets *logmask.Set, fn func(*euicc.Context) error) error {
 	session, err := s.cfg.Backend.Open(ctx, s.cfg.Device)
 	if err != nil {
 		return &lpa.OpError{Stage: lpa.StageConnect, BackendID: s.cfg.Backend.ID(),

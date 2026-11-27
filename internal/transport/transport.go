@@ -73,12 +73,29 @@ type CCIDConfig struct {
 	NoPPS bool
 }
 
+// AT modes: how the AT backend reaches the eUICC's logical channels.
+const (
+	// ATModeCCHO lets the modem open and close channels
+	// (AT+CCHO/AT+CCHC) and sends APDUs with AT+CGLA. The default.
+	ATModeCCHO = "ccho"
+	// ATModeCSIM sends every APDU, MANAGE CHANNEL and SELECT included,
+	// with AT+CSIM, as lpac's at_csim does: for modems that reject
+	// AT+CCHO (#69).
+	ATModeCSIM = "csim"
+)
+
 // ATConfig configures the AT backend (P4).
 type ATConfig struct {
-	Port    string
-	Mode    string // "ccho" | "csim"
+	Port string
+	// Mode is ATModeCCHO or ATModeCSIM; empty means ATModeCCHO.
+	Mode    string
 	Baud    int
 	Timeout int
+	// InitCommands are sent in order after the modem answers "AT" and
+	// before the mode's capability probes, for modems that need some
+	// set-up first. Each is a complete command starting with AT; an
+	// error from any of them fails the connection.
+	InitCommands []string
 }
 
 // CardSession is a connected card. All methods are safe for sequential

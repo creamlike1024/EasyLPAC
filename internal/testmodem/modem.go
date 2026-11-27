@@ -7,6 +7,7 @@ package testmodem
 import (
 	"errors"
 	"fmt"
+	"slices"
 	"strings"
 	"sync"
 
@@ -21,19 +22,38 @@ type PortTimeout struct{}
 func (PortTimeout) Error() string { return "serial: read timeout" }
 func (PortTimeout) Timeout() bool { return true }
 
-// Modem is a scripted AT modem (CCHO/CCHC/CGLA) over a byte stream.
+// Modem is a scripted AT modem (CCHO/CCHC/CGLA and CSIM) over a byte
+// stream.
 type Modem struct {
 	mu       sync.Mutex
 	out      []byte
 	sessions map[string]bool
 	nextID   int
 	card     *testcard.Card
+	// channels are the card's logical channels opened with MANAGE
+	// CHANNEL over AT+CSIM.
+	channels map[uint8]bool
 
 	// Fault injection.
 	BadProbe   string // probe command that answers ERROR
 	FailCGLA   bool   // CGLA answers ERROR
 	SilentCGLA bool   // CGLA never answers (timeout)
 	FailCCHO   bool   // CCHO answers ERROR
+	// RejectCCHO answers AT+CCHO with +CME ERROR: 100 although its
+	// probe succeeds, as the HP lt4132 of #69 does.
+	RejectCCHO bool
+	FailCSIM   bool // CSIM answers ERROR
+	// FailAPDU makes CSIM answer ERROR for the APDUs it matches.
+	FailAPDU   func(apdu []byte) bool
+	SilentCSIM bool // CSIM never answers (timeout)
+	// SelectSW is what SELECT over CSIM answers (default 6121, as #69's
+	// card does).
+	SelectSW []byte
+	// FirstChannel is the lowest channel MANAGE CHANNEL hands out
+	// (default 1).
+	FirstChannel uint8
+	// InitErrors are commands that answer ERROR (the init commands).
+	InitErrors []string
 	URC        []string
 
 	writes []string
@@ -41,7 +61,7 @@ type Modem struct {
 }
 
 func New() *Modem {
-	return &Modem{sessions: map[string]bool{}, card: &testcard.Card{}}
+	return &Modem{sessions: map[string]bool{}, channels: map[uint8]bool{}, card: &testcard.Card{}}
 }
 
 // Card exposes the underlying scripted card (request recording etc.).
@@ -92,6 +112,10 @@ func (m *Modem) Write(p []byte) (int, error) {
 		} else {
 			m.enqueue("OK\r\n")
 		}
+	case slices.Contains(m.InitErrors, line):
+		m.enqueue("ERROR\r\n")
+	case strings.HasPrefix(line, "AT+CCHO=") && m.RejectCCHO:
+		m.enqueue("+CME ERROR: 100\r\n")
 	case strings.HasPrefix(line, "AT+CCHO="):
 		if m.FailCCHO {
 			m.enqueue("ERROR\r\n")
@@ -132,10 +156,88 @@ func (m *Modem) Write(p []byte) (int, error) {
 		}
 		hexResp := atclient.EncodeHex(resp)
 		m.enqueue(fmt.Sprintf("+CGLA: %d,\"%s\"\r\nOK\r\n", len(hexResp), hexResp))
+	case strings.HasPrefix(line, "AT+CSIM="):
+		m.csim(strings.TrimPrefix(line, "AT+CSIM="))
 	default:
-		m.enqueue("ERROR\r\n")
+		m.enqueue("OK\r\n") // other commands (init commands) succeed
 	}
 	return len(p), nil
+}
+
+// csim answers AT+CSIM=<len>,"<hex>"; caller must hold the lock.
+func (m *Modem) csim(args string) {
+	if m.FailCSIM {
+		m.enqueue("ERROR\r\n")
+		return
+	}
+	if m.SilentCSIM {
+		return
+	}
+	for _, u := range m.URC {
+		m.enqueue(u + "\r\n")
+	}
+	n, arg, ok := strings.Cut(args, ",")
+	arg = strings.Trim(arg, "\"")
+	if !ok || n != fmt.Sprint(len(arg)) {
+		m.enqueue("+CME ERROR: 3\r\n")
+		return
+	}
+	apdu, err := atclient.DecodeHex(arg)
+	if err != nil || len(apdu) < 4 {
+		m.enqueue("+CME ERROR: 3\r\n")
+		return
+	}
+	if m.FailAPDU != nil && m.FailAPDU(apdu) {
+		m.enqueue("ERROR\r\n")
+		return
+	}
+	resp, err := m.respondCSIM(apdu)
+	if err != nil {
+		m.enqueue("+CME ERROR: 4\r\n")
+		return
+	}
+	hexResp := atclient.EncodeHex(resp)
+	m.enqueue(fmt.Sprintf("+CSIM: %d,\"%s\"\r\nOK\r\n", len(hexResp), hexResp))
+}
+
+// respondCSIM is the card's side of one APDU on any channel: MANAGE
+// CHANNEL and SELECT here, the rest by the scripted card.
+func (m *Modem) respondCSIM(apdu []byte) ([]byte, error) {
+	channel := apdu[0] & 0x03
+	switch {
+	case apdu[1] == 0x70 && apdu[2] == 0x00: // MANAGE CHANNEL open
+		for ch := max(m.FirstChannel, 1); ch < 20; ch++ {
+			if !m.channels[ch] {
+				m.channels[ch] = true
+				return []byte{ch, 0x90, 0x00}, nil
+			}
+		}
+		return []byte{0x6A, 0x81}, nil
+	case apdu[1] == 0x70 && apdu[2] == 0x80: // MANAGE CHANNEL close
+		if !m.channels[apdu[3]] {
+			return []byte{0x68, 0x81}, nil
+		}
+		delete(m.channels, apdu[3])
+		return []byte{0x90, 0x00}, nil
+	case channel != 0 && !m.channels[channel]:
+		return []byte{0x68, 0x81}, nil // logical channel not supported
+	case apdu[1] == 0xA4: // SELECT
+		if len(apdu) < 5 || !slices.Equal(apdu[5:], testcard.AID) {
+			return []byte{0x6A, 0x82}, nil
+		}
+		if m.SelectSW != nil {
+			return m.SelectSW, nil
+		}
+		return []byte{0x61, 0x21}, nil
+	}
+	return m.card.Respond(apdu)
+}
+
+// Channels returns the card's logical channels left open.
+func (m *Modem) Channels() int {
+	m.mu.Lock()
+	defer m.mu.Unlock()
+	return len(m.channels)
 }
 
 func (m *Modem) Close() error {
@@ -163,6 +265,9 @@ func (m *Modem) Writes() []string {
 type Opener struct {
 	Modem *Modem
 	Ports []string
+	// FailOpens makes the next opens fail, as a port does while the
+	// modem resets the card.
+	FailOpens int
 }
 
 func (o *Opener) Enumerate() ([]string, error) { return o.Ports, nil }
@@ -170,6 +275,10 @@ func (o *Opener) Enumerate() ([]string, error) { return o.Ports, nil }
 func (o *Opener) Open(string, serial.OpenOptions) (serial.Port, error) {
 	if o.Modem == nil {
 		return nil, errors.New("testmodem: no modem")
+	}
+	if o.FailOpens > 0 {
+		o.FailOpens--
+		return nil, errors.New("testmodem: port busy")
 	}
 	o.Modem.reopen()
 	return o.Modem, nil
