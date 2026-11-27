@@ -522,3 +522,63 @@ func skipOnPhone(t *testing.T) {
 		t.Skip("the desktop's layout")
 	}
 }
+
+// #69: the modem's APDU commands, refresh and init commands.
+func TestSettingsModem(t *testing.T) {
+	skipOnPhone(t)
+	f := newFixture(t, newFakeCard())
+	f.tt.Frame()
+	f.click(t, "Settings")
+	f.tt.Frame()
+	f.click(t, locales.SettingsBackendAt())
+	f.until(t, func() bool { return !f.g.app.Discovering })
+	f.g.app.SelectDevice("ACS ACR38U-CCID")
+	f.until(t, func() bool { return f.g.app.Loaded || f.g.app.LastError != nil })
+	at := func() settings.Backend { return f.g.app.Settings.Backends[settings.BackendAT] }
+
+	if !f.tt.HasText(locales.SettingsAtRequirement()) {
+		t.Fatalf("no CCHO requirement; texts %q", f.tt.Texts())
+	}
+	f.click(t, "AT+CSIM")
+	f.tt.Frame()
+	if at().ATMode != settings.ATModeCSIM || !f.tt.HasText(locales.SettingsAtRequirementCsim()) {
+		t.Fatalf("mode %q; texts %q", at().ATMode, f.tt.Texts())
+	}
+
+	sw, ok := f.tt.AccessByRole(ui.RoleSwitch, locales.SettingsAtRefresh())
+	if !ok {
+		t.Fatal("no refresh switch")
+	}
+	f.tt.ClickAt(sw.Bounds.X+sw.Bounds.W/2, sw.Bounds.Y+sw.Bounds.H/2)
+	f.tt.Frame()
+	if !at().RefreshOnSwitch {
+		t.Fatal("refresh not turned on")
+	}
+
+	if f.tt.HasText(locales.SettingsAtInitHint()) {
+		t.Fatal("advanced settings open without init commands")
+	}
+	f.click(t, locales.SettingsAtAdvanced())
+	f.tt.Advance(time.Second)
+	f.tt.Frame()
+	f.g.atInit = "AT+CMEE=2\nCFUN=1"
+	f.tt.Frame()
+	if !f.tt.HasText(locales.SettingsAtInitInvalid(2)) {
+		t.Fatalf("no line error; texts %q", f.tt.Texts())
+	}
+	f.click(t, locales.SettingsApply()) // disabled: nothing changes
+	f.tt.Frame()
+	if at().InitCommands != nil {
+		t.Fatalf("invalid commands applied: %q", at().InitCommands)
+	}
+	f.g.atInit = "AT+CMEE=2\n\nAT+QCFG=\"x\""
+	f.tt.Frame()
+	f.click(t, locales.SettingsApply())
+	f.tt.Frame()
+	if got := at().InitCommands; len(got) != 2 || got[0] != "AT+CMEE=2" || got[1] != "AT+QCFG=\"x\"" {
+		t.Fatalf("init commands %q", got)
+	}
+	f.tt.Advance(time.Second)
+	f.tt.Frame()
+	f.shot(t, "settings-modem")
+}

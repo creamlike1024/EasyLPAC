@@ -1,6 +1,7 @@
 package main
 
 import (
+	"errors"
 	"slices"
 	"strconv"
 	"strings"
@@ -193,17 +194,78 @@ func (g *gui) atSettings(c *ui.Context, busy bool) {
 	if b.Baud == 0 {
 		baud = strconv.Itoa(settings.DefaultATBaud)
 	}
+	update := func(fn func(*settings.Backend)) {
+		g.app.UpdateSettings(func(s *settings.Config) {
+			bb := s.Backends[settings.BackendAT]
+			fn(&bb)
+			s.Backends[settings.BackendAT] = bb
+		})
+	}
 	ui.Field(c, locales.SettingsBaud(), func() {
 		if ui.Select(c, &baud, baudRates).Label(locales.SettingsBaud()).Disabled(busy).Width(160).Changed() {
 			n, _ := strconv.Atoi(baud)
-			g.app.UpdateSettings(func(s *settings.Config) {
-				bb := s.Backends[settings.BackendAT]
-				bb.Baud = n
-				s.Backends[settings.BackendAT] = bb
-			})
+			update(func(bb *settings.Backend) { bb.Baud = n })
 		}
 	})
-	ui.Text(c, locales.SettingsAtRequirement()).FontSize(12).TextColor(t.TextMuted)
+
+	// How APDUs reach the card: the modem's channels (CCHO), or the
+	// card's own through AT+CSIM (#69). Never switched automatically.
+	csim := 0
+	if b.ATMode == settings.ATModeCSIM {
+		csim = 1
+	}
+	ui.Field(c, locales.SettingsAtMode(), func() {
+		if ui.Segmented(c, &csim, "AT+CCHO / AT+CGLA", "AT+CSIM").Label(locales.SettingsAtMode()).AlignSelf(ui.Start).Disabled(busy).Changed() {
+			mode := settings.ATModeCCHO
+			if csim == 1 {
+				mode = settings.ATModeCSIM
+			}
+			update(func(bb *settings.Backend) { bb.ATMode = mode })
+		}
+	})
+	requirement := locales.SettingsAtRequirement()
+	if csim == 1 {
+		requirement = locales.SettingsAtRequirementCsim()
+	}
+	ui.Text(c, requirement).FontSize(12).TextColor(t.TextMuted)
+
+	toggleRow(c, locales.SettingsAtRefresh(), locales.SettingsAtRefreshBody(), b.RefreshOnSwitch, func(on bool) {
+		update(func(bb *settings.Backend) { bb.RefreshOnSwitch = on })
+	})
+
+	if !g.atInitLoaded {
+		g.atInitLoaded = true
+		g.atInit = strings.Join(b.InitCommands, "\n")
+		g.atAdvanced = len(b.InitCommands) > 0
+	}
+	ui.Collapsible(c, locales.SettingsAtAdvanced(), &g.atAdvanced, func() {
+		g.atInitSettings(c, busy, b, update)
+	})
+}
+
+// atInitSettings edits the commands sent before the modem's probes,
+// applied with a button: half-typed commands must not reach the modem.
+func (g *gui) atInitSettings(c *ui.Context, busy bool, b settings.Backend, update func(func(*settings.Backend))) {
+	t := c.Theme()
+	cmds, err := app.ParseInitCommands(g.atInit)
+	changed := err == nil && !slices.Equal(cmds, b.InitCommands)
+	ui.Field(c, locales.SettingsAtInit(), func() {
+		ui.Column(c).Gap(8).Children(func() {
+			ui.TextArea(c, &g.atInit).Label(locales.SettingsAtInit()).Placeholder("AT+CMEE=2").
+				Font("monospace").MinHeight(72).Disabled(busy).Invalid(err != nil)
+			ui.Row(c).Justify(ui.End).Children(func() {
+				if ui.Button(c, locales.SettingsApply()).Radius(14).Disabled(busy || !changed).Clicked() {
+					update(func(bb *settings.Backend) { bb.InitCommands = cmds })
+					c.Toast(locales.SettingsAtInitSaved())
+				}
+			})
+		})
+	})
+	var lineErr *app.InitCommandError
+	if errors.As(err, &lineErr) {
+		ui.Text(c, locales.SettingsAtInitInvalid(lineErr.Line)).FontSize(12).TextColor(t.Danger)
+	}
+	ui.Text(c, locales.SettingsAtInitHint()).FontSize(12).TextColor(t.TextMuted)
 }
 
 func (g *gui) aidSettings(c *ui.Context, busy bool) {

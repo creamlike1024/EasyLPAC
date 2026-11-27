@@ -11,6 +11,7 @@ import (
 	"fmt"
 	"log/slog"
 	"slices"
+	"strings"
 
 	"EasyLPAC/internal/euicc"
 	"EasyLPAC/internal/lpa"
@@ -95,11 +96,14 @@ func newService(cfg *settings.Config, onStage func(string), logger *slog.Logger)
 		svcCfg.Device = transport.DeviceConfig{
 			BackendID: settings.BackendAT,
 			AT: &transport.ATConfig{
-				Port:    b.Port,
-				Baud:    b.Baud,
-				Timeout: b.Timeout,
+				Port:         b.Port,
+				Mode:         b.ATMode,
+				Baud:         b.Baud,
+				Timeout:      b.Timeout,
+				InitCommands: b.InitCommands,
 			},
 		}
+		svcCfg.RefreshOnSwitch = b.RefreshOnSwitch
 	}
 	return euiccsvc.New(svcCfg)
 }
@@ -133,4 +137,31 @@ func ParseAID(s string) ([]byte, error) {
 		return nil, errors.New("AID contains non-hex characters")
 	}
 	return aid, nil
+}
+
+// InitCommandError is a line of the init commands that can't be sent.
+type InitCommandError struct {
+	Line int // 1-based
+	Err  error
+}
+
+func (e *InitCommandError) Error() string { return fmt.Sprintf("line %d: %v", e.Line, e.Err) }
+func (e *InitCommandError) Unwrap() error { return e.Err }
+
+// ParseInitCommands splits the AT init commands as typed, one per line,
+// leaving out blank lines. A line that is not an AT command is an
+// *InitCommandError.
+func ParseInitCommands(text string) ([]string, error) {
+	var cmds []string
+	for i, line := range strings.Split(text, "\n") {
+		line = strings.TrimSpace(line)
+		if line == "" {
+			continue
+		}
+		if err := at.ValidateInitCommand(line); err != nil {
+			return nil, &InitCommandError{Line: i + 1, Err: err}
+		}
+		cmds = append(cmds, line)
+	}
+	return cmds, nil
 }

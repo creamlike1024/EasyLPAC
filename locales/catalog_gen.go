@@ -1658,14 +1658,104 @@ func (msgs Messages) SettingsBaud() string {
 	return Catalog.Format(msgs.locale, "settingsBaud", nil)
 }
 
-// SettingsAtRequirement says "The modem must support AT+CCHO, AT+CCHC and AT+CGLA."
+// SettingsAtRequirement says "The modem must support AT+CCHO, AT+CCHC and AT+CGLA. If it answers AT+CCHO with an error such as +CME ERROR: 100, try…"
 // in the language the app shows.
 func SettingsAtRequirement() string { return In(i18n.Locale()).SettingsAtRequirement() }
 
-// SettingsAtRequirement says "The modem must support AT+CCHO, AT+CCHC and AT+CGLA."
+// SettingsAtRequirement says "The modem must support AT+CCHO, AT+CCHC and AT+CGLA. If it answers AT+CCHO with an error such as +CME ERROR: 100, try…"
 // in the language of msgs.
 func (msgs Messages) SettingsAtRequirement() string {
 	return Catalog.Format(msgs.locale, "settingsAtRequirement", nil)
+}
+
+// SettingsAtRequirementCsim says "The modem must support AT+CSIM. EasyLPAC opens and closes the chip's logical channel itself."
+// in the language the app shows.
+func SettingsAtRequirementCsim() string { return In(i18n.Locale()).SettingsAtRequirementCsim() }
+
+// SettingsAtRequirementCsim says "The modem must support AT+CSIM. EasyLPAC opens and closes the chip's logical channel itself."
+// in the language of msgs.
+func (msgs Messages) SettingsAtRequirementCsim() string {
+	return Catalog.Format(msgs.locale, "settingsAtRequirementCsim", nil)
+}
+
+// SettingsAtMode says "APDU commands"
+// in the language the app shows.
+func SettingsAtMode() string { return In(i18n.Locale()).SettingsAtMode() }
+
+// SettingsAtMode says "APDU commands"
+// in the language of msgs.
+func (msgs Messages) SettingsAtMode() string {
+	return Catalog.Format(msgs.locale, "settingsAtMode", nil)
+}
+
+// SettingsAtRefresh says "Refresh after switching profiles"
+// in the language the app shows.
+func SettingsAtRefresh() string { return In(i18n.Locale()).SettingsAtRefresh() }
+
+// SettingsAtRefresh says "Refresh after switching profiles"
+// in the language of msgs.
+func (msgs Messages) SettingsAtRefresh() string {
+	return Catalog.Format(msgs.locale, "settingsAtRefresh", nil)
+}
+
+// SettingsAtRefreshBody says "Ask the modem to reload the chip after a profile is enabled or disabled, so it uses the new profile without a restart…"
+// in the language the app shows.
+func SettingsAtRefreshBody() string { return In(i18n.Locale()).SettingsAtRefreshBody() }
+
+// SettingsAtRefreshBody says "Ask the modem to reload the chip after a profile is enabled or disabled, so it uses the new profile without a restart…"
+// in the language of msgs.
+func (msgs Messages) SettingsAtRefreshBody() string {
+	return Catalog.Format(msgs.locale, "settingsAtRefreshBody", nil)
+}
+
+// SettingsAtAdvanced says "Advanced"
+// in the language the app shows.
+func SettingsAtAdvanced() string { return In(i18n.Locale()).SettingsAtAdvanced() }
+
+// SettingsAtAdvanced says "Advanced"
+// in the language of msgs.
+func (msgs Messages) SettingsAtAdvanced() string {
+	return Catalog.Format(msgs.locale, "settingsAtAdvanced", nil)
+}
+
+// SettingsAtInit says "Commands before connecting"
+// in the language the app shows.
+func SettingsAtInit() string { return In(i18n.Locale()).SettingsAtInit() }
+
+// SettingsAtInit says "Commands before connecting"
+// in the language of msgs.
+func (msgs Messages) SettingsAtInit() string {
+	return Catalog.Format(msgs.locale, "settingsAtInit", nil)
+}
+
+// SettingsAtInitHint says "One AT command per line, sent in order each time EasyLPAC connects to the modem. Only for modems that need setting up…"
+// in the language the app shows.
+func SettingsAtInitHint() string { return In(i18n.Locale()).SettingsAtInitHint() }
+
+// SettingsAtInitHint says "One AT command per line, sent in order each time EasyLPAC connects to the modem. Only for modems that need setting up…"
+// in the language of msgs.
+func (msgs Messages) SettingsAtInitHint() string {
+	return Catalog.Format(msgs.locale, "settingsAtInitHint", nil)
+}
+
+// SettingsAtInitInvalid says "Line {line} is not an AT command."
+// in the language the app shows.
+func SettingsAtInitInvalid(line int) string { return In(i18n.Locale()).SettingsAtInitInvalid(line) }
+
+// SettingsAtInitInvalid says "Line {line} is not an AT command."
+// in the language of msgs.
+func (msgs Messages) SettingsAtInitInvalid(line int) string {
+	return Catalog.Format(msgs.locale, "settingsAtInitInvalid", map[string]any{"line": line})
+}
+
+// SettingsAtInitSaved says "Commands saved"
+// in the language the app shows.
+func SettingsAtInitSaved() string { return In(i18n.Locale()).SettingsAtInitSaved() }
+
+// SettingsAtInitSaved says "Commands saved"
+// in the language of msgs.
+func (msgs Messages) SettingsAtInitSaved() string {
+	return Catalog.Format(msgs.locale, "settingsAtInitSaved", nil)
 }
 
 // SettingsAid says "ISD-R AID"

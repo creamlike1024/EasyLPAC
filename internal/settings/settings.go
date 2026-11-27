@@ -3,6 +3,8 @@
 // launch starts from Default, with no device chosen.
 package settings
 
+import "EasyLPAC/internal/transport"
+
 // Backend identifiers.
 const (
 	BackendPCSC = "pcsc"
@@ -42,7 +44,21 @@ type Backend struct {
 	DisableTerminalCapability bool
 	// NoPPS keeps the card at the default rate (ccid).
 	NoPPS bool
+	// ATMode is how APDUs reach the card (at): ATModeCCHO, the default
+	// when empty, or ATModeCSIM.
+	ATMode string
+	// RefreshOnSwitch requests the refresh when enabling or disabling
+	// a profile (at).
+	RefreshOnSwitch bool
+	// InitCommands are sent before the capability probes (at).
+	InitCommands []string
 }
+
+// AT modes (Backend.ATMode), as transport names them.
+const (
+	ATModeCCHO = transport.ATModeCCHO
+	ATModeCSIM = transport.ATModeCSIM
+)
 
 // Config is the settings of the current run.
 type Config struct {

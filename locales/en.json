@@ -322,7 +322,23 @@
   "settingsPort": "Port",
   "settingsUse": "Use",
   "settingsBaud": "Baud rate",
-  "settingsAtRequirement": "The modem must support AT+CCHO, AT+CCHC and AT+CGLA.",
+  "settingsAtRequirement": "The modem must support AT+CCHO, AT+CCHC and AT+CGLA. If it answers AT+CCHO with an error such as +CME ERROR: 100, try AT+CSIM.",
+  "settingsAtRequirementCsim": "The modem must support AT+CSIM. EasyLPAC opens and closes the chip's logical channel itself.",
+  "settingsAtMode": "APDU commands",
+  "settingsAtRefresh": "Refresh after switching profiles",
+  "settingsAtRefreshBody": "Ask the modem to reload the chip after a profile is enabled or disabled, so it uses the new profile without a restart. If the chip refuses, the profile is switched without it.",
+  "settingsAtAdvanced": "Advanced",
+  "settingsAtInit": "Commands before connecting",
+  "settingsAtInitHint": "One AT command per line, sent in order each time EasyLPAC connects to the modem. Only for modems that need setting up first: a command can change how the modem works.",
+  "settingsAtInitInvalid": "Line {line} is not an AT command.",
+  "@settingsAtInitInvalid": {
+    "placeholders": {
+      "line": {
+        "type": "int"
+      }
+    }
+  },
+  "settingsAtInitSaved": "Commands saved",
   "settingsAid": "ISD-R AID",
   "settingsAidStandard": "Standard (GSMA)",
   "settingsAidCustom": "Custom…",
