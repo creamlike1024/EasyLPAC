@@ -81,7 +81,7 @@ export CGO_LDFLAGS="-L$(pkg-config --variable=libdir libpcsclite) -Wl,--allow-sh
 
 以 `sudo systemctl enable --now pcscd.socket` 啟動服務。
 
-發行版本提供 `.deb`（相依於 `libpcsclite1` 與 `pcscd`）、`.rpm`（相依於 `libpcsclite.so.1` 與 `pcsc-lite`）及 `PKGBUILD`（相依於 `pcsclite` 與 `ccid`）：將 `PKGBUILD` 與發行版本中的 `.tar.gz` 及兩個圖示（`easylpac-256x256.png`、`easylpac-512x512.png`）放在同一目錄，再執行 `makepkg -si`。其他發行版的打包者應將其對應為各自的套件，並維持以動態連結使用 pcsc-lite：靜態連結的用戶端可能使用系統 `pcscd` 不接受的協定版本。
+發行版本提供 `.deb`（相依於 `libpcsclite1` 與 `pcscd`）、`.rpm`（相依於 `libpcsclite.so.1` 與 `pcsc-lite`）及各架構的 PKGBUILD（相依於 `pcsclite` 與 `ccid`）：`PKGBUILD-x86_64` 與 `PKGBUILD-aarch64`。將對應架構的 PKGBUILD 與發行版本中該架構的 `.tar.gz` 及兩個圖示（`easylpac-256x256.png`、`easylpac-512x512.png`）放在同一目錄，再執行 `makepkg -si -p PKGBUILD-x86_64`（或 `-p PKGBUILD-aarch64`）。其他發行版的打包者應將其對應為各自的套件，並維持以動態連結使用 pcsc-lite：靜態連結的用戶端可能使用系統 `pcscd` 不接受的協定版本。
 
 ## Android
 

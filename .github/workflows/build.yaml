@@ -26,7 +26,8 @@ concurrency:
   cancel-in-progress: ${{ github.ref_type != 'tag' }}
 
 # Every C build uses zig (scripts/zcc): libeuicc for each target, and cgo.
-# Linux and Windows are cross-compiled on one Ubuntu runner. macOS builds
+# Linux amd64 and Windows are cross-compiled on one Ubuntu runner, Linux
+# arm64 is built on an arm64 Ubuntu runner. macOS builds
 # need the macOS SDK (the PCSC, CoreFoundation and Security frameworks and
 # libresolv, which zig does not ship, and which Apple licenses for Apple
 # hardware only), so they run on a macOS runner, still compiled by zig,
@@ -113,12 +114,16 @@ jobs:
           ./scripts/build-libeuicc.sh linux/amd64
           ./scripts/build-libeuicc.sh windows/amd64
       # A .deb, an .rpm, a PKGBUILD (with the icons it installs, beside the
-      # archive it packages) and the archive with install.sh.
+      # archive it packages) and the archive with install.sh. The PKGBUILD
+      # ships as PKGBUILD-x86_64, beside arm64's PKGBUILD-aarch64
+      # (makepkg -si -p PKGBUILD-x86_64).
       - name: Build Linux (amd64)
         env:
           CC: ${{ github.workspace }}/scripts/zcc
           CGO_LDFLAGS: -L/usr/lib/x86_64-linux-gnu -Wl,--allow-shlib-undefined
-        run: ./scripts/with-version.sh go run github.com/egoist/mygo/cmd/mygo@v0.10.0 build -platform linux/amd64
+        run: |
+          ./scripts/with-version.sh go run github.com/egoist/mygo/cmd/mygo@v0.10.0 build -platform linux/amd64
+          mv build/linux-amd64/PKGBUILD build/linux-amd64/PKGBUILD-x86_64
       # Windows ships the single executable, without the NSIS installer:
       # it needs no files beside it, and libeuicc is linked in statically.
       # mygo_nowebview leaves WebView2 out: every window is native UI, so
@@ -139,11 +144,61 @@ jobs:
             build/linux-amd64/*.tar.gz
             build/linux-amd64/*.deb
             build/linux-amd64/*.rpm
-            build/linux-amd64/PKGBUILD
+            build/linux-amd64/PKGBUILD-x86_64
             build/linux-amd64/easylpac-256x256.png
             build/linux-amd64/easylpac-512x512.png
             build/windows-amd64/easylpac-*-windows-amd64.exe
             dist/*
+
+  # Linux arm64 (#51) builds natively on GitHub's arm64 runner, free for
+  # public repositories: cgo links the runner's arm64 libpcsclite, which
+  # the x64 runner would only have through a multiarch apt setup. The
+  # tests run again here, on arm64. Its PKGBUILD ships as
+  # PKGBUILD-aarch64 (makepkg -si -p PKGBUILD-aarch64), beside amd64's
+  # PKGBUILD-x86_64 in the flat release. Its icons are left out: they are the
+  # amd64 job's, byte for byte, under the same names (the release checks
+  # each PKGBUILD's checksums against the files it ships).
+  build-linux-arm64:
+    needs: test
+    runs-on: ubuntu-26.04-arm
+    env:
+      EASYLPAC_VERSION: ${{ needs.test.outputs.version }}
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          submodules: true # third_party/lpac and third_party/go-ccid
+      - uses: actions/setup-go@v7
+        with:
+          go-version-file: go.mod
+      - uses: mlugg/setup-zig@v2
+        with:
+          version: ${{ env.ZIG_VERSION }}
+      - name: Install build dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends libpcsclite-dev
+      - name: Build libeuicc (linux/arm64)
+        run: ./scripts/build-libeuicc.sh linux/arm64
+      - name: Test
+        env:
+          CC: ${{ github.workspace }}/scripts/zcc
+          CGO_LDFLAGS: -L/usr/lib/aarch64-linux-gnu -Wl,--allow-shlib-undefined
+        run: go test ./...
+      - name: Build Linux (arm64)
+        env:
+          CC: ${{ github.workspace }}/scripts/zcc
+          CGO_LDFLAGS: -L/usr/lib/aarch64-linux-gnu -Wl,--allow-shlib-undefined
+        run: |
+          ./scripts/with-version.sh go run github.com/egoist/mygo/cmd/mygo@v0.10.0 build -platform linux/arm64
+          mv build/linux-arm64/PKGBUILD build/linux-arm64/PKGBUILD-aarch64
+      - uses: actions/upload-artifact@v7
+        with:
+          name: easylpac-${{ env.EASYLPAC_VERSION }}-linux-arm64
+          path: |
+            build/linux-arm64/*.tar.gz
+            build/linux-arm64/*.deb
+            build/linux-arm64/*.rpm
+            build/linux-arm64/PKGBUILD-aarch64
 
   build-macos:
     needs: test
@@ -242,7 +297,7 @@ jobs:
 
   release:
     if: github.ref_type == 'tag'
-    needs: [build-linux-windows, build-macos, build-android]
+    needs: [build-linux-windows, build-linux-arm64, build-macos, build-android]
     runs-on: ubuntu-26.04
     permissions:
       contents: write
@@ -268,6 +323,18 @@ jobs:
             cat SHA256SUMS
             echo '```'
           } > ../notes.md
+      # The PKGBUILDs (amd64's and arm64's) share the icons, which the
+      # amd64 job's artifact supplies: every source of each must be in
+      # the release, with the checksum the PKGBUILD gives.
+      - name: Check the PKGBUILDs' sources
+        run: |
+          cd release
+          for p in PKGBUILD-x86_64 PKGBUILD-aarch64; do
+            if ! (. "./$p" && for i in "${!source[@]}"; do echo "${sha256sums[i]}  ${source[i]}"; done) | sha256sum -c --quiet; then
+              echo "::error::$p: its sources are not the release's files"
+              exit 1
+            fi
+          done
       - uses: softprops/action-gh-release@v3
         with:
           files: release/*

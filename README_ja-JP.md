@@ -81,7 +81,7 @@ export CGO_LDFLAGS="-L$(pkg-config --variable=libdir libpcsclite) -Wl,--allow-sh
 
 サービスは `sudo systemctl enable --now pcscd.socket` で起動します。
 
-リリースには `.deb`（`libpcsclite1` と `pcscd` に依存）、`.rpm`（`libpcsclite.so.1` と `pcsc-lite` に依存）、`PKGBUILD`（`pcsclite` と `ccid` に依存）があります。`PKGBUILD` はリリースの `.tar.gz` と 2 つのアイコン（`easylpac-256x256.png`、`easylpac-512x512.png`）と同じディレクトリに置き、`makepkg -si` を実行してください。他のディストリビューションのパッケージ作成者は、これらを各ディストリビューションのパッケージに置き換え、pcsc-lite は動的リンクのままにしてください。静的リンクしたクライアントは、システムの `pcscd` が受け付けないプロトコルバージョンを使う可能性があります。
+リリースには `.deb`（`libpcsclite1` と `pcscd` に依存）、`.rpm`（`libpcsclite.so.1` と `pcsc-lite` に依存）、アーキテクチャごとの PKGBUILD（`pcsclite` と `ccid` に依存）：`PKGBUILD-x86_64` と `PKGBUILD-aarch64` があります。PKGBUILD はリリースの同じアーキテクチャの `.tar.gz` と 2 つのアイコン（`easylpac-256x256.png`、`easylpac-512x512.png`）と同じディレクトリに置き、`makepkg -si -p PKGBUILD-x86_64`（または `-p PKGBUILD-aarch64`）を実行してください。他のディストリビューションのパッケージ作成者は、これらを各ディストリビューションのパッケージに置き換え、pcsc-lite は動的リンクのままにしてください。静的リンクしたクライアントは、システムの `pcscd` が受け付けないプロトコルバージョンを使う可能性があります。
 
 ## Android
 
