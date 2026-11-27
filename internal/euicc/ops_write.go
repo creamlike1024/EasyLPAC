@@ -41,7 +41,8 @@ func (c *Context) DisableProfile(iccid string, refresh int) error {
 }
 
 // ResultError is a write the card refused with a result code of its
-// own (SGP.22 5.7.16-5.7.18: EnableProfileResponse and the like). The
+// own (SGP.22 5.7.16 and 5.7.17: EnableProfileResponse and
+// DisableProfileResponse). The
 // card answered, so its state is known: the operation did not happen.
 type ResultError struct {
 	Func string
@@ -59,8 +60,8 @@ func (e *ResultError) Error() string {
 	return fmt.Sprintf("euicc: %s failed: the card answered result %d", e.Func, e.Code)
 }
 
-// resultFailed is failed for the calls that return the card's result
-// code (positive) or -1 for any other failure.
+// resultFailed reports the failure of a call that returns the card's
+// result code when positive, and -1 for any other failure.
 func (c *Context) resultFailed(fn string, rc int) error {
 	if rc > 0 {
 		c.lastErr = nil

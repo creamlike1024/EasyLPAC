@@ -88,7 +88,8 @@ func (s *Service) withContext(ctx context.Context, fn func(*euicc.Context) error
 
 // withSecrets is withContext with secrets of the operation (the
 // matching ID of a download) starred in the APDUs and HTTP bodies it
-// logs.
+// logs. After a switch with refresh it waits for the device to bring
+// the card back (settleAfterRefresh).
 func (s *Service) withSecrets(ctx context.Context, secrets *logmask.Set, fn func(*euicc.Context) error) error {
 	if s.settleUntil.IsZero() {
 		return s.connect(ctx, secrets, fn)

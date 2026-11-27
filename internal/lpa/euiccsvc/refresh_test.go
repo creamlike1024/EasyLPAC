@@ -15,7 +15,7 @@ import (
 	"EasyLPAC/internal/transport/at"
 )
 
-func newRefreshService(t *testing.T, m *testmodem.Modem, o *testmodem.Opener, refresh bool) *Service {
+func newRefreshService(t *testing.T, o *testmodem.Opener, refresh bool) *Service {
 	t.Helper()
 	svc, err := New(Config{
 		Backend: at.NewWithOpener(o),
@@ -53,7 +53,7 @@ func switchRequests(c *testcard.Card) []bool {
 
 func TestSwitchWithoutRefreshByDefault(t *testing.T) {
 	m := testmodem.New()
-	svc := newRefreshService(t, m, &testmodem.Opener{Modem: m}, false)
+	svc := newRefreshService(t, &testmodem.Opener{Modem: m}, false)
 	if err := svc.ProfileEnable(context.Background(), testcard.ICCID2); err != nil {
 		t.Fatal(err)
 	}
@@ -69,7 +69,7 @@ func TestSwitchWithRefresh(t *testing.T) {
 	shortSettle(t)
 	m := testmodem.New()
 	o := &testmodem.Opener{Modem: m}
-	svc := newRefreshService(t, m, o, true)
+	svc := newRefreshService(t, o, true)
 	ctx := context.Background()
 	if err := svc.ProfileEnable(ctx, testcard.ICCID2); err != nil {
 		t.Fatal(err)
@@ -98,7 +98,7 @@ func TestSwitchRefreshGivesUp(t *testing.T) {
 	shortSettle(t)
 	m := testmodem.New()
 	o := &testmodem.Opener{Modem: m}
-	svc := newRefreshService(t, m, o, true)
+	svc := newRefreshService(t, o, true)
 	if err := svc.ProfileEnable(context.Background(), testcard.ICCID2); err != nil {
 		t.Fatal(err)
 	}
@@ -117,7 +117,7 @@ func TestSwitchRefreshRefused(t *testing.T) {
 	for _, code := range []uint8{euicc.ResultCatBusy, euicc.ResultCommandError} {
 		m := testmodem.New()
 		m.Card().RefuseRefresh = code
-		svc := newRefreshService(t, m, &testmodem.Opener{Modem: m}, true)
+		svc := newRefreshService(t, &testmodem.Opener{Modem: m}, true)
 		if err := svc.ProfileDisable(context.Background(), testcard.ICCID); err != nil {
 			t.Fatalf("result %d: %v", code, err)
 		}
@@ -135,7 +135,7 @@ func TestSwitchOtherResultNotRetried(t *testing.T) {
 	m := testmodem.New()
 	m.Card().WriteResult = 2 // profileNotInDisabledState
 	m.Card().RefuseRefresh = 2
-	svc := newRefreshService(t, m, &testmodem.Opener{Modem: m}, true)
+	svc := newRefreshService(t, &testmodem.Opener{Modem: m}, true)
 	err := svc.ProfileEnable(context.Background(), testcard.ICCID)
 	var res *euicc.ResultError
 	if !errors.As(err, &res) || res.Code != 2 {
@@ -150,7 +150,7 @@ func TestSwitchOtherResultNotRetried(t *testing.T) {
 func TestSwitchTransportErrorNotRetried(t *testing.T) {
 	m := testmodem.New()
 	m.Card().RefuseRefresh = euicc.ResultCommandError
-	svc := newRefreshService(t, m, &testmodem.Opener{Modem: m}, true)
+	svc := newRefreshService(t, &testmodem.Opener{Modem: m}, true)
 	var attempts int
 	m.FailAPDU = func(apdu []byte) bool {
 		if len(apdu) > 5 && testcard.HasTag(apdu[5:], 0xBF31) {
