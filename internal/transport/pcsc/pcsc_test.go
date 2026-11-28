@@ -43,11 +43,13 @@ type fakeClient struct {
 	card     *fakeCard
 	connErr  error
 	released bool
+	proto    scard.Protocol
 }
 
 func (f *fakeClient) ListReaders() ([]string, error) { return f.readers, nil }
 
-func (f *fakeClient) Connect(reader string, _ scard.ShareMode, _ scard.Protocol) (card, error) {
+func (f *fakeClient) Connect(reader string, _ scard.ShareMode, proto scard.Protocol) (card, error) {
+	f.proto = proto
 	if f.connErr != nil {
 		return nil, f.connErr
 	}
@@ -141,6 +143,21 @@ func TestOpenSendsTerminalCapabilityThenSelect(t *testing.T) {
 	}
 	if err := s.Close(); err != nil {
 		t.Fatalf("second Close: %v", err)
+	}
+}
+
+// Asking for T=0|T=1 fails with some readers and T=0-only cards (#73).
+func TestOpenConnectsWithT0(t *testing.T) {
+	cl := &fakeClient{card: managedCard(1)}
+	s, err := newTestBackend(cl).Open(context.Background(), transport.DeviceConfig{
+		PCSC: &transport.PCSCConfig{Reader: "R", DisableTerminalCapability: true},
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer s.Close()
+	if cl.proto != scard.ProtocolT0 {
+		t.Fatalf("protocol = %v, want T=0", cl.proto)
 	}
 }
 
