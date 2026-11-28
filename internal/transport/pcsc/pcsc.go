@@ -104,9 +104,9 @@ func (b *Backend) Discover(ctx context.Context) ([]transport.Device, error) {
 	return devices, nil
 }
 
-// Open connects to the configured reader. The negotiated protocol is
-// whatever the card and reader agree on (T=0 or T=1); scard selects the
-// matching PCI. libeuicc's APDU framing is protocol independent.
+// Open connects to the configured reader with T=0, as lpac does. Asking
+// for T=0 or T=1 makes some readers fail the protocol negotiation with
+// T=0-only cards (SCARD_W_UNRESPONSIVE_CARD, issue #73).
 func (b *Backend) Open(ctx context.Context, cfg transport.DeviceConfig) (transport.CardSession, error) {
 	if cfg.PCSC == nil || cfg.PCSC.Reader == "" {
 		return nil, errors.New("pcsc: no reader configured")
@@ -120,7 +120,7 @@ func (b *Backend) Open(ctx context.Context, cfg transport.DeviceConfig) (transpo
 		return nil, fmt.Errorf("pcsc: establish context: %w", err)
 	}
 
-	crd, err := cl.Connect(cfg.PCSC.Reader, scard.ShareExclusive, scard.ProtocolAny)
+	crd, err := cl.Connect(cfg.PCSC.Reader, scard.ShareExclusive, scard.ProtocolT0)
 	if err != nil {
 		_ = cl.Release()
 		return nil, kind(fmt.Errorf("pcsc: connect %q: %w", cfg.PCSC.Reader, err))
